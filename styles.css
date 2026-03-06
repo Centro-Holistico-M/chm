@@ -376,32 +376,71 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+        width: 100%;
+    }
+
+    .container {
+        max-width: 100%;
+        width: 100vw;
+        overflow-x: hidden;
+    }
+
     .header {
-        padding: 20px;
+        padding: 15px;
+        width: 100%;
     }
 
     .logo-section {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
     }
 
     .logo {
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
+        flex-shrink: 0;
+    }
+
+    .brand-info {
+        text-align: center;
+        width: 100%;
     }
 
     .brand-info h1 {
-        font-size: 24px;
+        font-size: 20px;
+    }
+
+    .slogan {
+        font-size: 14px;
+        max-width: 100%;
     }
 
     .navigation {
         flex-direction: column;
+        padding: 12px;
+        gap: 10px;
+        width: 100%;
     }
 
     .nav-btn {
         width: 100%;
         text-align: center;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    .content {
+        padding: 15px;
+        width: 100%;
+    }
+
+    .section h2 {
+        font-size: 22px;
+        margin-bottom: 20px;
     }
 
     .contacto-grid {
@@ -413,11 +452,29 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .section h2 {
-        font-size: 24px;
+    .servicio-card,
+    .horario-card,
+    .contacto-info {
+        padding: 15px;
     }
 
-    .content {
-        padding: 20px;
+    .footer {
+        padding: 15px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand-info h1 {
+        font-size: 18px;
+    }
+
+    .section h2 {
+        font-size: 18px;
+    }
+
+    .horario-card,
+    .servicio-card {
+        padding: 12px;
     }
 }
