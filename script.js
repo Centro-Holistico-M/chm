@@ -213,33 +213,55 @@ function renderCarousel(container, items, dotsContainer, nameFn, defaultIcon) {
         const cupo = item.Cupos || item.Cupo || 'Abierto';
         const estado = item.Estado || 'Disponible';
         const tipo = item.Tipo || (defaultIcon === '🧘' ? 'Actividad' : 'Taller');
+        const fecha = item.Fecha || '';
+        const diaSemana = capitalize(item['Día'] || item.Dia || '');
         
         const card = document.createElement('div');
         card.className = 'horario-card';
-        card.innerHTML = `
-            <div class="card-header">
-                <h3 class="card-title">${name}</h3>
-                <span class="card-category">${tipo}</span>
-            </div>
-            <p class="card-description-short">${shortDesc}</p>
-            <div class="card-meta-row">
-                <span class="card-badge badge-cupo">👤 ${cupo}</span>
-                <span class="card-badge badge-estado">${estado}</span>
-            </div>
-            <div class="card-footer">
-                <span class="card-time">${hora}</span>
-                <span class="card-icon">${defaultIcon}</span>
-            </div>
-        `;
+        
+        // Custom rendering based on type
+        if (defaultIcon === '🧘') {
+            // Actividades Semanales: nombre, hora, descripción corta, estado y cupo
+            card.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${name}</h3>
+                    <span class="card-time">${hora}</span>
+                </div>
+                <p class="card-description-short">${shortDesc}</p>
+                <div class="card-meta-row">
+                    <span class="card-badge badge-estado">${estado}</span>
+                    <span class="card-badge badge-cupo">👤 ${cupo}</span>
+                </div>
+            `;
+        } else {
+            // Talleres: nombre, hora, dia, descripción corta, estado, cupo y fecha
+            card.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${name}</h3>
+                    <span class="card-time">${hora}</span>
+                </div>
+                <div class="card-meta-row" style="margin-bottom: 5px;">
+                    <span style="color:var(--gold); font-size: 0.7rem;">📅 ${fecha}</span>
+                    <span style="color:var(--text-muted); font-size: 0.7rem;">📆 ${diaSemana}</span>
+                </div>
+                <p class="card-description-short">${shortDesc}</p>
+                <div class="card-meta-row">
+                    <span class="card-badge badge-estado">${estado}</span>
+                    <span class="card-badge badge-cupo">👤 ${cupo}</span>
+                </div>
+            `;
+        }
 
         card.addEventListener('click', () => {
             const details = [
                 { label: 'Categoría', value: `${tipo} ${defaultIcon}` },
+                { label: 'Día', value: diaSemana },
                 { label: 'Horario', value: hora },
                 { label: 'Duración', value: item.Duracion || item.Duración || '60 min' },
                 { label: 'Cupo', value: cupo },
                 { label: 'Estado', value: estado }
             ];
+            if (fecha) details.push({ label: 'Fecha', value: fecha });
             if (item.Precio) details.push({ label: 'Inversión', value: `$${item.Precio}` });
             
             showExpandedCard(name, tipo, fullDesc, item.Imagen, details);
