@@ -165,7 +165,7 @@ function renderHorarios() {
     if (!actividadesCarousel || !talleresCarousel) return;
 
     // Detect column mapping
-    const getType = (item) => {
+    const getTypeMapping = (item) => {
         if (item.Nombre && (item.Nombre.toLowerCase() === 'actividad' || item.Nombre.toLowerCase() === 'taller')) {
             return item.Nombre.toLowerCase();
         }
@@ -176,7 +176,7 @@ function renderHorarios() {
         return 'actividad';
     };
 
-    const getName = (item) => {
+    const getNameMapping = (item) => {
         if (item.Nombre && (item.Nombre.toLowerCase() === 'actividad' || item.Nombre.toLowerCase() === 'taller')) {
             return item.Descripcion || item.Actividad || 'Sin nombre';
         }
@@ -185,19 +185,15 @@ function renderHorarios() {
 
     // Filter Actividades by current day
     const actividades = allHorariosData.filter(item => {
-        const type = getType(item);
+        const type = getTypeMapping(item);
         const itemDay = (item['Día'] || item.Dia || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace('miercoles', 'miércoles');
         return type === 'actividad' && itemDay === currentDay;
     });
 
-    // Filter Workshops (Talleres) - No day filter, sorted by date
-    const talleres = allHorariosData.filter(item => getType(item) === 'taller');
+    const talleres = allHorariosData.filter(item => getTypeMapping(item) === 'taller');
 
-    // Render Actividades
-    renderCarousel(actividadesCarousel, actividades, actividadesDots, getName, '🧘');
-    
-    // Render Talleres
-    renderCarousel(talleresCarousel, talleres, talleresDots, getName, '✨');
+    renderCarousel(actividadesCarousel, actividades, actividadesDots, getNameMapping, '🧘');
+    renderCarousel(talleresCarousel, talleres, talleresDots, getNameMapping, '✨');
 }
 
 function renderCarousel(container, items, dotsContainer, nameFn, defaultIcon) {
@@ -205,43 +201,56 @@ function renderCarousel(container, items, dotsContainer, nameFn, defaultIcon) {
     dotsContainer.innerHTML = '';
 
     if (items.length === 0) {
-        container.innerHTML = '<p class="error-msg">No hay actividades programadas para este día.</p>';
+        container.innerHTML = '<p class="error-msg">No hay actividades para este día.</p>';
         return;
     }
 
     items.forEach((item, index) => {
         const name = nameFn(item);
         const hora = item.Hora || item.Horario || '--:--';
-        const desc = item.Descripcion || item.Descripción || 'Experiencia transformadora para tu bienestar.';
-        const duracion = item.Duración || item.Duracion || '60 min';
-        const precio = item.Precio ? `$${item.Precio}` : 'Consultar';
-        const imagen = item.Imagen || 'images/logo.png';
-        const categoria = item.Categoría || item.Categoria || (defaultIcon === '🧘' ? 'Actividad' : 'Taller');
-
+        const fullDesc = item.Descripcion || item.Descripción || 'Experiencia de bienestar.';
+        const shortDesc = fullDesc.length > 60 ? fullDesc.substring(0, 60) + '...' : fullDesc;
+        const cupo = item.Cupos || item.Cupo || 'Abierto';
+        const estado = item.Estado || 'Disponible';
+        const tipo = item.Tipo || (defaultIcon === '🧘' ? 'Actividad' : 'Taller');
+        
         const card = document.createElement('div');
         card.className = 'horario-card';
         card.innerHTML = `
             <div class="card-header">
                 <h3 class="card-title">${name}</h3>
-                <span class="card-category">${categoria}</span>
+                <span class="card-category">${tipo}</span>
             </div>
-            <p class="card-description-brief">${desc}</p>
+            <p class="card-description-short">${shortDesc}</p>
+            <div class="card-meta-row">
+                <span class="card-badge badge-cupo">👤 ${cupo}</span>
+                <span class="card-badge badge-estado">${estado}</span>
+            </div>
             <div class="card-footer">
                 <span class="card-time">${hora}</span>
                 <span class="card-icon">${defaultIcon}</span>
             </div>
         `;
 
-        card.addEventListener('click', () => expandCard(item, name, hora, desc, duracion, precio, imagen, categoria, defaultIcon));
+        card.addEventListener('click', () => {
+            const details = [
+                { label: 'Categoría', value: `${tipo} ${defaultIcon}` },
+                { label: 'Horario', value: hora },
+                { label: 'Duración', value: item.Duracion || item.Duración || '60 min' },
+                { label: 'Cupo', value: cupo },
+                { label: 'Estado', value: estado }
+            ];
+            if (item.Precio) details.push({ label: 'Inversión', value: `$${item.Precio}` });
+            
+            showExpandedCard(name, tipo, fullDesc, item.Imagen, details);
+        });
         container.appendChild(card);
 
-        // Add dot
         const dot = document.createElement('div');
         dot.className = `dot ${index === 0 ? 'active' : ''}`;
         dotsContainer.appendChild(dot);
     });
 
-    // Update dots on scroll
     container.addEventListener('scroll', () => {
         const scrollIndex = Math.round(container.scrollLeft / (container.offsetWidth * 0.85));
         dotsContainer.querySelectorAll('.dot').forEach((d, i) => {
@@ -250,64 +259,52 @@ function renderCarousel(container, items, dotsContainer, nameFn, defaultIcon) {
     });
 }
 
-function expandCard(item, name, hora, desc, duracion, precio, imagen, categoria, icon) {
+function showExpandedCard(title, subtitle, description, imagen, details) {
     const overlay = document.getElementById('card-overlay');
-    
-    // Create detailed expanded content
-    const expandedCard = document.createElement('div');
-    expandedCard.className = 'horario-card expanded';
-    expandedCard.id = 'active-expanded-card';
-    
-    expandedCard.innerHTML = `
-        <button class="expanded-close" onclick="closeExpandedCard()">✕</button>
-        <div class="expanded-content">
-            <img src="${imagen}" alt="${name}" class="expanded-img" onerror="this.src='images/logo.png'">
-            <div class="expanded-details">
-                <h2 class="card-title" style="font-size: 1.5rem; margin-bottom: 10px;">${name}</h2>
-                <div class="detail-item">
-                    <span class="detail-label">Categoría:</span>
-                    <span class="detail-value">${categoria} ${icon}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Horario:</span>
-                    <span class="detail-value">${hora}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Duración:</span>
-                    <span class="detail-value">${duracion}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Inversión:</span>
-                    <span class="detail-value">${precio}</span>
-                </div>
-                <div class="detail-item" style="flex-direction: column; gap: 5px; margin-top: 10px;">
-                    <span class="detail-label">Descripción:</span>
-                    <span class="detail-value" style="line-height: 1.5;">${desc}</span>
-                </div>
-            </div>
+    const existing = document.getElementById('active-expanded-card');
+    if (existing) existing.remove();
+
+    const expanded = document.createElement('div');
+    expanded.className = 'expanded-card';
+    expanded.id = 'active-expanded-card';
+
+    let detailsHTML = details.map(d => `
+        <div class="detail-row">
+            <span class="detail-label">${d.label}</span>
+            <span class="detail-text">${d.value}</span>
+        </div>
+    `).join('');
+
+    expanded.innerHTML = `
+        <button class="close-btn" onclick="closeExpandedCard()">✕</button>
+        <div class="expanded-header">
+            <h2 class="expanded-title">${title}</h2>
+            <span class="expanded-tag">${subtitle}</span>
+        </div>
+        ${imagen ? `<img src="${imagen}" style="width:100%; height:180px; object-fit:cover; border-radius:12px; margin-bottom:20px;" onerror="this.style.display='none'">` : ''}
+        <div class="expanded-body">
+            <div class="details-list">${detailsHTML}</div>
+            <p class="long-description">${description}</p>
         </div>
     `;
 
-    document.body.appendChild(expandedCard);
+    document.body.appendChild(expanded);
     overlay.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent body scroll
+    document.body.style.overflow = 'hidden';
 }
 
 function closeExpandedCard() {
-    const activeCard = document.getElementById('active-expanded-card');
+    const expanded = document.getElementById('active-expanded-card');
     const overlay = document.getElementById('card-overlay');
-    
-    if (activeCard) {
-        activeCard.style.animation = 'expandIn 0.3s ease-in reverse forwards';
+    if (expanded) {
+        expanded.style.animation = 'expandIn 0.3s ease-in reverse forwards';
         setTimeout(() => {
-            activeCard.remove();
+            expanded.remove();
             overlay.classList.remove('active');
             document.body.style.overflow = '';
         }, 300);
     }
 }
-
-// Make globally accessible for onclick
 window.closeExpandedCard = closeExpandedCard;
 
 /* ====================================================
@@ -327,16 +324,30 @@ async function fetchServicios() {
 function renderServicios(data) {
     serviciosContainer.innerHTML = '';
     data.forEach(item => {
+        const fullDesc = item.Descripción || item.Descripcion || '';
+        const shortDesc = fullDesc.length > 80 ? fullDesc.substring(0, 80) + '...' : fullDesc;
+        
         const card = document.createElement('div');
         card.className = 'card fade-in';
         card.innerHTML = `
             <h2 class="card-title">${item.Nombre}</h2>
             <div class="card-content">
-                <p style="margin-bottom:15px; font-style: italic; color: #f4f4f4;">${item.Descripción || item.Descripcion || ''}</p>
-                <strong>Duración:</strong> ${item.Duración || item.Duracion || 'N/A'}<br>
-                <strong style="color:var(--gold)">Inversión:</strong> $${item.Precio || 'N/A'}
+                <p class="card-description-short" style="margin-bottom:15px; color: #f4f4f4;">${shortDesc}</p>
+                <div class="card-meta-row" style="margin-top:10px;">
+                    <span style="color:var(--gold)">$${item.Precio || 'N/A'}</span>
+                    <span style="color:var(--text-muted)">${item.Duración || item.Duracion || ''}</span>
+                </div>
             </div>
         `;
+
+        card.addEventListener('click', () => {
+            const details = [
+                { label: 'Duración', value: item.Duracion || item.Duración || 'N/A' },
+                { label: 'Inversión', value: `$${item.Precio || 'N/A'}` }
+            ];
+            showExpandedCard(item.Nombre, 'Servicio Holístico', fullDesc, item.Imagen, details);
+        });
+        
         serviciosContainer.appendChild(card);
     });
 }
