@@ -507,7 +507,7 @@ body {
 
     .header-slogan {
         font-size: 0.72rem;
-        max-width: 170px;
+        max-width: 180px;
     }
 
     .nav-links {
@@ -568,7 +568,10 @@ body {
 }
 
 @media (max-width: 380px) {
-    .header-slogan { display: none; }
+    .header-slogan {
+        font-size: 0.65rem;
+        max-width: 140px;
+    }
 
     .nav-btn {
         font-size: 0.78rem;
