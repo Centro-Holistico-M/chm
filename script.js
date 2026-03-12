@@ -7,12 +7,22 @@ const API_CONTACTO = "https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEA
 const navBtns = document.querySelectorAll('.nav-btn');
 const sections = document.querySelectorAll('.view-section');
 
-const horariosContainer = document.getElementById('horarios-container');
+const horariosContainer = document.querySelector('.horarios-section-wrapper');
+const actividadesCarousel = document.getElementById('actividades-carousel');
+const talleresCarousel = document.getElementById('talleres-carousel');
+const daysTabs = document.getElementById('days-tabs');
+const actividadesDots = document.getElementById('actividades-dots');
+const talleresDots = document.getElementById('talleres-dots');
+
 const serviciosContainer = document.getElementById('servicios-container');
 const contactoContainer = document.getElementById('contacto-container');
 const headerSlogan = document.getElementById('header-slogan');
 const splashScreen = document.getElementById('splash-screen');
 const particlesContainer = document.getElementById('particles-container');
+
+// Global state for Horarios
+let allHorariosData = [];
+let currentDay = '';
 
 /* --- Service Worker Registration --- */
 if ('serviceWorker' in navigator) {
@@ -37,6 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Init Particles
     initParticles();
 
+    // Set current day (default)
+    const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    currentDay = days[new Date().getDay()];
+
     // Navigation
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -53,6 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchHorarios();
     fetchServicios();
     fetchContacto();
+
+    // Create Overlay for expanded cards
+    const overlay = document.createElement('div');
+    overlay.className = 'card-overlay';
+    overlay.id = 'card-overlay';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', closeExpandedCard);
 });
 
 /* --- Tab Navigation Logic (Cross-fade) --- */
@@ -109,30 +130,45 @@ function dayIndex(day) {
 }
 
 /* ====================================================
-   HORARIOS
+   HORARIOS PREMIUM LOGIC
    ==================================================== */
 async function fetchHorarios() {
     try {
         const response = await fetch(API_HORARIOS);
-        const data = await response.json();
-        renderHorarios(data);
+        allHorariosData = await response.json();
+        renderHorariosTabs();
+        renderHorarios();
     } catch (error) {
         console.error("Error fetching Horarios:", error);
-        horariosContainer.innerHTML = '<p class="error-msg">No se pudieron cargar los horarios en este momento.</p>';
+        if (actividadesCarousel) actividadesCarousel.innerHTML = '<p class="error-msg">No se pudieron cargar los horarios.</p>';
     }
 }
 
-function renderHorarios(data) {
-    horariosContainer.innerHTML = '';
+function renderHorariosTabs() {
+    if (!daysTabs) return;
+    daysTabs.innerHTML = '';
+    DAY_ORDER.forEach(day => {
+        const tab = document.createElement('div');
+        tab.className = `day-tab ${day === currentDay ? 'active' : ''}`;
+        tab.textContent = capitalize(day);
+        tab.addEventListener('click', () => {
+            currentDay = day;
+            document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            renderHorarios();
+        });
+        daysTabs.appendChild(tab);
+    });
+}
 
-    // Detect column mapping: the API may use "Nombre" or "Actividad" for the type field
-    // and "Descripcion" or "Actividad" for the actual activity name
+function renderHorarios() {
+    if (!actividadesCarousel || !talleresCarousel) return;
+
+    // Detect column mapping
     const getType = (item) => {
-        // "Nombre" column holds "Actividad" or "Taller"
         if (item.Nombre && (item.Nombre.toLowerCase() === 'actividad' || item.Nombre.toLowerCase() === 'taller')) {
             return item.Nombre.toLowerCase();
         }
-        // Fallback: "Actividad" column may hold "Taller" or the activity name directly
         if (item.Actividad) {
             if (item.Actividad.toLowerCase() === 'taller') return 'taller';
             return 'actividad';
@@ -141,155 +177,138 @@ function renderHorarios(data) {
     };
 
     const getName = (item) => {
-        const type = getType(item);
-        // If type comes from "Nombre" column, the real name is in "Descripcion"
         if (item.Nombre && (item.Nombre.toLowerCase() === 'actividad' || item.Nombre.toLowerCase() === 'taller')) {
             return item.Descripcion || item.Actividad || 'Sin nombre';
         }
-        // Otherwise, the name is in "Actividad" directly
         return item.Actividad || item.Descripcion || 'Sin nombre';
     };
 
-    const actividades = data.filter(item => getType(item) === 'actividad');
-    const talleres = data.filter(item => getType(item) === 'taller');
+    // Filter Actividades by current day
+    const actividades = allHorariosData.filter(item => {
+        const type = getType(item);
+        const itemDay = (item['Día'] || item.Dia || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace('miercoles', 'miércoles');
+        return type === 'actividad' && itemDay === currentDay;
+    });
 
-    // ─── ACTIVIDADES SEMANALES ───
-    if (actividades.length > 0) {
-        const section = document.createElement('div');
-        section.className = 'horarios-group fade-in';
-        section.innerHTML = `
-            <div class="group-header">
-                <span class="group-icon">🧘</span>
-                <h2 class="group-title">Actividades Semanales</h2>
-            </div>
-        `;
+    // Filter Workshops (Talleres) - No day filter, sorted by date
+    const talleres = allHorariosData.filter(item => getType(item) === 'taller');
 
-        // Group by activity name
-        const grouped = {};
-        actividades.forEach(item => {
-            const name = getName(item);
-            if (!grouped[name]) grouped[name] = [];
-            grouped[name].push(item);
-        });
+    // Render Actividades
+    renderCarousel(actividadesCarousel, actividades, actividadesDots, getName, '🧘');
+    
+    // Render Talleres
+    renderCarousel(talleresCarousel, talleres, talleresDots, getName, '✨');
+}
 
-        const cardsGrid = document.createElement('div');
-        cardsGrid.className = 'actividades-grid';
+function renderCarousel(container, items, dotsContainer, nameFn, defaultIcon) {
+    container.innerHTML = '';
+    dotsContainer.innerHTML = '';
 
-        Object.keys(grouped).forEach(actName => {
-            const items = grouped[actName];
-            // Sort by day order, then by time
-            items.sort((a, b) => {
-                const dA = dayIndex(a['Día'] || a.Dia || '');
-                const dB = dayIndex(b['Día'] || b.Dia || '');
-                if (dA !== dB) return dA - dB;
-                return (a.Hora || '').localeCompare(b.Hora || '');
-            });
-
-            const card = document.createElement('div');
-            card.className = 'act-card';
-
-            let rows = '';
-            items.forEach(item => {
-                const dia = capitalize(item['Día'] || item.Dia || '');
-                const hora = item.Hora || item.Horario || '--:--';
-                const cupos = item.Cupos || '';
-                const estado = item.Estado || '';
-                rows += `
-                    <tr>
-                        <td class="day-cell">${dia}</td>
-                        <td class="time-cell">${hora}</td>
-                        <td class="cupos-cell">${cupos}</td>
-                    </tr>`;
-            });
-
-            card.innerHTML = `
-                <div class="act-card-header">
-                    <h3 class="act-name">${actName}</h3>
-                </div>
-                <div class="act-card-body">
-                    <table class="schedule-table">
-                        <thead>
-                            <tr>
-                                <th>Día</th>
-                                <th>Hora</th>
-                                <th>Cupos</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-            `;
-            cardsGrid.appendChild(card);
-        });
-
-        section.appendChild(cardsGrid);
-        horariosContainer.appendChild(section);
+    if (items.length === 0) {
+        container.innerHTML = '<p class="error-msg">No hay actividades programadas para este día.</p>';
+        return;
     }
 
-    // ─── TALLERES ESPECIALES ───
-    if (talleres.length > 0) {
-        const section = document.createElement('div');
-        section.className = 'horarios-group fade-in';
-        section.innerHTML = `
-            <div class="group-header">
-                <span class="group-icon">✨</span>
-                <h2 class="group-title">Talleres Especiales</h2>
+    items.forEach((item, index) => {
+        const name = nameFn(item);
+        const hora = item.Hora || item.Horario || '--:--';
+        const desc = item.Descripcion || item.Descripción || 'Experiencia transformadora para tu bienestar.';
+        const duracion = item.Duración || item.Duracion || '60 min';
+        const precio = item.Precio ? `$${item.Precio}` : 'Consultar';
+        const imagen = item.Imagen || 'images/logo.png';
+        const categoria = item.Categoría || item.Categoria || (defaultIcon === '🧘' ? 'Actividad' : 'Taller');
+
+        const card = document.createElement('div');
+        card.className = 'horario-card';
+        card.innerHTML = `
+            <div class="card-header">
+                <h3 class="card-title">${name}</h3>
+                <span class="card-category">${categoria}</span>
+            </div>
+            <p class="card-description-brief">${desc}</p>
+            <div class="card-footer">
+                <span class="card-time">${hora}</span>
+                <span class="card-icon">${defaultIcon}</span>
             </div>
         `;
 
-        // Sort talleres by date
-        talleres.sort((a, b) => {
-            const parseDate = (str) => {
-                if (!str) return new Date(9999, 0);
-                const parts = str.split('/');
-                if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
-                return new Date(9999, 0);
-            };
-            return parseDate(a.Fecha) - parseDate(b.Fecha);
+        card.addEventListener('click', () => expandCard(item, name, hora, desc, duracion, precio, imagen, categoria, defaultIcon));
+        container.appendChild(card);
+
+        // Add dot
+        const dot = document.createElement('div');
+        dot.className = `dot ${index === 0 ? 'active' : ''}`;
+        dotsContainer.appendChild(dot);
+    });
+
+    // Update dots on scroll
+    container.addEventListener('scroll', () => {
+        const scrollIndex = Math.round(container.scrollLeft / (container.offsetWidth * 0.85));
+        dotsContainer.querySelectorAll('.dot').forEach((d, i) => {
+            d.classList.toggle('active', i === scrollIndex);
         });
+    });
+}
 
-        const cardsGrid = document.createElement('div');
-        cardsGrid.className = 'talleres-grid';
-
-        talleres.forEach(item => {
-            const nombre = getName(item);
-            const fecha = item.Fecha || '';
-            const dia = capitalize(item['Día'] || item.Dia || '');
-            const hora = item.Hora || item.Horario || '--:--';
-            const cupos = item.Cupos || '';
-            const estado = item.Estado || '';
-
-            // Parse date for nice display
-            let fechaDisplay = fecha;
-            if (fecha) {
-                const parts = fecha.split('/');
-                if (parts.length === 3) {
-                    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-                    fechaDisplay = `${parseInt(parts[0])} ${months[parseInt(parts[1]) - 1]} ${parts[2]}`;
-                }
-            }
-
-            const card = document.createElement('div');
-            card.className = 'taller-card';
-
-            card.innerHTML = `
-                <div class="taller-card-accent"></div>
-                <h3 class="taller-name">${nombre}</h3>
-                <div class="taller-info">
-                    ${fechaDisplay ? `<div class="taller-meta"><span class="meta-icon">📅</span><span class="meta-text">${fechaDisplay}</span></div>` : ''}
-                    ${dia ? `<div class="taller-meta"><span class="meta-icon">📆</span><span class="meta-text">${dia}</span></div>` : ''}
-                    <div class="taller-meta"><span class="meta-icon">🕐</span><span class="meta-text">${hora}</span></div>
-                    ${cupos ? `<div class="taller-meta"><span class="meta-icon">👥</span><span class="meta-text">${cupos} cupos</span></div>` : ''}
+function expandCard(item, name, hora, desc, duracion, precio, imagen, categoria, icon) {
+    const overlay = document.getElementById('card-overlay');
+    
+    // Create detailed expanded content
+    const expandedCard = document.createElement('div');
+    expandedCard.className = 'horario-card expanded';
+    expandedCard.id = 'active-expanded-card';
+    
+    expandedCard.innerHTML = `
+        <button class="expanded-close" onclick="closeExpandedCard()">✕</button>
+        <div class="expanded-content">
+            <img src="${imagen}" alt="${name}" class="expanded-img" onerror="this.src='images/logo.png'">
+            <div class="expanded-details">
+                <h2 class="card-title" style="font-size: 1.5rem; margin-bottom: 10px;">${name}</h2>
+                <div class="detail-item">
+                    <span class="detail-label">Categoría:</span>
+                    <span class="detail-value">${categoria} ${icon}</span>
                 </div>
-                ${estado ? `<span class="taller-badge">${estado}</span>` : ''}
-            `;
-            cardsGrid.appendChild(card);
-        });
+                <div class="detail-item">
+                    <span class="detail-label">Horario:</span>
+                    <span class="detail-value">${hora}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Duración:</span>
+                    <span class="detail-value">${duracion}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Inversión:</span>
+                    <span class="detail-value">${precio}</span>
+                </div>
+                <div class="detail-item" style="flex-direction: column; gap: 5px; margin-top: 10px;">
+                    <span class="detail-label">Descripción:</span>
+                    <span class="detail-value" style="line-height: 1.5;">${desc}</span>
+                </div>
+            </div>
+        </div>
+    `;
 
-        section.appendChild(cardsGrid);
-        horariosContainer.appendChild(section);
+    document.body.appendChild(expandedCard);
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent body scroll
+}
+
+function closeExpandedCard() {
+    const activeCard = document.getElementById('active-expanded-card');
+    const overlay = document.getElementById('card-overlay');
+    
+    if (activeCard) {
+        activeCard.style.animation = 'expandIn 0.3s ease-in reverse forwards';
+        setTimeout(() => {
+            activeCard.remove();
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }, 300);
     }
 }
+
+// Make globally accessible for onclick
+window.closeExpandedCard = closeExpandedCard;
 
 /* ====================================================
    SERVICIOS
@@ -301,7 +320,7 @@ async function fetchServicios() {
         renderServicios(data);
     } catch (error) {
         console.error("Error fetching Servicios:", error);
-        serviciosContainer.innerHTML = '<p class="error-msg">No se pudieron cargar los servicios en este momento.</p>';
+        serviciosContainer.innerHTML = '<p class="error-msg">No se pudieron cargar los servicios.</p>';
     }
 }
 

@@ -91,98 +91,93 @@ body {
 }
 
 /* ============================================
-   STICKY HEADER — Logo + Slogan + Nav
+   STICKY HEADER — Centered Logo + Slogan
    ============================================ */
 .sticky-header {
     position: sticky; top: 0; z-index: 1000;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 30px;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px 20px;
     background: rgba(7, 7, 7, 0.96);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--gold-dim);
+    gap: 12px;
 }
 
-.header-brand {
-    display: flex; align-items: center; gap: 14px;
+.header-brand-centered {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
 }
 
 /* Logo Frame */
 .logo-frame {
     position: relative;
-    width: 56px; height: 56px;
+    width: 64px; height: 64px;
     border-radius: 12px;
     overflow: hidden;
     border: 2px solid var(--gold-dim);
-    box-shadow: 0 0 12px var(--gold-glow), inset 0 0 8px rgba(0,0,0,0.4);
+    box-shadow: 0 0 15px var(--gold-glow);
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    flex-shrink: 0;
 }
 
 .logo-frame:hover {
     border-color: var(--gold);
-    box-shadow: 0 0 22px rgba(212, 175, 55, 0.35), 0 0 40px rgba(212, 175, 55, 0.1);
-    transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+    transform: scale(1.05);
 }
 
 .logo {
     width: 100%; height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     display: block;
-    transition: transform 0.4s ease;
-}
-
-.logo-frame:hover .logo {
-    transform: scale(1.06);
 }
 
 /* Slogan */
 .header-slogan {
     font-family: var(--font-body);
-    font-size: 0.82rem;
-    font-weight: 300;
+    font-size: 0.85rem;
+    font-weight: 400;
     font-style: italic;
-    color: var(--text-muted);
+    color: var(--gold);
     letter-spacing: 0.5px;
-    max-width: 220px;
-    line-height: 1.35;
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transition: opacity 0.8s ease;
+    white-space: nowrap;
 }
 
 /* Navigation */
 .nav-links {
-    display: flex; gap: 20px;
+    display: flex; gap: 15px;
+    width: 100%;
+    justify-content: center;
 }
 
 .nav-btn {
     background: transparent; border: none;
     color: var(--text-muted);
     font-family: var(--font-heading);
-    font-size: 1rem;
+    font-size: 0.9rem;
     cursor: pointer;
-    text-transform: uppercase; letter-spacing: 2px;
-    padding: 8px 14px;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    padding: 6px 12px;
     transition: all 0.3s ease;
     border-bottom: 2px solid transparent;
 }
 
 .nav-btn:hover {
     color: var(--gold);
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
 .nav-btn.active {
     color: var(--gold);
     border-bottom-color: var(--gold);
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
 /* ============================================
    MAIN CONTENT
    ============================================ */
 .content-wrapper {
-    padding: 35px 20px 60px;
-    max-width: 1100px;
+    padding: 24px 16px 80px;
+    max-width: 100%;
     margin: 0 auto;
 }
 
@@ -190,9 +185,9 @@ body {
     font-family: var(--font-heading);
     color: var(--gold);
     text-align: center;
-    font-size: 2.2rem;
-    margin-bottom: 35px;
-    letter-spacing: 3px;
+    font-size: 1.8rem;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
     text-shadow: 0 0 15px var(--gold-glow);
 }
 
@@ -208,18 +203,244 @@ body {
     transform: translateY(0);
 }
 
-.fade-in { animation: fadeIn 0.8s ease-out forwards; }
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
+/* ============================================
+   HORARIOS SECTION PREMIUM
+   ============================================ */
+.horarios-section-wrapper {
+    display: flex; flex-direction: column; gap: 40px;
 }
 
-/* ============================================
-   HORARIOS SECTION LAYOUT
-   ============================================ */
-.horarios-layout {
-    display: flex; flex-direction: column; gap: 40px;
+.horarios-block {
+    display: flex; flex-direction: column; gap: 16px;
+}
+
+.block-title {
+    font-family: var(--font-heading);
+    color: var(--gold);
+    font-size: 1.3rem;
+    text-align: center;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+/* Days Tabs */
+.days-tabs-container {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none; /* Firefox */
+}
+
+.days-tabs-container::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.days-tabs {
+    display: flex;
+    gap: 10px;
+    padding: 2px 4px;
+}
+
+.day-tab {
+    padding: 8px 16px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 20px;
+    background: rgba(212, 175, 55, 0.05);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-family: var(--font-body);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.day-tab.active {
+    background: var(--gold);
+    color: var(--bg-dark);
+    border-color: var(--gold);
+    font-weight: 600;
+    box-shadow: 0 0 10px var(--gold-glow);
+}
+
+/* Carousel */
+.carousel-container {
+    position: relative;
+    width: 100%;
+}
+
+.carousel {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding: 10px 4px 20px;
+    scrollbar-width: none;
+}
+
+.carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: -10px;
+}
+
+.dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: var(--gold);
+    transform: scale(1.2);
+}
+
+/* Premium Cards */
+.horario-card {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--card-radius);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.horario-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+}
+
+.card-header {
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.card-title {
+    font-family: var(--font-heading);
+    color: var(--gold);
+    font-size: 1.15rem;
+    margin: 0;
+}
+
+.card-category {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card-description-brief {
+    font-size: 0.9rem;
+    color: var(--text-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: auto;
+}
+
+.card-time {
+    color: var(--gold);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.card-icon {
+    font-size: 1.4rem;
+}
+
+/* Expanded State */
+.horario-card.expanded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-height: 80vh;
+    z-index: 2000;
+    background: rgba(15, 15, 15, 0.98);
+    border: 1px solid var(--gold);
+    padding: 30px 24px;
+    cursor: default;
+    scroll-snap-align: none;
+    overflow-y: auto;
+    animation: expandIn 0.3s ease-out forwards;
+}
+
+@keyframes expandIn {
+    from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.card-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 1999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.card-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.expanded-close {
+    position: absolute; top: 15px; right: 15px;
+    background: none; border: none;
+    color: var(--gold);
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+.expanded-content {
+    display: flex; flex-direction: column; gap: 20px;
+}
+
+.expanded-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--gold-dim);
+}
+
+.expanded-details {
+    display: flex; flex-direction: column; gap: 12px;
+}
+
+.detail-item {
+    display: flex; gap: 10px; align-items: flex-start;
+}
+
+.detail-label {
+    color: var(--gold);
+    font-weight: 600;
+    min-width: 80px;
+}
+
+.detail-value {
+    color: var(--text-light);
 }
 
 .horarios-group {
