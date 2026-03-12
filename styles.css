@@ -1,20 +1,26 @@
+/* ============================================
+   DESIGN SYSTEM — Centro Holístico M
+   ============================================ */
 :root {
     --bg-dark: #070707;
+    --bg-card: rgba(17, 17, 17, 0.72);
+    --bg-card-hover: rgba(22, 22, 22, 0.9);
     --gold: #d4af37;
-    --gold-dim: rgba(212, 175, 55, 0.4);
+    --gold-dim: rgba(212, 175, 55, 0.35);
     --gold-glow: rgba(212, 175, 55, 0.15);
+    --gold-bright: #e8c84a;
+    --taller-accent: rgba(212, 175, 55, 0.6);
     --text-light: #ffffff;
     --text-muted: #aaaaaa;
-    --card-bg: #111111;
+    --text-soft: #d0d0d0;
+    --card-radius: 16px;
     --font-heading: 'Cinzel', serif;
     --font-body: 'Montserrat', sans-serif;
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.5);
+    --shadow-hover: 0 8px 32px rgba(212, 175, 55, 0.12);
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     background-color: var(--bg-dark);
@@ -26,125 +32,136 @@ body {
     min-height: 100vh;
 }
 
-/* Splash Screen */
+/* ============================================
+   SPLASH SCREEN
+   ============================================ */
 #splash-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    position: fixed; inset: 0;
     background-color: var(--bg-dark);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex; justify-content: center; align-items: center;
     z-index: 9999;
     transition: opacity 0.8s ease-out, visibility 0.8s;
 }
 
 .splash-logo {
-    height: 100px;
-    width: auto;
+    height: 100px; width: auto;
     filter: drop-shadow(0 0 15px var(--gold));
     animation: splashPulse 1.5s ease-in-out infinite alternate;
 }
 
 @keyframes splashPulse {
-    0% { filter: drop-shadow(0 0 10px var(--gold)); transform: scale(0.95); opacity: 0.8; }
+    0%   { filter: drop-shadow(0 0 10px var(--gold)); transform: scale(0.95); opacity: 0.8; }
     100% { filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.8)); transform: scale(1.05); opacity: 1; }
 }
 
-/* Background Aura */
+/* ============================================
+   BACKGROUND AURA & PARTICLES
+   ============================================ */
 .aura-background {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    width: 100vw;
-    height: 100vh;
+    position: fixed; top: 50%; left: 50%;
+    width: 100vw; height: 100vh;
     transform: translate(-50%, -50%);
     background: radial-gradient(circle, var(--gold-glow) 0%, transparent 65%);
-    z-index: -1;
-    pointer-events: none;
+    z-index: -1; pointer-events: none;
     animation: slowPulse 8s infinite alternate;
 }
 
 @keyframes slowPulse {
-    0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9) rotate(0deg); }
-    100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+    0%   { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
+    100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
 }
 
-/* Particles Container */
 #particles-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-    pointer-events: none;
-    overflow: hidden;
+    position: fixed; inset: 0;
+    z-index: -1; pointer-events: none; overflow: hidden;
 }
 
 .particle {
-    position: absolute;
-    background: var(--gold);
-    border-radius: 50%;
-    opacity: 0;
+    position: absolute; background: var(--gold);
+    border-radius: 50%; opacity: 0;
     animation: drift linear forwards;
     box-shadow: 0 0 6px var(--gold-glow);
 }
 
 @keyframes drift {
-    0% { transform: translateY(0) scale(0.5); opacity: 0; }
-    20% { opacity: 0.6; }
-    80% { opacity: 0.6; }
+    0%   { transform: translateY(0) scale(0.5); opacity: 0; }
+    20%  { opacity: 0.6; }
+    80%  { opacity: 0.6; }
     100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
 }
 
-/* Sticky Header */
+/* ============================================
+   STICKY HEADER — Logo + Slogan + Nav
+   ============================================ */
 .sticky-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 30px;
-    background: rgba(7, 7, 7, 0.95);
-    backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 1000;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 30px;
+    background: rgba(7, 7, 7, 0.96);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--gold-dim);
 }
 
-.logo {
-    height: 60px;
-    width: auto;
-    border-radius: 50%;
-    border: 1px solid var(--gold-dim);
-    transition: all 0.4s ease;
-    box-shadow: 0 0 10px var(--gold-glow);
+.header-brand {
+    display: flex; align-items: center; gap: 14px;
 }
 
-.logo:hover {
+/* Logo Frame */
+.logo-frame {
+    position: relative;
+    width: 56px; height: 56px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--gold-dim);
+    box-shadow: 0 0 12px var(--gold-glow), inset 0 0 8px rgba(0,0,0,0.4);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    flex-shrink: 0;
+}
+
+.logo-frame:hover {
     border-color: var(--gold);
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-    transform: scale(1.05);
+    box-shadow: 0 0 22px rgba(212, 175, 55, 0.35), 0 0 40px rgba(212, 175, 55, 0.1);
+    transform: scale(1.08);
 }
 
-/* Navigation Buttons */
+.logo {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.logo-frame:hover .logo {
+    transform: scale(1.06);
+}
+
+/* Slogan */
+.header-slogan {
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    max-width: 220px;
+    line-height: 1.35;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+/* Navigation */
 .nav-links {
-    display: flex;
-    gap: 20px;
+    display: flex; gap: 20px;
 }
 
 .nav-btn {
-    background: transparent;
-    border: none;
+    background: transparent; border: none;
     color: var(--text-muted);
     font-family: var(--font-heading);
-    font-size: 1.1rem;
+    font-size: 1rem;
     cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    padding: 8px 15px;
+    text-transform: uppercase; letter-spacing: 2px;
+    padding: 8px 14px;
     transition: all 0.3s ease;
     border-bottom: 2px solid transparent;
 }
@@ -152,19 +169,20 @@ body {
 .nav-btn:hover {
     color: var(--gold);
     text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-    transform: scale(1.05);
 }
 
 .nav-btn.active {
     color: var(--gold);
-    border-bottom: 2px solid var(--gold);
+    border-bottom-color: var(--gold);
     text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-/* Main Content */
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
 .content-wrapper {
-    padding: 40px 20px;
-    max-width: 1200px;
+    padding: 35px 20px 60px;
+    max-width: 1100px;
     margin: 0 auto;
 }
 
@@ -172,195 +190,270 @@ body {
     font-family: var(--font-heading);
     color: var(--gold);
     text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 40px;
+    font-size: 2.2rem;
+    margin-bottom: 35px;
     letter-spacing: 3px;
     text-shadow: 0 0 15px var(--gold-glow);
 }
 
-/* Dynamic Sections - Cross Fade Transitions */
+/* Sections Cross Fade */
 .view-section {
-    display: none;
-    opacity: 0;
-    transform: translateY(15px);
+    display: none; opacity: 0;
+    transform: translateY(12px);
     transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
 .view-section.active {
-    display: block;
-    opacity: 1;
+    display: block; opacity: 1;
     transform: translateY(0);
 }
 
-.fade-in {
-    animation: fadeIn 0.8s ease-out forwards;
-}
+.fade-in { animation: fadeIn 0.8s ease-out forwards; }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Grid Layout for Cards */
-.grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+/* ============================================
+   HORARIOS SECTION LAYOUT
+   ============================================ */
+.horarios-layout {
+    display: flex; flex-direction: column; gap: 40px;
 }
 
-/* Holistic Cards */
-.card {
-    background: rgba(17, 17, 17, 0.65);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--gold-dim);
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+.horarios-group {
+    display: flex; flex-direction: column; gap: 20px;
 }
 
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 30px var(--gold-glow);
-    border-color: var(--gold);
-    background: rgba(17, 17, 17, 0.85);
+/* Group Header */
+.group-header {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
 }
 
-/* Horarios Interactive Cards */
-.horario-card {
-    cursor: pointer;
+.group-icon {
+    font-size: 1.5rem;
 }
 
-/* Group Titles */
 .group-title {
     font-family: var(--font-heading);
     color: var(--gold);
-    font-size: 1.6rem;
-    text-align: center;
-    margin: 40px 0 20px;
+    font-size: 1.45rem;
     letter-spacing: 2px;
-    text-shadow: 0 0 10px var(--gold-glow);
-    position: relative;
-    padding-bottom: 10px;
-    grid-column: 1 / -1;
+    text-shadow: 0 0 8px var(--gold-glow);
+    margin: 0;
 }
 
-.group-title::after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 10px auto 0;
+/* ============================================
+   ACTIVIDAD CARDS
+   ============================================ */
+.actividades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
 }
 
-/* Actividad Cards - Schedule Table */
-.actividad-card {
-    text-align: left;
+.act-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--shadow-card);
 }
 
-.card-subtitle {
-    color: var(--text-muted);
-    font-style: italic;
-    font-size: 0.95rem;
-    margin-bottom: 15px;
+.act-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--gold);
+    background: var(--bg-card-hover);
+}
+
+.act-card-header {
+    padding: 20px 24px 12px;
     text-align: center;
 }
 
+.act-name {
+    font-family: var(--font-heading);
+    color: var(--gold);
+    font-size: 1.35rem;
+    letter-spacing: 1px;
+}
+
+.act-card-body {
+    padding: 0 20px 20px;
+}
+
+/* Schedule Table */
 .schedule-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
 }
 
 .schedule-table thead th {
     color: var(--gold);
     font-family: var(--font-heading);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 8px 10px;
+    letter-spacing: 1.5px;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--gold-dim);
     text-align: left;
 }
 
 .schedule-table tbody td {
-    padding: 8px 10px;
-    font-size: 0.95rem;
-    color: var(--text-light);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px 12px;
+    font-size: 0.92rem;
+    color: var(--text-soft);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .schedule-table tbody tr:last-child td {
     border-bottom: none;
 }
 
+.schedule-table tbody tr {
+    transition: background 0.2s ease;
+}
+
 .schedule-table tbody tr:hover td {
-    background: rgba(212, 175, 55, 0.05);
+    background: rgba(212, 175, 55, 0.06);
 }
 
-/* Taller Cards */
-.taller-card {
-    text-align: center;
-    border: 1px solid rgba(212, 175, 55, 0.5);
-    background: linear-gradient(135deg, rgba(17, 17, 17, 0.7), rgba(30, 25, 10, 0.5));
-}
-
-.taller-details {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.taller-date {
+.day-cell {
+    font-weight: 500;
     color: var(--text-light);
-    font-size: 1.05rem;
+}
+
+.time-cell {
+    color: var(--gold);
     font-weight: 500;
 }
 
-.taller-time {
+.cupos-cell {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   TALLER CARDS
+   ============================================ */
+.talleres-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.taller-card {
+    position: relative;
+    background: var(--bg-card);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--taller-accent);
+    border-radius: var(--card-radius);
+    padding: 26px 24px 22px;
+    text-align: center;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: var(--shadow-card);
+}
+
+.taller-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--gold-bright);
+    background: var(--bg-card-hover);
+}
+
+.taller-card-accent {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.taller-name {
+    font-family: var(--font-heading);
     color: var(--gold);
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+.taller-info {
+    display: flex; flex-direction: column; gap: 8px;
+    margin-bottom: 14px;
+}
+
+.taller-meta {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 0.95rem;
+}
+
+.meta-icon {
     font-size: 1rem;
 }
 
-.taller-cupos {
-    color: var(--text-muted);
-    font-size: 0.9rem;
+.meta-text {
+    color: var(--text-soft);
 }
 
 .taller-badge {
     display: inline-block;
-    margin-top: 8px;
-    padding: 4px 14px;
-    font-size: 0.8rem;
+    padding: 5px 16px;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #1a1a1a;
+    letter-spacing: 1.5px;
+    color: var(--bg-dark);
     background: var(--gold);
     border-radius: 20px;
     font-weight: 600;
 }
 
+/* ============================================
+   GENERIC CARDS (Servicios, Contacto)
+   ============================================ */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px;
+}
+
+.card {
+    background: var(--bg-card);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--card-radius);
+    padding: 28px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex; flex-direction: column; justify-content: center;
+    box-shadow: var(--shadow-card);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--gold);
+    background: var(--bg-card-hover);
+}
+
 .card-title {
     font-family: var(--font-heading);
     color: var(--gold);
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     margin-bottom: 12px;
 }
 
 .card-content {
     color: var(--text-light);
-    font-size: 1.05rem;
+    font-size: 1rem;
     line-height: 1.8;
 }
 
-/* Contact Grid Specific Layout */
+/* Contacto */
 .contacto-layout {
     grid-template-columns: 1fr;
     max-width: 600px;
@@ -385,34 +478,103 @@ body {
     transform: scale(1.05);
 }
 
-/* Mobile First Responsiveness */
+/* Error message */
+.error-msg {
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 40px 20px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 @media (max-width: 768px) {
     .sticky-header {
         flex-direction: column;
-        padding: 15px;
-        gap: 15px;
+        padding: 12px 15px;
+        gap: 10px;
     }
-    
-    .logo {
-        height: 50px;
+
+    .header-brand {
+        gap: 10px;
+    }
+
+    .logo-frame {
+        width: 46px; height: 46px;
+        border-radius: 10px;
+    }
+
+    .header-slogan {
+        font-size: 0.72rem;
+        max-width: 170px;
     }
 
     .nav-links {
-        width: 100%;
-        justify-content: center;
-        gap: 15px;
+        width: 100%; justify-content: center;
+        gap: 10px;
     }
 
     .nav-btn {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
         padding: 5px 10px;
+        letter-spacing: 1px;
     }
 
     .section-title {
-        font-size: 2rem;
+        font-size: 1.7rem;
+        margin-bottom: 25px;
+    }
+
+    .content-wrapper {
+        padding: 25px 14px 50px;
+    }
+
+    .group-title {
+        font-size: 1.2rem;
+    }
+
+    .actividades-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .talleres-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
     }
 
     .grid-container {
         grid-template-columns: 1fr;
     }
+
+    .act-card-header { padding: 16px 18px 10px; }
+    .act-card-body { padding: 0 14px 16px; }
+    .act-name { font-size: 1.15rem; }
+
+    .schedule-table thead th {
+        font-size: 0.7rem;
+        padding: 8px;
+    }
+
+    .schedule-table tbody td {
+        padding: 8px;
+        font-size: 0.88rem;
+    }
+
+    .taller-card { padding: 20px 18px 18px; }
+    .taller-name { font-size: 1.05rem; }
+    .taller-meta { font-size: 0.88rem; }
+}
+
+@media (max-width: 380px) {
+    .header-slogan { display: none; }
+
+    .nav-btn {
+        font-size: 0.78rem;
+        padding: 4px 7px;
+        letter-spacing: 0.5px;
+    }
+
+    .section-title { font-size: 1.5rem; }
 }

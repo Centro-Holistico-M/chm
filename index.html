@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centro Holístico M</title>
+    <meta name="description" content="Centro Holístico M — Yoga, Taekwondo, talleres de sanación y bienestar integral en Huauchinango, Puebla.">
 
     <!-- PWA Configuration -->
     <link rel="manifest" href="images/manifest.json">
@@ -12,7 +13,7 @@
     <meta name="theme-color" content="#070707">
 
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
@@ -29,10 +30,13 @@
     <div id="particles-container"></div>
 
     <header class="sticky-header">
-        <div class="logo-container">
-            <img src="images/logo.png" alt="Centro Holístico M" class="logo">
+        <div class="header-brand">
+            <div class="logo-frame">
+                <img src="images/logo.png" alt="Centro Holístico M" class="logo" id="header-logo">
+            </div>
+            <p class="header-slogan" id="header-slogan"></p>
         </div>
-        <nav class="nav-links">
+        <nav class="nav-links" id="main-nav">
             <button class="nav-btn active" data-target="horarios">Horarios</button>
             <button class="nav-btn" data-target="servicios">Servicios</button>
             <button class="nav-btn" data-target="contacto">Contacto</button>
@@ -43,7 +47,7 @@
         <!-- Section: Horarios -->
         <section id="horarios" class="view-section active">
             <h1 class="section-title fade-in">Nuestros Horarios</h1>
-            <div id="horarios-container" class="grid-container">
+            <div id="horarios-container" class="horarios-layout">
                 <!-- Data dynamically inserted by JS -->
             </div>
         </section>
