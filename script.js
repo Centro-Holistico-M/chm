@@ -1,286 +1,285 @@
-// URLs de las APIs
-const API_URLS = {
-    horarios: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Horarios',
-    servicios: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Servicios',
-    contacto: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto'
-};
+/* --- API Endpoints --- */
+const API_HORARIOS = "https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Horarios";
+const API_SERVICIOS = "https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Servicios";
+const API_CONTACTO = "https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto";
 
-// Estado de la aplicación
-const app = {
-    data: {
-        horarios: [],
-        servicios: [],
-        contacto: {}
-    },
-    currentSection: 'horarios'
-};
+/* --- DOM Selection --- */
+const navBtns = document.querySelectorAll('.nav-btn');
+const sections = document.querySelectorAll('.view-section');
 
-// Inicializar la aplicación
+const horariosContainer = document.getElementById('horarios-container');
+const serviciosContainer = document.getElementById('servicios-container');
+const contactoContainer = document.getElementById('contacto-container');
+const headerSlogan = document.getElementById('header-slogan');
+const splashScreen = document.getElementById('splash-screen');
+const particlesContainer = document.getElementById('particles-container');
+
+/* --- Service Worker Registration --- */
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('images/sw.js')
+            .then(reg => console.log('Service Worker registrado con éxito.', reg))
+            .catch(err => console.error('Fallo en el registro del Service Worker:', err));
+    });
+}
+
+/* --- Initialization --- */
 document.addEventListener('DOMContentLoaded', () => {
-    setupNavigation();
-    loadAllData();
-});
+    // Splash Screen Logic
+    if(splashScreen) {
+        setTimeout(() => {
+            splashScreen.style.opacity = '0';
+            splashScreen.style.visibility = 'hidden';
+            setTimeout(() => splashScreen.remove(), 800);
+        }, 1500);
+    }
 
-// Configurar navegación
-function setupNavigation() {
-    const navBtns = document.querySelectorAll('.nav-btn');
+    // Init Particles
+    initParticles();
+
+    // Escuchar clicks de los botones de navegación
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            const section = btn.dataset.section;
-            switchSection(section);
+            const targetId = btn.getAttribute('data-target');
+            switchSection(targetId);
             
-            // Actualizar active state
             navBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
         });
     });
+
+    // Iniciar con la sección "horarios" visible
+    switchSection('horarios');
+
+    // Inyectar datos de la API globalmente
+    fetchHorarios();
+    fetchServicios();
+    fetchContacto();
+});
+
+/* --- Tab Navigation Logic (Cross-fade) --- */
+function switchSection(targetId) {
+    const fadeDuration = 400; // ms
+
+    sections.forEach(section => {
+        if (section.classList.contains('active') && section.id !== targetId) {
+            // Fade out current section
+            section.classList.remove('active');
+            setTimeout(() => {
+                section.classList.add('hidden');
+            }, fadeDuration);
+        }
+    });
+
+    // Fade in new section
+    setTimeout(() => {
+        sections.forEach(section => {
+            if (section.id === targetId) {
+                section.classList.remove('hidden');
+                // Allow display: block to apply before fading in
+                setTimeout(() => section.classList.add('active'), 50);
+            }
+        });
+    }, fadeDuration);
 }
 
-// Cambiar sección
-function switchSection(sectionName) {
-    // Ocultar todas las secciones
-    const sections = document.querySelectorAll('.section');
-    sections.forEach(section => section.classList.remove('active'));
+/* --- Particle Generator --- */
+function initParticles() {
+    if(!particlesContainer) return;
+    const maxParticles = 25;
     
-    // Mostrar la sección seleccionada
-    const selectedSection = document.getElementById(sectionName);
-    if (selectedSection) {
-        selectedSection.classList.add('active');
-    }
-    
-    app.currentSection = sectionName;
+    setInterval(() => {
+        if(particlesContainer.childElementCount < maxParticles) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Random properties
+            const size = Math.random() * 3 + 1; // 1px - 4px
+            const left = Math.random() * 100; // 0% - 100%
+            const duration = Math.random() * 8 + 6; // 6s - 14s
+            
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            particle.style.left = `${left}vw`;
+            particle.style.top = '100vh';
+            particle.style.animationDuration = `${duration}s`;
+            
+            particlesContainer.appendChild(particle);
+            
+            // Cleanup
+            setTimeout(() => {
+                if(particle.parentNode) particle.remove();
+            }, duration * 1000);
+        }
+    }, 800);
 }
 
-// Cargar todos los datos
-async function loadAllData() {
-    try {
-        await Promise.all([
-            loadHorarios(),
-            loadServicios(),
-            loadContacto()
-        ]);
-    } catch (error) {
-        console.error('Error cargando datos:', error);
-    }
-}
+/* --- Fetches from Google Sheets APIs --- */
 
-// Cargar horarios
-async function loadHorarios() {
+// Horarios
+async function fetchHorarios() {
     try {
-        const response = await fetch(API_URLS.horarios);
+        const response = await fetch(API_HORARIOS);
         const data = await response.json();
-        app.data.horarios = data;
         renderHorarios(data);
     } catch (error) {
-        console.error('Error cargando horarios:', error);
-        document.getElementById('horarios-container').innerHTML = 
-            '<div class="loading" style="color: red;">Error al cargar horarios</div>';
+        console.error("Error fetching Horarios:", error);
+        horariosContainer.innerHTML = '<p class="card-content">No se pudieron cargar los horarios en este momento.</p>';
     }
 }
 
-// Renderizar horarios
-function renderHorarios(horarios) {
-    const container = document.getElementById('horarios-container');
-    
-    if (horarios.length === 0) {
-        container.innerHTML = '<div class="loading">No hay horarios disponibles</div>';
-        return;
-    }
-    
-    // Agrupar horarios por día
-    const horariosPorDía = {};
-    horarios.forEach(h => {
-        if (h.Día) {
-            if (!horariosPorDía[h.Día]) {
-                horariosPorDía[h.Día] = [];
-            }
-            horariosPorDía[h.Día].push(h);
-        }
-    });
-    
-    const diasOrden = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-    let html = '';
-    
-    diasOrden.forEach(día => {
-        if (horariosPorDía[día]) {
-            horariosPorDía[día].forEach(horario => {
-                html += crearTarjetaHorario(día, horario);
+function renderHorarios(data) {
+    horariosContainer.innerHTML = '';
+
+    // Separate regular activities from talleres
+    const actividades = data.filter(item => (item.Actividad || '').toLowerCase() !== 'taller');
+    const talleres = data.filter(item => (item.Actividad || '').toLowerCase() === 'taller');
+
+    // --- Group: Actividades Semanales ---
+    if (actividades.length > 0) {
+        const actHeader = document.createElement('h2');
+        actHeader.className = 'group-title fade-in';
+        actHeader.textContent = 'Actividades Semanales';
+        horariosContainer.appendChild(actHeader);
+
+        // Group activities by name
+        const grouped = {};
+        actividades.forEach(item => {
+            const name = item.Actividad || 'Actividad';
+            if (!grouped[name]) grouped[name] = [];
+            grouped[name].push(item);
+        });
+
+        Object.keys(grouped).forEach(actName => {
+            const card = document.createElement('div');
+            card.className = 'card fade-in actividad-card';
+
+            const desc = grouped[actName][0].Descripcion || '';
+
+            let scheduleRows = '';
+            grouped[actName].forEach(item => {
+                const dia = item['Día'] || item.Dia || '';
+                const hora = item.Hora || item.Horario || '--:--';
+                const cupos = item.Cupos || '';
+                scheduleRows += `
+                    <tr>
+                        <td>${dia}</td>
+                        <td>${hora}</td>
+                        <td>${cupos ? cupos + ' cupos' : ''}</td>
+                    </tr>`;
             });
-        }
-    });
-    
-    // Agregar talleres especiales (sin día)
-    if (horariosPorDía['']) {
-        horariosPorDía[''].forEach(horario => {
-            html += crearTarjetaHorario('Taller Especial', horario);
+
+            card.innerHTML = `
+                <h2 class="card-title">${actName}</h2>
+                ${desc ? `<p class="card-subtitle">${desc}</p>` : ''}
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Día</th>
+                            <th>Hora</th>
+                            <th>Cupos</th>
+                        </tr>
+                    </thead>
+                    <tbody>${scheduleRows}</tbody>
+                </table>
+            `;
+            horariosContainer.appendChild(card);
         });
     }
-    
-    container.innerHTML = html;
+
+    // --- Group: Talleres Especiales ---
+    if (talleres.length > 0) {
+        const tallerHeader = document.createElement('h2');
+        tallerHeader.className = 'group-title fade-in';
+        tallerHeader.textContent = 'Talleres Especiales';
+        horariosContainer.appendChild(tallerHeader);
+
+        talleres.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card fade-in taller-card';
+
+            const nombre = item.Descripcion || 'Taller';
+            const fecha = item.Fecha || '';
+            const hora = item.Hora || item.Horario || '--:--';
+            const cupos = item.Cupos || '';
+            const estado = item.Estado || '';
+
+            card.innerHTML = `
+                <h2 class="card-title">${nombre}</h2>
+                <div class="taller-details">
+                    ${fecha ? `<p class="taller-date">📅 ${fecha}</p>` : ''}
+                    <p class="taller-time">🕐 ${hora}</p>
+                    ${cupos ? `<p class="taller-cupos">${cupos} cupos disponibles</p>` : ''}
+                    ${estado ? `<span class="taller-badge">${estado}</span>` : ''}
+                </div>
+            `;
+            horariosContainer.appendChild(card);
+        });
+    }
 }
 
-// Crear tarjeta de horario
-function crearTarjetaHorario(día, horario) {
-    const fecha = horario.Fecha ? `<span style="font-size: 12px; color: #999;">Fecha: ${horario.Fecha}</span>` : '';
-    return `
-        <div class="horario-card">
-            <div class="horario-dia">${día}</div>
-            <div class="horario-hora">${horario.Hora}</div>
-            <div class="horario-actividad">${horario.Actividad}</div>
-            <div class="horario-descripcion">${horario.Descripcion}</div>
-            <div class="horario-info">
-                <span class="horario-estado">${horario.Estado}</span>
-                <span>Cupos: ${horario.Cupos}</span>
-            </div>
-            ${fecha}
-        </div>
-    `;
-}
-
-// Cargar servicios
-async function loadServicios() {
+// Servicios
+async function fetchServicios() {
     try {
-        const response = await fetch(API_URLS.servicios);
+        const response = await fetch(API_SERVICIOS);
         const data = await response.json();
-        app.data.servicios = data;
         renderServicios(data);
     } catch (error) {
-        console.error('Error cargando servicios:', error);
-        document.getElementById('servicios-container').innerHTML = 
-            '<div class="loading" style="color: red;">Error al cargar servicios</div>';
+        console.error("Error fetching Servicios:", error);
+        serviciosContainer.innerHTML = '<p class="card-content">No se pudieron cargar los servicios en este momento.</p>';
     }
 }
 
-// Renderizar servicios
-function renderServicios(servicios) {
-    const container = document.getElementById('servicios-container');
-    
-    if (servicios.length === 0) {
-        container.innerHTML = '<div class="loading">No hay servicios disponibles</div>';
-        return;
-    }
-    
-    let html = '';
-    servicios.forEach(servicio => {
-        html += `
-            <div class="servicio-card">
-                <div class="servicio-nombre">${servicio.Nombre}</div>
-                <span class="servicio-categoria">${servicio.Categoria}</span>
-                <div class="servicio-corta">${servicio.DescripcionCorta}</div>
-                <div class="servicio-descripcion">${servicio.DescripcionCompleta}</div>
-                <div class="servicio-footer">
-                    <span class="servicio-duracion">⏱️ ${servicio.Duracion}</span>
-                    <span class="servicio-precio">$${servicio.Precio}</span>
-                </div>
+function renderServicios(data) {
+    serviciosContainer.innerHTML = ''; 
+    data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card fade-in';
+        
+        card.innerHTML = `
+            <h2 class="card-title">${item.Nombre}</h2>
+            <div class="card-content">
+                <p style="margin-bottom:15px; font-style: italic; color: #f4f4f4;">${item.Descripción || item.Descripcion || ''}</p>
+                <strong>Duración:</strong> ${item.Duración || item.Duracion || 'N/A'}<br>
+                <strong style="color:var(--gold)">Inversión:</strong> $${item.Precio || 'N/A'}
             </div>
         `;
+        serviciosContainer.appendChild(card);
     });
-    
-    container.innerHTML = html;
 }
 
-// Cargar contacto
-async function loadContacto() {
+// Contacto
+async function fetchContacto() {
     try {
-        const response = await fetch(API_URLS.contacto);
+        const response = await fetch(API_CONTACTO);
         const data = await response.json();
-        if (data.length > 0) {
-            const contactoData = data[0];
-            app.data.contacto = contactoData;
-            renderContacto(contactoData);
-        }
+        if(data && data.length > 0) renderContacto(data[0]);
     } catch (error) {
-        console.error('Error cargando contacto:', error);
-        document.getElementById('contacto-container').innerHTML = 
-            '<div class="loading" style="color: red;">Error al cargar información de contacto</div>';
+        console.error("Error fetching Contacto:", error);
+        contactoContainer.innerHTML = '<p class="card-content">No se pudo cargar la información de contacto.</p>';
     }
 }
 
-// Renderizar contacto
-function renderContacto(contacto) {
-    // Actualizar header con logo y slogan
-    if (contacto.Logo) {
-        const logoImg = document.getElementById('logo');
-        // Convertir link de Google Drive a formato de descarga directa
-        const logoUrl = convertGoogleDriveUrl(contacto.Logo);
-        logoImg.src = logoUrl;
-    }
-    
-    if (contacto.Nombre) {
-        document.getElementById('nombre-centro').textContent = contacto.Nombre;
-    }
-    
-    if (contacto.Slogan) {
-        document.getElementById('slogan').textContent = contacto.Slogan;
-    }
-    
-    // Renderizar información de contacto
-    const container = document.getElementById('contacto-container');
-    
-    const redesSociales = `
-        ${contacto.WhatsApp ? `<a href="https://wa.me/52${contacto.WhatsApp}" class="red-social" title="WhatsApp">💬</a>` : ''}
-        ${contacto.Email ? `<a href="mailto:${contacto.Email}" class="red-social" title="Email">✉️</a>` : ''}
-        ${contacto.Telefono ? `<a href="tel:${contacto.Telefono}" class="red-social" title="Teléfono">📞</a>` : ''}
-        ${contacto.Instagram ? `<a href="${contacto.Instagram}" target="_blank" class="red-social" title="Instagram">📷</a>` : ''}
-        ${contacto.Facebook ? `<a href="${contacto.Facebook}" target="_blank" class="red-social" title="Facebook">f</a>` : ''}
-        ${contacto.Youtube ? `<a href="${contacto.Youtube}" target="_blank" class="red-social" title="YouTube">▶️</a>` : ''}
-    `;
-    
-    const mapaUrl = contacto.MapaURL ? contacto.MapaURL : '';
-    const mapaIframe = contacto.MapaURL ? 
-        `<iframe src="${mapaUrl.replace('maps.app.goo.gl', 'www.google.com/maps')}" width="100%" height="300" style="border: none; border-radius: 10px;"></iframe>` : 
-        '';
-    
-    const html = `
-        <div class="contacto-info">
-            <div class="contacto-item">
-                <span class="contacto-label">Nombre:</span>
-                <span class="contacto-valor">${contacto.Nombre}</span>
-            </div>
-            
-            <div class="contacto-item">
-                <span class="contacto-label">Teléfono:</span>
-                <span class="contacto-valor"><a href="tel:${contacto.Telefono}">${contacto.Telefono}</a></span>
-            </div>
-            
-            <div class="contacto-item">
-                <span class="contacto-label">WhatsApp:</span>
-                <span class="contacto-valor"><a href="https://wa.me/52${contacto.WhatsApp}">+52 ${contacto.WhatsApp}</a></span>
-            </div>
-            
-            <div class="contacto-item">
-                <span class="contacto-label">Email:</span>
-                <span class="contacto-valor"><a href="mailto:${contacto.Email}">${contacto.Email}</a></span>
-            </div>
-            
-            <div class="contacto-item">
-                <span class="contacto-label">Dirección:</span>
-                <span class="contacto-valor">${contacto.Direccion}, ${contacto.Ciudad}, ${contacto.Estado}</span>
-            </div>
-            
-            <div class="contacto-item">
-                <span class="contacto-label">Horarios:</span>
-                <span class="contacto-valor">${contacto.HorarioAtencion}</span>
-            </div>
-            
-            <div class="contacto-redes">
-                ${redesSociales}
-            </div>
-        </div>
-        
-        <div class="contacto-mapa">
-            ${mapaIframe || '<div class="loading">Mapa no disponible</div>'}
-        </div>
-    `;
-    
-    container.innerHTML = html;
-}
+function renderContacto(info) {
+    contactoContainer.innerHTML = '';
+    const whatsappClean = (info.WhatsApp || '').replace(/\D/g, '');
+    const card = document.createElement('div');
+    card.className = 'card fade-in';
 
-// Convertir URL de Google Drive a URL descargable
-function convertGoogleDriveUrl(url) {
-    const fileIdMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)\//);
-    if (fileIdMatch) {
-        return `https://drive.google.com/uc?export=view&id=${fileIdMatch[1]}`;
-    }
-    return url;
+    card.innerHTML = `
+        <h2 class="card-title">Comunícate Conmigo</h2>
+        <div class="card-content" style="text-align: left; padding: 0 5%;">
+            <p style="text-align: center; margin-bottom: 25px; color: #f4f4f4;">Inicia tu proceso de sanación.</p>
+            
+            <p style="margin-bottom: 12px;"><strong>📍 Dirección:</strong> ${info.Dirección || info.Direccion}</p>
+            <p style="margin-bottom: 12px;"><strong>📞 Teléfono:</strong> <a href="tel:${info.Teléfono || info.Telefono}" style="color:var(--text-light); text-decoration:none;">${info.Teléfono || info.Telefono}</a></p>
+            <p style="margin-bottom: 12px;"><strong>✉️ Email:</strong> <a href="mailto:${info.Email || info.Correo}" style="color:var(--gold); text-decoration:none;">${info.Email || info.Correo}</a></p>
+            <p style="margin-bottom: 30px;"><strong>🕰️ Horario:</strong> ${info.Horario}</p>
+
+            <div style="text-align: center;">
+                <a href="https://wa.me/${whatsappClean}" target="_blank" class="contact-btn">WhatsApp Directo</a>
+            </div>
+        </div>
+    `;
+    contactoContainer.appendChild(card);
 }

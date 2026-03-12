@@ -1,3 +1,15 @@
+:root {
+    --bg-dark: #070707;
+    --gold: #d4af37;
+    --gold-dim: rgba(212, 175, 55, 0.4);
+    --gold-glow: rgba(212, 175, 55, 0.15);
+    --text-light: #ffffff;
+    --text-muted: #aaaaaa;
+    --card-bg: #111111;
+    --font-heading: 'Cinzel', serif;
+    --font-body: 'Montserrat', sans-serif;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,476 +17,402 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #f5f1e8 0%, #e8d5c4 100%);
-    color: #2d3436;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+    font-family: var(--font-body);
     line-height: 1.6;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    background: white;
-    box-shadow: 0 0 40px rgba(0,0,0,0.15);
+    overflow-x: hidden;
+    position: relative;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
-/* Header */
-.header {
-    background: linear-gradient(135deg, #1a5d3d 0%, #2d8659 100%);
-    color: white;
-    padding: 30px;
-    border-bottom: 5px solid #c9a96d;
-}
-
-.logo-section {
+/* Splash Screen */
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-dark);
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 25px;
+    z-index: 9999;
+    transition: opacity 0.8s ease-out, visibility 0.8s;
+}
+
+.splash-logo {
+    height: 100px;
+    width: auto;
+    filter: drop-shadow(0 0 15px var(--gold));
+    animation: splashPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes splashPulse {
+    0% { filter: drop-shadow(0 0 10px var(--gold)); transform: scale(0.95); opacity: 0.8; }
+    100% { filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.8)); transform: scale(1.05); opacity: 1; }
+}
+
+/* Background Aura */
+.aura-background {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, var(--gold-glow) 0%, transparent 65%);
+    z-index: -1;
+    pointer-events: none;
+    animation: slowPulse 8s infinite alternate;
+}
+
+@keyframes slowPulse {
+    0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9) rotate(0deg); }
+    100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+}
+
+/* Particles Container */
+#particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: drift linear forwards;
+    box-shadow: 0 0 6px var(--gold-glow);
+}
+
+@keyframes drift {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { opacity: 0.6; }
+    80% { opacity: 0.6; }
+    100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+}
+
+/* Sticky Header */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background: rgba(7, 7, 7, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--gold-dim);
 }
 
 .logo {
-    width: 100px;
-    height: 100px;
-    border-radius: 8px;
-    object-fit: cover;
-    border: 3px solid #c9a96d;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    height: 60px;
+    width: auto;
+    border-radius: 50%;
+    border: 1px solid var(--gold-dim);
+    transition: all 0.4s ease;
+    box-shadow: 0 0 10px var(--gold-glow);
 }
 
-.brand-info h1 {
-    font-size: 32px;
-    margin-bottom: 8px;
-    font-weight: 700;
-    color: #ffffff;
+.logo:hover {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    transform: scale(1.05);
 }
 
-.slogan {
-    font-size: 16px;
-    font-style: italic;
-    opacity: 0.95;
-    max-width: 350px;
-    color: #e8d5c4;
-    line-height: 1.5;
-}
-
-/* Navegación */
-.navigation {
+/* Navigation Buttons */
+.nav-links {
     display: flex;
-    gap: 15px;
-    padding: 25px 30px;
-    background: linear-gradient(to right, #f9f7f4, #f5ede4);
-    border-bottom: 2px solid #c9a96d;
-    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .nav-btn {
-    padding: 12px 28px;
-    border: 2px solid #1a5d3d;
-    background: white;
-    color: #1a5d3d;
-    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 8px 15px;
     transition: all 0.3s ease;
+    border-bottom: 2px solid transparent;
 }
 
 .nav-btn:hover {
-    background: #1a5d3d;
-    color: #c9a96d;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(26, 93, 61, 0.3);
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+    transform: scale(1.05);
 }
 
 .nav-btn.active {
-    background: #1a5d3d;
-    color: white;
-    box-shadow: 0 6px 18px rgba(26, 93, 61, 0.3);
-    border-color: #c9a96d;
+    color: var(--gold);
+    border-bottom: 2px solid var(--gold);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
-/* Content */
-.content {
-    flex: 1;
-    padding: 40px 30px;
+/* Main Content */
+.content-wrapper {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.section {
+.section-title {
+    font-family: var(--font-heading);
+    color: var(--gold);
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 15px var(--gold-glow);
+}
+
+/* Dynamic Sections - Cross Fade Transitions */
+.view-section {
     display: none;
-    animation: fadeIn 0.3s ease;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
 }
 
-.section.active {
+.view-section.active {
     display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.section h2 {
-    color: #1a5d3d;
-    margin-bottom: 30px;
-    font-size: 28px;
-    border-bottom: 3px solid #c9a96d;
-    padding-bottom: 12px;
-    font-weight: 700;
-}
-
-/* Horarios */
-.horarios-grid {
+/* Grid Layout for Cards */
+.grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
-}
-
-.horario-card {
-    background: linear-gradient(135deg, #f9f7f4 0%, #f5ede4 100%);
-    border-left: 5px solid #c9a96d;
-    border-radius: 8px;
-    padding: 22px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
-}
-
-.horario-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    border-left-color: #1a5d3d;
-}
-
-.horario-dia {
-    font-weight: 700;
-    color: #1a5d3d;
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.horario-hora {
-    background: linear-gradient(135deg, #1a5d3d 0%, #2d8659 100%);
-    color: white;
-    padding: 8px 14px;
-    border-radius: 5px;
-    display: inline-block;
-    margin-bottom: 10px;
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.horario-actividad {
-    font-weight: 600;
-    color: #2d3436;
-    margin-bottom: 5px;
-    font-size: 16px;
-}
-
-.horario-descripcion {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 8px;
-}
-
-.horario-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: #999;
-}
-
-.horario-estado {
-    background: #d4edda;
-    color: #155724;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
-/* Servicios */
-.servicios-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
-}
-
-.servicio-card {
-    background: white;
-    border: 2px solid #e8d5c4;
-    border-radius: 8px;
-    padding: 25px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
-}
-
-.servicio-card:hover {
-    border-color: #1a5d3d;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    transform: translateY(-5px);
-}
-
-.servicio-nombre {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1a5d3d;
-    margin-bottom: 8px;
-}
-
-.servicio-categoria {
-    background: #1a5d3d;
-    color: #c9a96d;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    display: inline-block;
-    margin-bottom: 15px;
-    font-weight: 600;
-}
-
-.servicio-corta {
-    font-weight: 600;
-    color: #2d8659;
-    margin-bottom: 12px;
-    font-size: 15px;
-}
-
-.servicio-descripcion {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 15px;
-    line-height: 1.6;
-}
-
-.servicio-footer {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 15px;
-    border-top: 1px solid #e8d5c4;
-    font-size: 14px;
-}
-
-.servicio-duracion {
-    color: #1a5d3d;
-    font-weight: 600;
-}
-
-.servicio-precio {
-    background: linear-gradient(135deg, #1a5d3d 0%, #2d8659 100%);
-    color: #c9a96d;
-    padding: 6px 14px;
-    border-radius: 5px;
-    font-weight: 700;
-}
-
-/* Contacto */
-.contacto-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
 }
 
-.contacto-info {
-    background: linear-gradient(135deg, #f9f7f4 0%, #f5ede4 100%);
-    border-radius: 8px;
-    padding: 25px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.contacto-item {
-    margin-bottom: 20px;
+/* Holistic Cards */
+.card {
+    background: rgba(17, 17, 17, 0.65);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
-    gap: 15px;
-}
-
-.contacto-label {
-    font-weight: 700;
-    color: #1a5d3d;
-    min-width: 110px;
-}
-
-.contacto-valor {
-    color: #2d3436;
-}
-
-.contacto-valor a {
-    color: #1a5d3d;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.contacto-valor a:hover {
-    text-decoration: underline;
-    color: #2d8659;
-}
-
-.contacto-redes {
-    display: flex;
-    gap: 15px;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 2px solid #e8d5c4;
-}
-
-.red-social {
-    display: inline-flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
-    width: 45px;
-    height: 45px;
-    background: linear-gradient(135deg, #1a5d3d 0%, #2d8659 100%);
-    color: #c9a96d;
-    border-radius: 5px;
-    text-decoration: none;
-    font-size: 20px;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
-.red-social:hover {
-    background: #c9a96d;
-    color: #1a5d3d;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px var(--gold-glow);
+    border-color: var(--gold);
+    background: rgba(17, 17, 17, 0.85);
 }
 
-.contacto-mapa {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+/* Horarios Interactive Cards */
+.horario-card {
+    cursor: pointer;
 }
 
-.contacto-mapa iframe {
+/* Group Titles */
+.group-title {
+    font-family: var(--font-heading);
+    color: var(--gold);
+    font-size: 1.6rem;
+    text-align: center;
+    margin: 40px 0 20px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--gold-glow);
+    position: relative;
+    padding-bottom: 10px;
+    grid-column: 1 / -1;
+}
+
+.group-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 10px auto 0;
+}
+
+/* Actividad Cards - Schedule Table */
+.actividad-card {
+    text-align: left;
+}
+
+.card-subtitle {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.schedule-table {
     width: 100%;
-    border: none;
+    border-collapse: collapse;
+    margin-top: 10px;
 }
 
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: #999;
-    font-size: 18px;
+.schedule-table thead th {
+    color: var(--gold);
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--gold-dim);
+    text-align: left;
 }
 
-/* Footer */
-.footer {
-    background: #1a5d3d;
-    color: #e8d5c4;
+.schedule-table tbody td {
+    padding: 8px 10px;
+    font-size: 0.95rem;
+    color: var(--text-light);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.schedule-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.schedule-table tbody tr:hover td {
+    background: rgba(212, 175, 55, 0.05);
+}
+
+/* Taller Cards */
+.taller-card {
     text-align: center;
-    padding: 20px;
-    margin-top: auto;
-    border-top: 3px solid #c9a96d;
+    border: 1px solid rgba(212, 175, 55, 0.5);
+    background: linear-gradient(135deg, rgba(17, 17, 17, 0.7), rgba(30, 25, 10, 0.5));
+}
+
+.taller-details {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.taller-date {
+    color: var(--text-light);
+    font-size: 1.05rem;
+    font-weight: 500;
+}
+
+.taller-time {
+    color: var(--gold);
+    font-size: 1rem;
+}
+
+.taller-cupos {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.taller-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1a1a1a;
+    background: var(--gold);
+    border-radius: 20px;
     font-weight: 600;
 }
 
-/* Responsive */
+.card-title {
+    font-family: var(--font-heading);
+    color: var(--gold);
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+}
+
+.card-content {
+    color: var(--text-light);
+    font-size: 1.05rem;
+    line-height: 1.8;
+}
+
+/* Contact Grid Specific Layout */
+.contacto-layout {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.contact-btn {
+    display: inline-block;
+    padding: 10px 25px;
+    margin-top: 15px;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: var(--font-heading);
+    transition: all 0.3s ease;
+}
+
+.contact-btn:hover {
+    background: var(--gold-glow);
+    box-shadow: 0 0 15px var(--gold-glow);
+    transform: scale(1.05);
+}
+
+/* Mobile First Responsiveness */
 @media (max-width: 768px) {
-    html, body {
-        overflow-x: hidden;
-        width: 100%;
-    }
-
-    .container {
-        max-width: 100%;
-        width: 100vw;
-        overflow-x: hidden;
-    }
-
-    .header {
+    .sticky-header {
+        flex-direction: column;
         padding: 15px;
-        width: 100%;
+        gap: 15px;
     }
-
-    .logo-section {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-    }
-
+    
     .logo {
-        width: 70px;
-        height: 70px;
-        flex-shrink: 0;
+        height: 50px;
     }
 
-    .brand-info {
-        text-align: center;
+    .nav-links {
         width: 100%;
-    }
-
-    .brand-info h1 {
-        font-size: 20px;
-    }
-
-    .slogan {
-        font-size: 14px;
-        max-width: 100%;
-    }
-
-    .navigation {
-        flex-direction: column;
-        padding: 12px;
-        gap: 10px;
-        width: 100%;
+        justify-content: center;
+        gap: 15px;
     }
 
     .nav-btn {
-        width: 100%;
-        text-align: center;
-        padding: 10px 15px;
-        font-size: 14px;
+        font-size: 0.95rem;
+        padding: 5px 10px;
     }
 
-    .content {
-        padding: 15px;
-        width: 100%;
+    .section-title {
+        font-size: 2rem;
     }
 
-    .section h2 {
-        font-size: 22px;
-        margin-bottom: 20px;
-    }
-
-    .contacto-grid {
+    .grid-container {
         grid-template-columns: 1fr;
-    }
-
-    .horarios-grid,
-    .servicios-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .servicio-card,
-    .horario-card,
-    .contacto-info {
-        padding: 15px;
-    }
-
-    .footer {
-        padding: 15px;
-        font-size: 12px;
-    }
-}
-
-@media (max-width: 480px) {
-    .brand-info h1 {
-        font-size: 18px;
-    }
-
-    .section h2 {
-        font-size: 18px;
-    }
-
-    .horario-card,
-    .servicio-card {
-        padding: 12px;
     }
 }

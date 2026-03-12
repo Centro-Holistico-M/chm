@@ -1,64 +1,71 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Centro Holístico M</title>
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="images/manifest.json">
+    <link rel="icon" type="image/png" href="images/logo.png">
+    <meta name="theme-color" content="#070707">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-    <div class="container">
-        <!-- Header con Logo y Slogan -->
-        <header class="header">
-            <div class="logo-section">
-                <img id="logo" class="logo" alt="Logo Centro Holístico" src="">
-                <div class="brand-info">
-                    <h1 id="nombre-centro" class="nombre-centro">Centro Holístico M</h1>
-                    <p id="slogan" class="slogan">La sanación comienza cuando te escuchas</p>
-                </div>
-            </div>
-        </header>
-
-        <!-- Navegación con Botones -->
-        <nav class="navigation">
-            <button class="nav-btn active" data-section="horarios">📅 Horarios</button>
-            <button class="nav-btn" data-section="servicios">💆 Servicios</button>
-            <button class="nav-btn" data-section="contacto">📞 Contacto</button>
-        </nav>
-
-        <!-- Contenedor de Secciones -->
-        <main class="content">
-            <!-- Sección Horarios -->
-            <section id="horarios" class="section active">
-                <h2>Nuestros Horarios</h2>
-                <div id="horarios-container" class="horarios-grid">
-                    <div class="loading">Cargando horarios...</div>
-                </div>
-            </section>
-
-            <!-- Sección Servicios -->
-            <section id="servicios" class="section">
-                <h2>Nuestros Servicios</h2>
-                <div id="servicios-container" class="servicios-grid">
-                    <div class="loading">Cargando servicios...</div>
-                </div>
-            </section>
-
-            <!-- Sección Contacto -->
-            <section id="contacto" class="section">
-                <h2>Contacto e Información</h2>
-                <div id="contacto-container" class="contacto-grid">
-                    <div class="loading">Cargando información...</div>
-                </div>
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2026 Centro Holístico M. Todos los derechos reservados.</p>
-        </footer>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <img src="images/logo.png" alt="Cargando..." class="splash-logo">
     </div>
+
+    <!-- Background Aura & Particles -->
+    <div class="aura-background"></div>
+    <div id="particles-container"></div>
+
+    <header class="sticky-header">
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Centro Holístico M" class="logo">
+        </div>
+        <nav class="nav-links">
+            <button class="nav-btn active" data-target="horarios">Horarios</button>
+            <button class="nav-btn" data-target="servicios">Servicios</button>
+            <button class="nav-btn" data-target="contacto">Contacto</button>
+        </nav>
+    </header>
+
+    <main class="content-wrapper">
+        <!-- Section: Horarios -->
+        <section id="horarios" class="view-section active">
+            <h1 class="section-title fade-in">Nuestros Horarios</h1>
+            <div id="horarios-container" class="grid-container">
+                <!-- Data dynamically inserted by JS -->
+            </div>
+        </section>
+
+        <!-- Section: Servicios -->
+        <section id="servicios" class="view-section hidden">
+            <h1 class="section-title fade-in">Servicios</h1>
+            <div id="servicios-container" class="grid-container">
+                <!-- Data dynamically inserted by JS -->
+            </div>
+        </section>
+
+        <!-- Section: Contacto -->
+        <section id="contacto" class="view-section hidden">
+            <h1 class="section-title fade-in">Contacto</h1>
+            <div id="contacto-container" class="grid-container contacto-layout">
+                <!-- Data dynamically inserted by JS -->
+            </div>
+        </section>
+    </main>
 
     <script src="script.js"></script>
 </body>
+
 </html>
