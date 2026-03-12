@@ -112,6 +112,23 @@ body {
     margin: 0 auto;
 }
 
+/* Logo Frame adjusted to be smaller */
+.logo-frame {
+    position: relative;
+    width: 48px; height: 48px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--gold-dim);
+    box-shadow: 0 0 10px var(--gold-glow);
+    transition: all 0.4s ease;
+}
+
+.logo {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
 .header-slogan {
     font-family: var(--font-body);
     font-size: 0.85rem;
@@ -371,6 +388,7 @@ body {
     color: var(--text-soft);
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin: 4px 0;
