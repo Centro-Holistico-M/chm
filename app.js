@@ -98,30 +98,28 @@ async function loadHorarios() {
 
     let html = '';
 
-    // Horario Semanal - como tabla
+    // Horario Semanal - Calendario
     if (horarios && horarios.length > 1) {
         html += '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
-        html += '<div class="horario-tabla-wrapper"><table class="horario-tabla">';
+        html += '<div class="calendario-semanal">';
         
         const headerRow = horarios[0];
         const allKeys = Object.keys(headerRow);
         
-        // Buscar columna de hora
         const horaKey = allKeys.find(k => k.toLowerCase().includes('hora'));
         
-        // Buscar columnas de días en orden
         const dayOrder = ['lunes', 'martes', 'miércoles', 'miercoles', 'jueves', 'viernes', 'sábado', 'sabado', 'domingo'];
         const dayKeys = dayOrder.filter(d => allKeys.some(k => k.toLowerCase().includes(d)));
         
-        // Header de la tabla
-        html += '<thead><tr><th>Hora</th>';
+        // Header días
+        html += '<div class="calendario-header"><div class="hora-header"></div>';
         dayKeys.forEach(d => {
-            const nombreDia = d.charAt(0).toUpperCase() + d.slice(1);
-            html += `<th>${nombreDia}</th>`;
+            const nombreDia = d.charAt(0).toUpperCase() + d.slice(1,3);
+            html += `<div class="dia-header">${nombreDia}</div>`;
         });
-        html += '</tr></thead><tbody>';
+        html += '</div>';
         
-        // Filas de datos
+        // Filas del calendario
         for (let i = 1; i < horarios.length; i++) {
             const row = horarios[i];
             if (!row) continue;
@@ -129,14 +127,15 @@ async function loadHorarios() {
             const hora = horaKey ? row[horaKey] : Object.values(row)[0];
             if (!hora) continue;
             
-            html += `<tr><td class="hora-cell">${hora}</td>`;
+            html += `<div class="calendario-fila"><div class="hora-label">${hora}</div>`;
             dayKeys.forEach(diaKey => {
                 const contenido = row[diaKey] || '';
-                html += `<td>${contenido}</td>`;
+                const clase = contenido ? 'celda-llena' : '';
+                html += `<div class="calendario-celda ${clase}">${contenido}</div>`;
             });
-            html += '</tr>';
+            html += '</div>';
         }
-        html += '</tbody></table></div>';
+        html += '</div>';
     }
 
     // Actividades (Tipo = Actividad)
@@ -210,7 +209,6 @@ async function loadServicios() {
             <p>${s['Descripcion corta']||s.DescripcionCorta||''}</p>
             <div class="card-footer">
                 <span>${s.Duracion||s.Duración||''}</span>
-                <span class="precio">${s.Precio ? '$'+s.Precio : ''}</span>
             </div>
         </div>`;
     });
@@ -255,8 +253,7 @@ async function loadContacto() {
         <div class="contacto-card">
             <h2>Comunícate Conmigo</h2>
             
-            ${c.Ciudad ? `<div class="info-row"><span class="icon">🌆</span><div class="text"><strong>Ciudad</strong><span>${c.Ciudad}</span></div></div>` : ''}
-            ${c.Direccion||c.Dirección ? `<div class="info-row"><span class="icon">📍</span><div class="text"><strong>Dirección</strong><span>${c.Direccion||c.Dirección}</span></div></div>` : ''}
+            ${c.Ciudad || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text"><strong>${c.Ciudad ? c.Ciudad + (c.Direccion||c.Dirección) ? ', ' : '' : ''}</strong><span>${c.Direccion||c.Dirección||''}</span></div></div>` : ''}
             ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono</strong><a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
             ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
             ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}

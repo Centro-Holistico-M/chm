@@ -276,13 +276,75 @@ body {
 /* Error */
 .error { text-align: center; padding: 40px; color: var(--text-muted); }
 
-/* Horario Semanal Tabla */
-.horario-tabla-wrapper {
-    overflow-x: auto;
+/* Calendario Semanal */
+.calendario-semanal {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
     margin: 20px 0;
-    border-radius: var(--radius);
     background: var(--bg-card);
+    border-radius: var(--radius);
     padding: 10px;
+    overflow-x: auto;
+}
+
+.calendario-header {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.hora-header {
+    background: transparent;
+}
+
+.dia-header {
+    background: rgba(212,175,55,0.2);
+    color: var(--gold);
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 6px;
+}
+
+.calendario-fila {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    gap: 2px;
+}
+
+.hora-label {
+    color: var(--gold-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 8px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+}
+
+.calendario-celda {
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.03);
+    border-radius: 4px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendario-celda.celda-llena {
+    background: rgba(212,175,55,0.15);
+    color: var(--text);
+    font-weight: 500;
+    border: 1px solid rgba(212,175,55,0.3);
 }
 
 .horario-tabla {
