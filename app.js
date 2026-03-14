@@ -12,10 +12,49 @@ const RETRY_DELAY = 1000; // 1 segundo
 let loadedTabs = { horarios: false, servicios: false, contacto: false };
 
 document.addEventListener('DOMContentLoaded', () => {
+    initParticles();
     initNavigation();
     loadTab('horarios');
     registerSW();
 });
+
+// ============================================
+// PARTÍCULAS DE FONDO
+// ============================================
+function initParticles() {
+    const container = document.getElementById('particles');
+    if (!container) return;
+    
+    const particleCount = 15;
+    const createParticle = () => {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        const size = Math.random() * 3 + 2;
+        const left = Math.random() * 100;
+        const duration = Math.random() * 10 + 10;
+        const delay = Math.random() * 5;
+        
+        particle.style.cssText = `
+            width: ${size}px;
+            height: ${size}px;
+            left: ${left}vw;
+            animation-duration: ${duration}s;
+            animation-delay: ${delay}s;
+        `;
+        
+        container.appendChild(particle);
+        
+        setTimeout(() => particle.remove(), (duration + delay) * 1000);
+    };
+    
+    // Crear partículas periódicamente
+    for (let i = 0; i < particleCount; i++) {
+        setTimeout(createParticle, i * 300);
+    }
+    
+    setInterval(createParticle, 800);
+}
 
 function registerSW() {
     if ('serviceWorker' in navigator) {
