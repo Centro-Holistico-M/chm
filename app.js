@@ -98,10 +98,10 @@ async function loadHorarios() {
 
     let html = '';
 
-    // Horario Semanal
+    // Horario Semanal - como tabla
     if (horarios && horarios.length > 1) {
         html += '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
-        html += '<div class="cards-grid">';
+        html += '<div class="horario-tabla-wrapper"><table class="horario-tabla">';
         
         const headerRow = horarios[0];
         const allKeys = Object.keys(headerRow);
@@ -109,17 +109,19 @@ async function loadHorarios() {
         // Buscar columna de hora
         const horaKey = allKeys.find(k => k.toLowerCase().includes('hora'));
         
-        // Buscar columnas de días
-        const dayKeys = allKeys.filter(k => 
-            k.toLowerCase().includes('lunes') || k.toLowerCase().includes('martes') ||
-            k.toLowerCase().includes('miércoles') || k.toLowerCase().includes('miercoles') ||
-            k.toLowerCase().includes('jueves') || k.toLowerCase().includes('viernes') ||
-            k.toLowerCase().includes('sábado') || k.toLowerCase().includes('sabado') ||
-            k.toLowerCase().includes('domingo')
-        );
+        // Buscar columnas de días en orden
+        const dayOrder = ['lunes', 'martes', 'miércoles', 'miercoles', 'jueves', 'viernes', 'sábado', 'sabado', 'domingo'];
+        const dayKeys = dayOrder.filter(d => allKeys.some(k => k.toLowerCase().includes(d)));
         
-        console.log('Horario keys:', allKeys, 'Hora:', horaKey, 'Dias:', dayKeys);
+        // Header de la tabla
+        html += '<thead><tr><th>Hora</th>';
+        dayKeys.forEach(d => {
+            const nombreDia = d.charAt(0).toUpperCase() + d.slice(1);
+            html += `<th>${nombreDia}</th>`;
+        });
+        html += '</tr></thead><tbody>';
         
+        // Filas de datos
         for (let i = 1; i < horarios.length; i++) {
             const row = horarios[i];
             if (!row) continue;
@@ -127,23 +129,14 @@ async function loadHorarios() {
             const hora = horaKey ? row[horaKey] : Object.values(row)[0];
             if (!hora) continue;
             
-            const dias = [];
+            html += `<tr><td class="hora-cell">${hora}</td>`;
             dayKeys.forEach(diaKey => {
-                if (row[diaKey]) {
-                    const diaCorto = diaKey.toLowerCase().replace(/[^a-záéíóúñ]/g, '').slice(0,3);
-                    dias.push(`${diaCorto}: ${row[diaKey]}`);
-                }
+                const contenido = row[diaKey] || '';
+                html += `<td>${contenido}</td>`;
             });
-            
-            if (dias.length > 0 || hora) {
-                const desc = dias.length > 0 ? dias.join(' | ') : 'Sin actividades';
-                html += `<div class="card" data-titulo="${hora}" data-desc="${desc}" data-tipo="horario">
-                    <h3>${hora}</h3>
-                    <p>${desc}</p>
-                </div>`;
-            }
+            html += '</tr>';
         }
-        html += '</div>';
+        html += '</tbody></table></div>';
     }
 
     // Actividades (Tipo = Actividad)

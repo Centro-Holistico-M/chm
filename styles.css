@@ -275,3 +275,49 @@ body {
 
 /* Error */
 .error { text-align: center; padding: 40px; color: var(--text-muted); }
+
+/* Horario Semanal Tabla */
+.horario-tabla-wrapper {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    padding: 10px;
+}
+
+.horario-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    min-width: 600px;
+}
+
+.horario-tabla th,
+.horario-tabla td {
+    padding: 10px 8px;
+    text-align: center;
+    border: 1px solid rgba(212,175,55,0.2);
+}
+
+.horario-tabla th {
+    background: rgba(212,175,55,0.15);
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.horario-tabla .hora-cell {
+    font-weight: 600;
+    color: var(--gold-light);
+    background: rgba(0,0,0,0.2);
+    white-space: nowrap;
+}
+
+.horario-tabla td:not(.hora-cell) {
+    min-width: 80px;
+}
+
+.horario-tabla tr:hover td {
+    background: rgba(212,175,55,0.05);
+}
