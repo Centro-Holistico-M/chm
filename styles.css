@@ -76,9 +76,15 @@ body {
 
 .logo { width: 60px; height: 60px; border-radius: 12px; border: 1px solid var(--gold); box-shadow: 0 0 25px rgba(212,175,55,0.5); }
 
+:root {
+    --font-size-base: 0.9rem;
+    --font-size-lg: 1rem;
+    --font-size-xl: 1.1rem;
+}
+
 .slogan {
     font-family: 'Montserrat', sans-serif; color: var(--gold);
-    font-size: 0.85rem; margin-top: 8px; font-weight: 600;
+    font-size: 1.1rem; margin-top: 8px; font-weight: 600;
     opacity: 0; transition: opacity 0.5s;
     max-width: 95%;
     text-align: center;
@@ -87,24 +93,15 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    position: relative;
 }
 .slogan.visible { 
     opacity: 1; 
-    animation: sloganAnimado 5s ease-in-out infinite;
-    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6) 40%, rgba(255,255,255,0.4) 50%, rgba(212,175,55,0.6) 60%, transparent);
-    background-size: 300% 100%;
-    animation: sloganAnimado 5s ease-in-out infinite, shimmer 2s linear infinite;
+    animation: sloganPulse 3s ease-in-out infinite;
 }
 
-@keyframes sloganAnimado {
+@keyframes sloganPulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-}
-
-@keyframes shimmer {
-    0% { background-position: 250% center; }
-    100% { background-position: -250% center; }
+    50% { transform: scale(1.03); }
 }
 
 /* Nav */
@@ -309,27 +306,28 @@ body {
 
 /* Redes */
 .redes-sociales {
-    display: flex; justify-content: center; gap: 24px;
-    margin: 24px 0; padding: 24px 0;
+    display: flex; justify-content: center; gap: 16px;
+    margin: 20px 0; padding: 20px 0;
     border-top: 1px solid rgba(212,175,55,0.2);
     border-bottom: 1px solid rgba(212,175,55,0.2);
 }
 
 .redes-sociales a {
-    width: 44px; height: 44px;
+    width: 40px; height: 40px;
     display: flex; align-items: center; justify-content: center;
     background: transparent;
-    border: 1px solid rgba(212,175,55,0.4);
-    border-radius: 8px; font-size: 1.4rem;
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 6px; font-size: 1.2rem;
     text-decoration: none; transition: all 0.3s;
     color: var(--gold);
+    opacity: 0.8;
 }
 
 .redes-sociales a:hover { 
-    background: rgba(212,175,55,0.15);
+    background: rgba(212,175,55,0.1);
     border-color: var(--gold);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(212,175,55,0.3);
+    transform: translateY(-2px);
+    opacity: 1;
 }
 
 .mapa-btn {
@@ -547,9 +545,9 @@ body {
 .timeline-card {
     display: flex;
     gap: 16px;
-    padding: 20px;
+    padding: 18px;
     background: var(--bg-card);
-    border-radius: 16px;
+    border-radius: 14px;
     border: 1px solid rgba(212,175,55,0.2);
     cursor: pointer;
     transition: all 0.3s;
@@ -564,7 +562,7 @@ body {
 .timeline-hora {
     color: var(--gold-light);
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     min-width: 50px;
 }
 
@@ -573,6 +571,20 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    font-size: 0.9rem;
+}
+
+.timeline-content h3 {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.timeline-desc {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin: 4px 0;
 }
 
 .timeline-content h3 {

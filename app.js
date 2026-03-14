@@ -5,7 +5,7 @@ const API = {
     CONTACTO: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto'
 };
 
-const CACHE_DURATION = 3600000;
+const CACHE_DURATION = 300000; // 5 minutos
 let cachedSlogan = '';
 let cachedWhatsApp = '';
 
