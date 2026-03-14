@@ -497,12 +497,13 @@ body {
 .timeline-card {
     display: flex;
     gap: 16px;
-    padding: 16px;
+    padding: 20px;
     background: var(--bg-card);
-    border-radius: 12px;
+    border-radius: 16px;
     border: 1px solid rgba(212,175,55,0.2);
     cursor: pointer;
     transition: all 0.3s;
+    margin-bottom: 12px;
 }
 
 .timeline-card:hover {
