@@ -408,27 +408,25 @@ async function loadHorarios() {
     const DAY_COLS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     
     // Procesar HORARIOS → Horario Semanal
-    // Buscar filas que contengan información de días
-    if (horariosRaw.length) {
-        horariosRaw.forEach(row => {
-            // Buscar cualquier valor que no sea undefined
-            const values = Object.values(row);
-            if (values.length > 0 && values[0]) {
-                // Verificar si es una fila de horario (contiene días)
-                const rowKeys = Object.keys(row);
-                const hasDay = DAY_COLS.some(dia => 
-                    row[dia] || row[dia.charAt(0).toUpperCase() + dia.slice(1)]
-                );
-                
-                if (hasDay) {
-                    // Es una fila de horario semanal
-                    const hora = values[0]; // Primer valor es la hora
+    // La primera fila son las cabeceras, las demás son datos
+    if (horariosRaw.length > 1) {
+        // Empezar desde la fila 1 (ignorar cabeceras)
+        for (let i = 1; i < horariosRaw.length; i++) {
+            const row = horariosRaw[i];
+            if (!row) continue;
+            
+            // Buscar la columna "Hora" (puede estar en cualquier posición)
+            const keys = Object.keys(row);
+            const horaKey = keys.find(k => k.toLowerCase() === 'hora');
+            
+            if (horaKey) {
+                const hora = row[horaKey];
+                // Si tiene hora, buscar los días
+                if (hora) {
                     const diasInfo = [];
-                    
                     DAY_COLS.forEach(dia => {
-                        const actividad = row[dia] || row[dia.charAt(0).toUpperCase() + dia.slice(1)] || '';
-                        if (actividad) {
-                            diasInfo.push(`${dia.slice(0,3)}: ${actividad}`);
+                        if (row[dia]) {
+                            diasInfo.push(`${dia.slice(0,3)}: ${row[dia]}`);
                         }
                     });
                     
@@ -442,19 +440,21 @@ async function loadHorarios() {
                     }
                 }
             }
-        });
+        }
     }
     
     // Procesar AGENDA → Actividades y Talleres
-    if (agendaRaw.length) {
-        agendaRaw.forEach(row => {
-            const hasNombre = row.Nombre !== undefined;
-            const hasTipo = row.Tipo !== undefined;
-            const hasFecha = row.Fecha !== undefined;
-            const hasCategoria = row.Categoria !== undefined;
+    // Primera fila son cabeceras
+    if (agendaRaw.length > 1) {
+        for (let i = 1; i < agendaRaw.length; i++) {
+            const row = agendaRaw[i];
+            if (!row || !row.Nombre) continue;
+            
+            const tipo = row.Tipo || '';
+            const tieneFecha = row.Fecha && row.Fecha.trim() !== '';
             
             // Talleres/Eventos: tienen Tipo="Taller" o Tipo="Evento" o tienen Fecha
-            if (hasNombre && (hasFecha || row.Tipo === 'Taller' || row.Tipo === 'Evento')) {
+            if (tipo === 'Taller' || tipo === 'Evento' || tieneFecha) {
                 horariosData.push({
                     seccion: 'talleres',
                     titulo: row.Nombre,
@@ -466,8 +466,8 @@ async function loadHorarios() {
                     estado: row.Estado || ''
                 });
             }
-            // Actividades: tienen Tipo="Actividad" o son solo actividades (sin Fecha)
-            else if (hasNombre && (row.Tipo === 'Actividad' || !hasFecha)) {
+            // Actividades: tienen Tipo="Actividad" o no tienen Fecha
+            else if (tipo === 'Actividad') {
                 const categoria = row.Categoria || '';
                 if (categoria && !horariosCategories.includes(categoria)) {
                     horariosCategories.push(categoria);
@@ -484,15 +484,12 @@ async function loadHorarios() {
                     estado: row.Estado || ''
                 });
             }
-        });
+        }
     }
     
     console.log('Parsed - Semanal:', horariosData.filter(d => d.seccion === 'semanal').length);
     console.log('Parsed - Actividades:', horariosData.filter(d => d.seccion === 'actividades').length);
     console.log('Parsed - Talleres:', horariosData.filter(d => d.seccion === 'talleres').length);
-    
-    // Generar filtros
-    updateFilterButtons('horarios', horariosCategories);
     
     // Renderizar
     renderFilteredHorarios(horariosData);
