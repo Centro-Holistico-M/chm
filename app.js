@@ -141,9 +141,11 @@ function cambiarDia(dia) {
             <div class="timeline-content">
                 <span class="categoria-tag ${colorClass}">${a.Categoria||'Actividad'}</span>
                 <h3>${a.Nombre}</h3>
-                ${infoExtra}
                 ${descCorta ? `<p class="timeline-desc">${descCorta}</p>` : ''}
-                <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
+                <div class="timeline-badges">
+                    ${infoExtra}
+                    <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
+                </div>
             </div>
         </div>`;
     });
