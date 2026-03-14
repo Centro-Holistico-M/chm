@@ -106,7 +106,16 @@ function cambiarDia(dia) {
         return;
     }
     
-    actividades.sort((a, b) => (a.Hora||'').localeCompare(b.Hora||''));
+    // Ordenar: primero AM luego PM
+    actividades.sort((a, b) => {
+        const horaA = (a.Hora||'').toLowerCase();
+        const horaB = (b.Hora||'').toLowerCase();
+        const isAmA = horaA.includes('am');
+        const isAmB = horaB.includes('am');
+        if (isAmA && !isAmB) return -1;
+        if (!isAmA && isAmB) return 1;
+        return horaA.localeCompare(horaB);
+    });
     
     const nombreDia = dia.charAt(0).toUpperCase() + dia.slice(1);
     let html = `<h4 class="timeline-dia">${nombreDia}</h4><div class="timeline">`;
@@ -280,6 +289,41 @@ async function loadHorarios() {
             }
         }, 200);
     });
+}
+
+function showModal(datos) {
+    const m = document.createElement('div');
+    m.className = 'modal-overlay active';
+    
+    const badgeClass = (datos.estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
+    const waMsg = encodeURIComponent(`Hola! Me interesa: ${datos.titulo}${datos.precio ? ` - $${datos.precio}` : ''}`);
+    
+    let infoHtml = '';
+    if (datos.categoria) infoHtml += `<p><span class="label">Categoría</span><span class="value">${datos.categoria}</span></p>`;
+    if (datos.duracion) infoHtml += `<p><span class="label">Duración</span><span class="value">${datos.duracion}</span></p>`;
+    if (datos.precio) infoHtml += `<p><span class="label">Precio</span><span class="value">$${datos.precio}</span></p>`;
+    if (datos.fecha) infoHtml += `<p><span class="label">Fecha</span><span class="value">${datos.fecha}</span></p>`;
+    if (datos.hora) infoHtml += `<p><span class="label">Hora</span><span class="value">${datos.hora}</span></p>`;
+    
+    m.innerHTML = `
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            ${datos.estado ? `<span class="badge ${badgeClass}">${datos.estado}</span>` : ''}
+            <h2 class="modal-title">${datos.titulo}</h2>
+            ${infoHtml ? `<div class="modal-info">${infoHtml}</div>` : ''}
+            <p class="modal-desc">${datos.descripcion || 'Sin descripción disponible.'}</p>
+            <div class="modal-buttons">
+                <a href="#contacto" onclick="document.querySelector('[data-tab=contacto]').click()" class="share-btn">📞 Ir a Contacto</a>
+                <a href="https://wa.me/?text=${waMsg}" target="_blank" class="share-btn wa-btn">💬 WhatsApp</a>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(m);
+    
+    m.querySelector('.modal-close').addEventListener('click', () => m.remove());
+    m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') m.remove(); });
 }
 
 function registerSW() {
