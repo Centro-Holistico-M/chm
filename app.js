@@ -133,6 +133,7 @@ function cambiarDia(dia) {
     
     actividades.forEach(a => {
         const descLarga = a.DescripcionLarga || a.DescripcionCorta || '';
+        const descCorta = a.DescripcionCorta || '';
         const colorClass = getColorCategoria(a.Categoria);
         const infoExtra = a.Cupo ? `<span class="cupo">Cupo: ${a.Cupo}</span>` : '';
         html += `<div class="timeline-card" data-titulo="${a.Nombre}" data-categoria="${a.Categoria||''}" data-desc="${descLarga}" data-duracion="${a.Duracion||''}" data-estado="${a.Estado||''}" data-hora="${a.Hora||''}" data-cupo="${a.Cupo||''}">
@@ -140,6 +141,7 @@ function cambiarDia(dia) {
             <div class="timeline-content">
                 <span class="categoria-tag ${colorClass}">${a.Categoria||'Actividad'}</span>
                 <h3>${a.Nombre}</h3>
+                ${descCorta ? `<p class="timeline-desc">${descCorta}</p>` : ''}
                 ${infoExtra}
                 <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
             </div>
