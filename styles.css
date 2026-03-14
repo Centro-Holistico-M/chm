@@ -87,32 +87,24 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-shadow: 0 0 8px rgba(212,175,55,0.3);
-    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.1), transparent);
-    background-size: 200% 100%;
+    position: relative;
 }
 .slogan.visible { 
     opacity: 1; 
-    animation: sloganAnimado 5s ease-in-out infinite, shimmer 3s ease-in-out infinite;
+    animation: sloganAnimado 5s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6) 40%, rgba(255,255,255,0.4) 50%, rgba(212,175,55,0.6) 60%, transparent);
+    background-size: 300% 100%;
+    animation: sloganAnimado 5s ease-in-out infinite, shimmer 2s linear infinite;
 }
 
 @keyframes sloganAnimado {
-    0%, 100% { 
-        transform: scale(1); 
-        text-shadow: 0 0 8px rgba(212,175,55,0.3);
-    }
-    50% { 
-        transform: scale(1.05); 
-        text-shadow: 0 0 20px rgba(212,175,55,0.6), 0 0 40px rgba(212,175,55,0.3);
-    }
-    75% {
-        text-shadow: 0 0 30px rgba(232,200,74,0.8);
-    }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
 }
 
 @keyframes shimmer {
-    0%, 100% { background-position: 200% 0; }
-    50% { background-position: -200% 0; }
+    0% { background-position: 250% center; }
+    100% { background-position: -250% center; }
 }
 
 /* Nav */
