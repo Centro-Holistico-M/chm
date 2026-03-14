@@ -87,15 +87,25 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 0 8px rgba(212,175,55,0.3);
 }
 .slogan.visible { 
     opacity: 1; 
-    animation: pulseSlogan 4s ease-in-out infinite;
+    animation: sloganAnimado 4s ease-in-out infinite;
 }
 
-@keyframes pulseSlogan {
-    0%, 100% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.02); opacity: 1; }
+@keyframes sloganAnimado {
+    0%, 100% { 
+        transform: scale(1); 
+        text-shadow: 0 0 8px rgba(212,175,55,0.3);
+    }
+    50% { 
+        transform: scale(1.05); 
+        text-shadow: 0 0 20px rgba(212,175,55,0.6), 0 0 40px rgba(212,175,55,0.3);
+    }
+    75% {
+        text-shadow: 0 0 30px rgba(232,200,74,0.8);
+    }
 }
 
 /* Nav */
