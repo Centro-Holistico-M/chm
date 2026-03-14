@@ -536,12 +536,6 @@ body {
     font-weight: 500;
 }
 
-.timeline-badges {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
 .timeline-desc {
     color: var(--text-muted);
     font-size: 0.8rem;

@@ -139,13 +139,10 @@ function cambiarDia(dia) {
         html += `<div class="timeline-card" data-titulo="${a.Nombre}" data-categoria="${a.Categoria||''}" data-desc="${descLarga}" data-duracion="${a.Duracion||''}" data-estado="${a.Estado||''}" data-hora="${a.Hora||''}" data-cupo="${a.Cupo||''}">
             <div class="timeline-hora">${a.Hora||''}</div>
             <div class="timeline-content">
-                <span class="categoria-tag ${colorClass}">${a.Categoria||'Actividad'}</span>
+                <span class="categoria-tag ${colorClass}">${a.Categoria||'Actividad'}</span> ${infoExtra}
                 <h3>${a.Nombre}</h3>
                 ${descCorta ? `<p class="timeline-desc">${descCorta}</p>` : ''}
-                <div class="timeline-badges">
-                    <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
-                    ${infoExtra}
-                </div>
+                <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
             </div>
         </div>`;
     });
