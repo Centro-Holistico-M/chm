@@ -536,6 +536,12 @@ body {
     font-weight: 500;
 }
 
+.timeline-content .badge, 
+.timeline-content .cupo {
+    display: inline-block;
+    margin-right: 8px;
+}
+
 .timeline-desc {
     color: var(--text-muted);
     font-size: 0.8rem;
