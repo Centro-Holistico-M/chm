@@ -153,6 +153,15 @@ body {
     color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;
 }
 
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
 /* Badge */
 .badge {
     display: inline-block; padding: 4px 10px; border-radius: 12px;
@@ -161,6 +170,16 @@ body {
 }
 .badge.disponible { background: rgba(76,175,80,0.2); color: #4caf50; }
 .badge.nodisponible { background: rgba(244,67,54,0.2); color: #f44336; }
+
+.cupo {
+    display: inline-block;
+    padding: 4px 10px;
+    background: rgba(33,150,243,0.2);
+    color: #2196f3;
+    font-size: 0.75rem;
+    border-radius: 12px;
+    margin-right: 6px;
+}
 
 /* Modal */
 .modal-overlay {

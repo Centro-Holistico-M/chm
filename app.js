@@ -134,11 +134,13 @@ function cambiarDia(dia) {
     actividades.forEach(a => {
         const descLarga = a.DescripcionLarga || a.DescripcionCorta || '';
         const colorClass = getColorCategoria(a.Categoria);
-        html += `<div class="timeline-card" data-titulo="${a.Nombre}" data-categoria="${a.Categoria||''}" data-desc="${descLarga}" data-duracion="${a.Duracion||''}" data-estado="${a.Estado||''}" data-hora="${a.Hora||''}">
+        const infoExtra = a.Cupo ? `<span class="cupo">Cupo: ${a.Cupo}</span>` : '';
+        html += `<div class="timeline-card" data-titulo="${a.Nombre}" data-categoria="${a.Categoria||''}" data-desc="${descLarga}" data-duracion="${a.Duracion||''}" data-estado="${a.Estado||''}" data-hora="${a.Hora||''}" data-cupo="${a.Cupo||''}">
             <div class="timeline-hora">${a.Hora||''}</div>
             <div class="timeline-content">
                 <span class="categoria-tag ${colorClass}">${a.Categoria||'Actividad'}</span>
                 <h3>${a.Nombre}</h3>
+                ${infoExtra}
                 <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
             </div>
         </div>`;
@@ -154,7 +156,8 @@ function cambiarDia(dia) {
                 descripcion: card.dataset.desc,
                 duracion: card.dataset.duracion,
                 estado: card.dataset.estado,
-                hora: card.dataset.hora
+                hora: card.dataset.hora,
+                cupo: card.dataset.cupo
             }, cachedWhatsApp);
         });
     });
@@ -259,10 +262,12 @@ async function loadHorarios() {
         eventos.forEach(t => {
             const descLarga = t.DescripcionLarga || t.DescripcionCorta || '';
             const estadoClass = (t.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
-            html += `<div class="card" data-titulo="${t.Nombre}" data-categoria="${t.Categoria||''}" data-desc="${descLarga}" data-precio="${t.Precio||''}" data-duracion="${t.Duracion||''}" data-estado="${t.Estado||''}" data-fecha="${t.Fecha||''}" data-hora="${t.Hora||''}" data-tipo="taller">
+            const infoExtra = t.Cupo ? `<span class="cupo">Cupo: ${t.Cupo}</span>` : '';
+            html += `<div class="card" data-titulo="${t.Nombre}" data-categoria="${t.Categoria||''}" data-desc="${descLarga}" data-precio="${t.Precio||''}" data-duracion="${t.Duracion||''}" data-estado="${t.Estado||''}" data-fecha="${t.Fecha||''}" data-hora="${t.Hora||''}" data-cupo="${t.Cupo||''}" data-tipo="taller">
                 <span class="badge evento">✨ ${t.Tipo||'Evento'}</span>
                 <h3>${t.Nombre}</h3>
                 <span class="categoria">${t.Fecha||''} ${t.Hora||''}</span>
+                ${infoExtra}
                 <span class="badge ${estadoClass}" style="margin-top:4px">${t.Estado||'Disponible'}</span>
                 <p>${t.DescripcionCorta||''}</p>
             </div>`;
@@ -283,7 +288,8 @@ async function loadHorarios() {
                 estado: card.dataset.estado,
                 fecha: card.dataset.fecha,
                 hora: card.dataset.hora,
-                tipo: card.dataset.tipo
+                tipo: card.dataset.tipo,
+                cupo: card.dataset.cupo
             }, cachedWhatsApp);
         });
     });
@@ -315,6 +321,7 @@ function showModal(datos, waNumero) {
     if (datos.precio) infoHtml += `<p><span class="label">Precio</span><span class="value">$${datos.precio}</span></p>`;
     if (datos.fecha) infoHtml += `<p><span class="label">Fecha</span><span class="value">${datos.fecha}</span></p>`;
     if (datos.hora) infoHtml += `<p><span class="label">Hora</span><span class="value">${datos.hora}</span></p>`;
+    if (datos.cupo) infoHtml += `<p><span class="label">Cupo</span><span class="value">${datos.cupo}</span></p>`;
     
     m.innerHTML = `
         <div class="modal-content">
@@ -362,13 +369,15 @@ async function loadServicios() {
     data.forEach(s => {
         const descLarga = s['Descripcion larga'] || s.DescripcionLarga || s['Descripcion corta'] || s.DescripcionCorta || '';
         const estadoClass = (s.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
-        html += `<div class="card" data-titulo="${s.Nombre}" data-categoria="${s.Categoria||s.Categoría||''}" data-desc="${descLarga}" data-precio="${s.Precio||''}" data-duracion="${s.Duracion||s.Duración||''}" data-estado="${s.Estado||''}" data-tipo="servicio">
+        const infoExtra = s.Cupo ? `<span class="cupo">Cupo: ${s.Cupo}</span>` : '';
+        html += `<div class="card" data-titulo="${s.Nombre}" data-categoria="${s.Categoria||s.Categoría||''}" data-desc="${descLarga}" data-precio="${s.Precio||''}" data-duracion="${s.Duracion||s.Duración||''}" data-estado="${s.Estado||''}" data-cupo="${s.Cupo||''}" data-tipo="servicio">
             <span class="badge ${estadoClass}">${s.Estado||'Disponible'}</span>
             <h3>${s.Nombre}</h3>
             <span class="categoria">${s.Categoria||s.Categoría||''}</span>
             <p>${s['Descripcion corta']||s.DescripcionCorta||''}</p>
             <div class="card-footer">
                 <span>${s.Duracion||s.Duración||''}</span>
+                ${infoExtra}
             </div>
         </div>`;
     });
@@ -383,7 +392,8 @@ async function loadServicios() {
                 descripcion: card.dataset.desc,
                 precio: card.dataset.precio,
                 duracion: card.dataset.duracion,
-                estado: card.dataset.estado
+                estado: card.dataset.estado,
+                cupo: card.dataset.cupo
             }, cachedWhatsApp);
         });
     });
