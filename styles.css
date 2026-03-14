@@ -309,26 +309,27 @@ body {
 
 /* Redes */
 .redes-sociales {
-    display: flex; justify-content: center; gap: 20px;
+    display: flex; justify-content: center; gap: 24px;
     margin: 24px 0; padding: 24px 0;
     border-top: 1px solid rgba(212,175,55,0.2);
     border-bottom: 1px solid rgba(212,175,55,0.2);
 }
 
 .redes-sociales a {
-    width: 52px; height: 52px;
+    width: 44px; height: 44px;
     display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(212,175,55,0.05) 100%);
+    background: transparent;
     border: 1px solid rgba(212,175,55,0.4);
-    border-radius: 50%; font-size: 1.5rem;
+    border-radius: 8px; font-size: 1.4rem;
     text-decoration: none; transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    color: var(--gold);
 }
 
 .redes-sociales a:hover { 
-    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
-    transform: scale(1.15);
-    box-shadow: 0 6px 25px rgba(212,175,55,0.4);
+    background: rgba(212,175,55,0.15);
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(212,175,55,0.3);
 }
 
 .mapa-btn {

@@ -367,7 +367,8 @@ async function loadServicios() {
     const container = document.getElementById('servicios-container');
     const data = await fetchAPI(API.SERVICIOS, 'ch_servicios');
 
-    let html = '<div class="cards-grid">';
+    let html = '<h3 class="section-subtitle">💆 Servicios</h3>';
+    html += '<div class="cards-grid">';
     data.forEach(s => {
         const descLarga = s['Descripcion larga'] || s.DescripcionLarga || s['Descripcion corta'] || s.DescripcionCorta || '';
         const estadoClass = (s.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
