@@ -60,7 +60,6 @@ function showLoading(show) {
     document.getElementById('loading').style.display = show ? 'flex' : 'none';
 }
 
-// Cache
 function getCache(key) {
     try {
         const c = localStorage.getItem(key);
@@ -99,7 +98,7 @@ async function loadHorarios() {
 
     let html = '';
 
-    // Horario Semanal (empezar desde fila 1)
+    // Horario Semanal
     if (horarios && horarios.length > 1) {
         html += '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
         html += '<div class="cards-grid">';
@@ -107,7 +106,12 @@ async function loadHorarios() {
         for (let i = 1; i < horarios.length; i++) {
             const row = horarios[i];
             if (!row) continue;
-            const hora = Object.values(row)[0];
+            
+            // Buscar la hora
+            const keys = Object.keys(row);
+            const horaKey = keys.find(k => k.toLowerCase() === 'hora');
+            const hora = horaKey ? row[horaKey] : null;
+            
             if (!hora) continue;
             
             const dias = [];
@@ -115,11 +119,11 @@ async function loadHorarios() {
                 if (row[dia]) dias.push(`${dia.slice(0,3)}: ${row[dia]}`);
             });
             
-            if (dias.length > 0) {
-                html += `
-                <div class="card" onclick="showModal('${hora}', '', '${dias.join(' | ')}', '', '', '')">
+            if (dias.length > 0 || hora) {
+                const desc = dias.length > 0 ? dias.join(' | ') : 'Sin actividades';
+                html += `<div class="card" data-titulo="${hora}" data-desc="${desc}" data-tipo="horario">
                     <h3>${hora}</h3>
-                    <p>${dias.join(' | ')}</p>
+                    <p>${desc}</p>
                 </div>`;
             }
         }
@@ -132,8 +136,8 @@ async function loadHorarios() {
         html += '<h3 class="section-subtitle">🎯 Actividades</h3>';
         html += '<div class="cards-grid">';
         actividades.forEach(a => {
-            html += `
-            <div class="card" onclick="showModal('${a.Nombre}', '${a.Categoria||''}', '${a.DescripcionCorta||''}', '${a.DescripcionLarga||a.DescripcionCorta||''}', '${a.Duracion||''}', '${a.Precio||''}', '${a.Estado||''}')">
+            const descLarga = a.DescripcionLarga || a.DescripcionCorta || '';
+            html += `<div class="card" data-titulo="${a.Nombre}" data-categoria="${a.Categoria||''}" data-desc="${descLarga}" data-precio="${a.Precio||''}" data-duracion="${a.Duracion||''}" data-estado="${a.Estado||''}" data-tipo="actividad">
                 <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
                 <h3>${a.Nombre}</h3>
                 <span class="categoria">${a.Categoria||''}</span>
@@ -149,8 +153,8 @@ async function loadHorarios() {
         html += '<h3 class="section-subtitle">📚 Talleres y Eventos</h3>';
         html += '<div class="cards-grid">';
         talleres.forEach(t => {
-            html += `
-            <div class="card" onclick="showModal('${t.Nombre}', '${t.Categoria||''}', '${t.DescripcionCorta||''}', '${t.DescripcionLarga||t.DescripcionCorta||''}', '${t.Duracion||''}', '${t.Precio||''}', '${t.Estado||''}', '${t.Fecha||''}', '${t.Hora||''}')">
+            const descLarga = t.DescripcionLarga || t.DescripcionCorta || '';
+            html += `<div class="card" data-titulo="${t.Nombre}" data-categoria="${t.Categoria||''}" data-desc="${descLarga}" data-precio="${t.Precio||''}" data-duracion="${t.Duracion||''}" data-estado="${t.Estado||''}" data-fecha="${t.Fecha||''}" data-hora="${t.Hora||''}" data-tipo="taller">
                 <span class="badge ${(t.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${t.Estado||'Disponible'}</span>
                 <h3>${t.Nombre}</h3>
                 <span class="categoria">${t.Fecha||''} ${t.Hora||''}</span>
@@ -161,6 +165,24 @@ async function loadHorarios() {
     }
 
     container.innerHTML = html || '<p class="error">No hay horarios disponibles</p>';
+    
+    // Agregar eventos click
+    container.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => {
+            const datos = {
+                titulo: card.dataset.titulo,
+                categoria: card.dataset.categoria,
+                descripcion: card.dataset.desc,
+                precio: card.dataset.precio,
+                duracion: card.dataset.duracion,
+                estado: card.dataset.estado,
+                fecha: card.dataset.fecha,
+                hora: card.dataset.hora,
+                tipo: card.dataset.tipo
+            };
+            showModal(datos);
+        });
+    });
 }
 
 // ======================
@@ -172,15 +194,32 @@ async function loadServicios() {
 
     let html = '<div class="cards-grid">';
     data.forEach(s => {
-        html += `
-        <div class="card" onclick="showModal('${s.Nombre}', '${s.Categoria||''}', '${s['Descripcion corta']||s.DescripcionCorta||''}', '${s['Descripcion larga']||s.DescripcionLarga||s['Descripcion corta']||''}', '${s.Duracion||s.Duración||''}', '${s.Precio||''}', '${s.Estado||''}')">
+        const descLarga = s['Descripcion larga'] || s.DescripcionLarga || s['Descripcion corta'] || s.DescripcionCorta || '';
+        html += `<div class="card" data-titulo="${s.Nombre}" data-categoria="${s.Categoria||s.Categoría||''}" data-desc="${descLarga}" data-precio="${s.Precio||''}" data-duracion="${s.Duracion||s.Duración||''}" data-tipo="servicio">
             <h3>${s.Nombre}</h3>
             <span class="categoria">${s.Categoria||s.Categoría||''}</span>
             <p>${s['Descripcion corta']||s.DescripcionCorta||''}</p>
+            <div class="card-footer">
+                <span>${s.Duracion||s.Duración||''}</span>
+                <span class="precio">${s.Precio ? '$'+s.Precio : ''}</span>
+            </div>
         </div>`;
     });
     html += '</div>';
     container.innerHTML = html || '<p class="error">No hay servicios disponibles</p>';
+    
+    container.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => {
+            const datos = {
+                titulo: card.dataset.titulo,
+                categoria: card.dataset.categoria,
+                descripcion: card.dataset.desc,
+                precio: card.dataset.precio,
+                duracion: card.dataset.duracion
+            };
+            showModal(datos);
+        });
+    });
 }
 
 // ======================
@@ -207,29 +246,11 @@ async function loadContacto() {
         <div class="contacto-card">
             <h2>Comunícate Conmigo</h2>
             
-            ${c.Direccion||c.Dirección ? `
-            <div class="info-row">
-                <span class="icon">📍</span>
-                <div class="text"><strong>Dirección</strong><span>${c.Direccion||c.Dirección}</span></div>
-            </div>` : ''}
-            
-            ${c.Telefono||c.Teléfono ? `
-            <div class="info-row">
-                <span class="icon">📞</span>
-                <div class="text"><strong>Teléfono</strong><a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div>
-            </div>` : ''}
-            
-            ${c.Email ? `
-            <div class="info-row">
-                <span class="icon">✉️</span>
-                <div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div>
-            </div>` : ''}
-            
-            ${c.Horario ? `
-            <div class="info-row">
-                <span class="icon">🕰️</span>
-                <div class="text"><strong>Horario</strong><span>${c.Horario}</span></div>
-            </div>` : ''}
+            ${c.Ciudad ? `<div class="info-row"><span class="icon">🌆</span><div class="text"><strong>Ciudad</strong><span>${c.Ciudad}</span></div></div>` : ''}
+            ${c.Direccion||c.Dirección ? `<div class="info-row"><span class="icon">📍</span><div class="text"><strong>Dirección</strong><span>${c.Direccion||c.Dirección}</span></div></div>` : ''}
+            ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono</strong><a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
+            ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
+            ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}
             
             ${redes ? `<div class="redes-sociales">${redes}</div>` : ''}
             
@@ -257,37 +278,36 @@ async function loadSlogan() {
 }
 
 // Modal
-function showModal(titulo, categoria, descCorta, descLarga, duracion, precio, estado, fecha, hora) {
+function showModal(datos) {
     const m = document.createElement('div');
     m.className = 'modal-overlay';
     
-    const desc = descLarga || descCorta || 'Sin descripción';
-    const badgeClass = (estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
-    const waMsg = encodeURIComponent(`Hola! Me interesa: ${titulo}${precio ? ` - $${precio}` : ''}`);
+    const badgeClass = (datos.estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
+    const waMsg = encodeURIComponent(`Hola! Me interesa: ${datos.titulo}${datos.precio ? ` - $${datos.precio}` : ''}`);
+    
+    let infoHtml = '';
+    if (datos.categoria) infoHtml += `<p><span class="label">Categoría</span><span class="value">${datos.categoria}</span></p>`;
+    if (datos.duracion) infoHtml += `<p><span class="label">Duración</span><span class="value">${datos.duracion}</span></p>`;
+    if (datos.precio) infoHtml += `<p><span class="label">Precio</span><span class="value">$${datos.precio}</span></p>`;
+    if (datos.fecha) infoHtml += `<p><span class="label">Fecha</span><span class="value">${datos.fecha}</span></p>`;
+    if (datos.hora) infoHtml += `<p><span class="label">Hora</span><span class="value">${datos.hora}</span></p>`;
     
     m.innerHTML = `
         <div class="modal-content">
-            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
-            <span class="badge ${badgeClass}">${estado||'Disponible'}</span>
-            <h2 class="modal-title">${titulo}</h2>
-            
-            <div class="modal-info">
-                ${categoria ? `<p><span class="label">Categoría</span><span class="value">${categoria}</span></p>` : ''}
-                ${duracion ? `<p><span class="label">Duración</span><span class="value">${duracion}</span></p>` : ''}
-                ${precio ? `<p><span class="label">Precio</span><span class="value">$${precio}</span></p>` : ''}
-                ${fecha ? `<p><span class="label">Fecha</span><span class="value">${fecha}</span></p>` : ''}
-                ${hora ? `<p><span class="label">Hora</span><span class="value">${hora}</span></p>` : ''}
-            </div>
-            
-            <p class="modal-desc">${desc}</p>
-            
+            <button class="modal-close">&times;</button>
+            ${datos.estado ? `<span class="badge ${badgeClass}">${datos.estado}</span>` : ''}
+            <h2 class="modal-title">${datos.titulo}</h2>
+            ${infoHtml ? `<div class="modal-info">${infoHtml}</div>` : ''}
+            <p class="modal-desc">${datos.descripcion || 'Sin descripción disponible.'}</p>
             <a href="https://wa.me/?text=${waMsg}" target="_blank" class="share-btn">💬 Consultar por WhatsApp</a>
         </div>
     `;
     
     document.body.appendChild(m);
-    m.addEventListener('click', e => { if (e.target === m) m.remove(); });
-    document.addEventListener('keydown', f => { if (f.key === 'Escape') m.remove(); });
+    
+    m.querySelector('.modal-close').addEventListener('click', () => m.remove());
+    m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') m.remove(); });
 }
 
 function registerSW() {
