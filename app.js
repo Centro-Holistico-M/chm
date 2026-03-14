@@ -408,23 +408,38 @@ async function loadHorarios() {
     const DAY_COLS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     
     // Procesar HORARIOS → Horario Semanal
+    // Buscar filas que contengan información de días
     if (horariosRaw.length) {
         horariosRaw.forEach(row => {
-            if (row.Hora) {
-                const diasInfo = [];
-                DAY_COLS.forEach(dia => {
-                    if (row[dia]) {
-                        diasInfo.push(`${dia.slice(0,3)}: ${row[dia]}`);
-                    }
-                });
+            // Buscar cualquier valor que no sea undefined
+            const values = Object.values(row);
+            if (values.length > 0 && values[0]) {
+                // Verificar si es una fila de horario (contiene días)
+                const rowKeys = Object.keys(row);
+                const hasDay = DAY_COLS.some(dia => 
+                    row[dia] || row[dia.charAt(0).toUpperCase() + dia.slice(1)]
+                );
                 
-                if (diasInfo.length > 0) {
-                    horariosData.push({
-                        seccion: 'semanal',
-                        titulo: row.Hora,
-                        descripcion: diasInfo.join(' | '),
-                        hora: row.Hora
+                if (hasDay) {
+                    // Es una fila de horario semanal
+                    const hora = values[0]; // Primer valor es la hora
+                    const diasInfo = [];
+                    
+                    DAY_COLS.forEach(dia => {
+                        const actividad = row[dia] || row[dia.charAt(0).toUpperCase() + dia.slice(1)] || '';
+                        if (actividad) {
+                            diasInfo.push(`${dia.slice(0,3)}: ${actividad}`);
+                        }
                     });
+                    
+                    if (diasInfo.length > 0) {
+                        horariosData.push({
+                            seccion: 'semanal',
+                            titulo: hora,
+                            descripcion: diasInfo.join(' | '),
+                            hora: hora
+                        });
+                    }
                 }
             }
         });
@@ -433,26 +448,26 @@ async function loadHorarios() {
     // Procesar AGENDA → Actividades y Talleres
     if (agendaRaw.length) {
         agendaRaw.forEach(row => {
-            // Verificar tipo de fila
             const hasNombre = row.Nombre !== undefined;
-            const hasCategoria = row.Categoria !== undefined;
+            const hasTipo = row.Tipo !== undefined;
             const hasFecha = row.Fecha !== undefined;
+            const hasCategoria = row.Categoria !== undefined;
             
-            // Si tiene Fecha → Talleres/Eventos
-            if (hasNombre && hasFecha) {
+            // Talleres/Eventos: tienen Tipo="Taller" o Tipo="Evento" o tienen Fecha
+            if (hasNombre && (hasFecha || row.Tipo === 'Taller' || row.Tipo === 'Evento')) {
                 horariosData.push({
                     seccion: 'talleres',
                     titulo: row.Nombre,
                     descripcion: row.DescripcionCorta || '',
                     descripcionLarga: row.DescripcionLarga || row.DescripcionCorta || '',
-                    fecha: row.Fecha || '',
+                    fecha: row.Fecha || row.Dia || '',
                     hora: row.Hora || '',
                     precio: row.Precio || '',
                     estado: row.Estado || ''
                 });
             }
-            // Si tiene Categoria → Actividades
-            else if (hasNombre && hasCategoria) {
+            // Actividades: tienen Tipo="Actividad" o son solo actividades (sin Fecha)
+            else if (hasNombre && (row.Tipo === 'Actividad' || !hasFecha)) {
                 const categoria = row.Categoria || '';
                 if (categoria && !horariosCategories.includes(categoria)) {
                     horariosCategories.push(categoria);
