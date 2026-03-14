@@ -1,5 +1,6 @@
 const API = {
     HORARIOS: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Horarios',
+    AGENDA: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Agenda',
     SERVICIOS: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Servicios',
     CONTACTO: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto'
 };
@@ -382,84 +383,94 @@ async function loadTab(tabName) {
 }
 
 // ============================================
-// HORARIOS - 3 TABLAS DESDE API HORARIOS
+// HORARIOS - Horario Semanal + Agenda (Actividades + Talleres)
 // ============================================
 async function loadHorarios() {
     const container = document.getElementById('horarios-grid');
-    const data = await fetchData(API.HORARIOS, 'chm_horarios');
     
-    if (!data.length) {
+    // Cargar ambas APIs en paralelo
+    const [horariosRaw, agendaRaw] = await Promise.all([
+        fetchData(API.HORARIOS, 'chm_horarios'),
+        fetchData(API.AGENDA, 'chm_agenda')
+    ]);
+    
+    console.log('Horarios API:', horariosRaw);
+    console.log('Agenda API:', agendaRaw);
+    
+    if (!horariosRaw.length && !agendaRaw.length) {
         container.innerHTML = createErrorHTML('No hay horarios disponibles', 'horarios');
         return;
     }
-    
-    console.log('API Response:', data);
     
     horariosData = [];
     horariosCategories = [];
     
     const DAY_COLS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     
-    // Analizar la estructura de los datos
-    data.forEach(row => {
-        const keys = Object.keys(row);
-        
-        // Verificar tipo de fila por las columnas que tiene
-        const hasHora = row.Hora !== undefined;
-        const hasNombre = row.Nombre !== undefined;
-        const hasCategoria = row.Categoria !== undefined;
-        const hasFecha = row.Fecha !== undefined;
-        
-        // TABLA 1: HORARIO SEMANAL - tiene Hora y al menos un día
-        if (hasHora) {
-            const diasInfo = [];
-            DAY_COLS.forEach(dia => {
-                if (row[dia]) {
-                    diasInfo.push(`${dia.slice(0,3)}: ${row[dia]}`);
+    // Procesar HORARIOS → Horario Semanal
+    if (horariosRaw.length) {
+        horariosRaw.forEach(row => {
+            if (row.Hora) {
+                const diasInfo = [];
+                DAY_COLS.forEach(dia => {
+                    if (row[dia]) {
+                        diasInfo.push(`${dia.slice(0,3)}: ${row[dia]}`);
+                    }
+                });
+                
+                if (diasInfo.length > 0) {
+                    horariosData.push({
+                        seccion: 'semanal',
+                        titulo: row.Hora,
+                        descripcion: diasInfo.join(' | '),
+                        hora: row.Hora
+                    });
                 }
-            });
+            }
+        });
+    }
+    
+    // Procesar AGENDA → Actividades y Talleres
+    if (agendaRaw.length) {
+        agendaRaw.forEach(row => {
+            // Verificar tipo de fila
+            const hasNombre = row.Nombre !== undefined;
+            const hasCategoria = row.Categoria !== undefined;
+            const hasFecha = row.Fecha !== undefined;
             
-            if (diasInfo.length > 0) {
+            // Si tiene Fecha → Talleres/Eventos
+            if (hasNombre && hasFecha) {
                 horariosData.push({
-                    seccion: 'semanal',
-                    titulo: row.Hora,
-                    descripcion: diasInfo.join(' | '),
-                    hora: row.Hora
+                    seccion: 'talleres',
+                    titulo: row.Nombre,
+                    descripcion: row.DescripcionCorta || '',
+                    descripcionLarga: row.DescripcionLarga || row.DescripcionCorta || '',
+                    fecha: row.Fecha || '',
+                    hora: row.Hora || '',
+                    precio: row.Precio || '',
+                    estado: row.Estado || ''
                 });
             }
-        }
-        // TABLA 2: ACTIVIDADES - tiene Nombre y Categoria (sin Fecha)
-        else if (hasNombre && hasCategoria && !hasFecha) {
-            const categoria = row.Categoria;
-            if (categoria && !horariosCategories.includes(categoria)) {
-                horariosCategories.push(categoria);
+            // Si tiene Categoria → Actividades
+            else if (hasNombre && hasCategoria) {
+                const categoria = row.Categoria || '';
+                if (categoria && !horariosCategories.includes(categoria)) {
+                    horariosCategories.push(categoria);
+                }
+                
+                horariosData.push({
+                    seccion: 'actividades',
+                    titulo: row.Nombre,
+                    descripcion: row.DescripcionCorta || '',
+                    descripcionLarga: row.DescripcionLarga || row.DescripcionCorta || '',
+                    categoria: categoria,
+                    duracion: row.Duracion || '',
+                    precio: row.Precio || '',
+                    estado: row.Estado || ''
+                });
             }
-            
-            horariosData.push({
-                seccion: 'actividades',
-                titulo: row.Nombre,
-                descripcion: row.DescripcionCorta || '',
-                descripcionLarga: row.DescripcionLarga || row.DescripcionCorta || '',
-                categoria: categoria,
-                duracion: row.Duracion || '',
-                precio: row.Precio || '',
-                estado: row.Estado || ''
-            });
-        }
-        // TABLA 3: TALLERES - tiene Nombre y Fecha
-        else if (hasNombre && hasFecha) {
-            horariosData.push({
-                seccion: 'talleres',
-                titulo: row.Nombre,
-                descripcion: row.DescripcionCorta || '',
-                descripcionLarga: row.DescripcionLarga || '',
-                fecha: row.Fecha || '',
-                hora: row.Hora || '',
-                precio: row.Precio || '',
-                estado: row.Estado || ''
-            });
-        }
-    });
+        });
+    }
     
     console.log('Parsed - Semanal:', horariosData.filter(d => d.seccion === 'semanal').length);
     console.log('Parsed - Actividades:', horariosData.filter(d => d.seccion === 'actividades').length);
