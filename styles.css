@@ -78,10 +78,22 @@ body {
 
 .slogan {
     font-family: 'Montserrat', sans-serif; color: var(--gold);
-    font-size: 0.9rem; margin-top: 8px; font-weight: 300;
+    font-size: 1.1rem; margin-top: 8px; font-weight: 300;
     opacity: 0; transition: opacity 0.5s;
+    max-width: 90%;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
-.slogan.visible { opacity: 1; }
+.slogan.visible { 
+    opacity: 1; 
+    animation: pulseSlogan 4s ease-in-out infinite;
+}
+
+@keyframes pulseSlogan {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.02); opacity: 1; }
+}
 
 /* Nav */
 .nav {
@@ -285,22 +297,42 @@ body {
 
 /* Redes */
 .redes-sociales {
-    display: flex; justify-content: center; gap: 16px;
-    margin: 24px 0; padding: 20px 0;
+    display: flex; justify-content: center; gap: 20px;
+    margin: 24px 0; padding: 24px 0;
     border-top: 1px solid rgba(212,175,55,0.2);
     border-bottom: 1px solid rgba(212,175,55,0.2);
 }
 
 .redes-sociales a {
-    width: 50px; height: 50px;
+    width: 52px; height: 52px;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(212,175,55,0.1);
-    border: 1px solid rgba(212,175,55,0.3);
-    border-radius: 50%; font-size: 1.4rem;
+    background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(212,175,55,0.05) 100%);
+    border: 1px solid rgba(212,175,55,0.4);
+    border-radius: 50%; font-size: 1.5rem;
     text-decoration: none; transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-.redes-sociales a:hover { background: var(--gold); transform: scale(1.1); }
+.redes-sociales a:hover { 
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    transform: scale(1.15);
+    box-shadow: 0 6px 25px rgba(212,175,55,0.4);
+}
+
+.mapa-btn {
+    display: block; width: 100%; padding: 14px;
+    background: rgba(212,175,55,0.15); color: var(--gold);
+    text-align: center; border-radius: 12px;
+    font-weight: 500; font-size: 0.95rem;
+    text-decoration: none; margin: 16px 0;
+    border: 1px solid rgba(212,175,55,0.4);
+    transition: all 0.3s;
+}
+
+.mapa-btn:hover {
+    background: rgba(212,175,55,0.3);
+    transform: translateY(-2px);
+}
 
 .btn-whatsapp {
     display: block; width: 100%; padding: 16px;

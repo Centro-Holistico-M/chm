@@ -427,6 +427,7 @@ async function loadContacto() {
             <h2>Comunícate Conmigo</h2>
             
             ${c.Ciudad || c.Estado || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text">${c.Direccion||c.Dirección ? `<strong>Dirección:</strong> ${c.Direccion||c.Dirección}` : ''}${c.Ciudad ? `<br><strong>Ciudad:</strong> ${c.Ciudad}` : ''}${c.Estado ? `<br><strong>Estado:</strong> ${c.Estado}` : ''}</div></div>` : ''}
+            ${c.GoogleMaps ? `<a href="${c.GoogleMaps}" target="_blank" class="mapa-btn">🗺️ Ver ubicación en mapa</a>` : ''}
             ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono:</strong> <a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
             ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
             ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}
