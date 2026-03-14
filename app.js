@@ -257,7 +257,7 @@ async function loadHorarios() {
         html += `<button class="dia-btn" data-dia="${dia}"><span class="dia-nombre">${diasCorto[idx]}</span><span class="dia-punto ${tieneActividades ? 'active' : ''}"></span></button>`;
     });
     html += '</div>';
-    html += '<div id="timeline-container"></div>';
+    html += '<div id="timeline-container" class="timeline-list"></div>';
     
     // Eventos y Talleres
     const eventos = agenda?.filter(r => r.Nombre && (r.Tipo === 'Taller' || r.Tipo === 'Evento' || r.Fecha)) || [];
@@ -430,7 +430,7 @@ async function loadContacto() {
             <h2>Comunícate Conmigo</h2>
             
             ${c.Ciudad || c.Estado || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text">${c.Direccion||c.Dirección ? `<strong>Dirección:</strong> ${c.Direccion||c.Dirección}` : ''}${c.Ciudad ? `<br><strong>Ciudad:</strong> ${c.Ciudad}` : ''}${c.Estado ? `<br><strong>Estado:</strong> ${c.Estado}` : ''}</div></div>` : ''}
-            ${c.Telefono||c.Teléfono || c.Telefono2 ? `<div class="info-row"><span class="icon">📞</span><div class="text">${c.Telefono||c.Teléfono ? `<strong>Teléfono 1:</strong> <a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a>` : ''}${c.Telefono2 ? `<br><strong>Teléfono 2:</strong> <a href="tel:${c.Telefono2}">${c.Telefono2}</a>` : ''}</div></div>` : ''}
+            ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono:</strong> <a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
             ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
             ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}
             

@@ -494,6 +494,11 @@ body {
     font-family: 'Cinzel', serif;
 }
 
+.timeline-list {
+    margin: 16px 0;
+    padding: 0 4px;
+}
+
 .timeline-card {
     display: flex;
     gap: 16px;
@@ -503,7 +508,7 @@ body {
     border: 1px solid rgba(212,175,55,0.2);
     cursor: pointer;
     transition: all 0.3s;
-    margin-bottom: 12px;
+    margin: 8px 0;
 }
 
 .timeline-card:hover {
