@@ -160,7 +160,41 @@ async function loadHorarios() {
     const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     const diasCorto = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     
-    const actividadesHorario = [];
+    // Limpiar array global
+    todasActividadesGlobal.length = 0;
+    
+    // Procesar hoja Agenda
+    if (agenda && agenda.length > 0) {
+        agenda.forEach(row => {
+            if (!row.Nombre) return;
+            
+            // Si tiene Fecha o es Evento/Taller -> es evento especial
+            if (row.Tipo === 'Evento' || row.Tipo === 'Taller' || row.Fecha) {
+                // Ya se maneja después como eventos
+            } else if (row.Tipo === 'Actividad' || !row.Tipo) {
+                // Es actividad regular - puede tener múltiples horas separadas por espacio
+                const horas = (row.Hora||'').split(/\s+/).filter(h => h);
+                const dia = (row.Dia||'').toLowerCase();
+                
+                horas.forEach(hora => {
+                    if (dia && hora) {
+                        todasActividadesGlobal.push({
+                            Nombre: row.Nombre,
+                            Dia: dia,
+                            Hora: hora,
+                            Categoria: row.Categoria||'Actividad',
+                            Estado: row.Estado||'Disponible',
+                            Duracion: row.Duracion,
+                            DescripcionCorta: row.DescripcionCorta,
+                            DescripcionLarga: row.DescripcionLarga
+                        });
+                    }
+                });
+            }
+        });
+    }
+    
+    // También procesar hoja Horarios (estructura clásica: Hora, lunes, martes...)
     if (horarios && horarios.length > 1) {
         const headerRow = horarios[0];
         const allKeys = Object.keys(headerRow);
@@ -175,8 +209,78 @@ async function loadHorarios() {
             diasSemana.forEach((dia) => {
                 const diaKey = allKeys.find(k => k.toLowerCase().includes(dia));
                 if (diaKey && row[diaKey]) {
-                    actividadesHorario.push({ Nombre: row[diaKey], Dia: dia, Hora: hora, Categoria: 'Actividad', Estado: 'Disponible' });
+                    todasActividadesGlobal.push({
+                        Nombre: row[diaKey],
+                        Dia: dia,
+                        Hora: hora,
+                        Categoria: 'Actividad',
+                        Estado: 'Disponible'
+                    });
                 }
+            });
+        }
+    }
+    
+    // Generar HTML
+    let html = '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
+    html += '<div class="dias-selector">';
+    diasSemana.forEach((dia, idx) => {
+        const tieneActividades = todasActividadesGlobal.some(a => a.Dia === dia);
+        html += `<button class="dia-btn" data-dia="${dia}"><span class="dia-nombre">${diasCorto[idx]}</span><span class="dia-punto ${tieneActividades ? 'active' : ''}"></span></button>`;
+    });
+    html += '</div>';
+    html += '<div id="timeline-container"></div>';
+    
+    // Eventos y Talleres
+    const eventos = agenda?.filter(r => r.Nombre && (r.Tipo === 'Taller' || r.Tipo === 'Evento' || r.Fecha)) || [];
+    if (eventos.length) {
+        html += '<h3 class="section-subtitle">📚 Talleres y Eventos</h3>';
+        html += '<div class="cards-grid">';
+        eventos.forEach(t => {
+            const descLarga = t.DescripcionLarga || t.DescripcionCorta || '';
+            const estadoClass = (t.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
+            html += `<div class="card" data-titulo="${t.Nombre}" data-categoria="${t.Categoria||''}" data-desc="${descLarga}" data-precio="${t.Precio||''}" data-duracion="${t.Duracion||''}" data-estado="${t.Estado||''}" data-fecha="${t.Fecha||''}" data-hora="${t.Hora||''}" data-tipo="taller">
+                <span class="badge evento">✨ ${t.Tipo||'Evento'}</span>
+                <h3>${t.Nombre}</h3>
+                <span class="categoria">${t.Fecha||''} ${t.Hora||''}</span>
+                <span class="badge ${estadoClass}" style="margin-top:4px">${t.Estado||'Disponible'}</span>
+                <p>${t.DescripcionCorta||''}</p>
+            </div>`;
+        });
+        html += '</div>';
+    }
+    
+    container.innerHTML = html || '<p class="error">No hay horarios disponibles</p>';
+    
+    container.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => {
+            showModal({
+                titulo: card.dataset.titulo,
+                categoria: card.dataset.categoria,
+                descripcion: card.dataset.desc,
+                precio: card.dataset.precio,
+                duracion: card.dataset.duracion,
+                estado: card.dataset.estado,
+                fecha: card.dataset.fecha,
+                hora: card.dataset.hora,
+                tipo: card.dataset.tipo
+            });
+        });
+    });
+    
+    container.querySelectorAll('.dia-btn').forEach(btn => {
+        btn.addEventListener('click', () => cambiarDia(btn.dataset.dia));
+    });
+    
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            const timelineContainer = document.getElementById('timeline-container');
+            if (timelineContainer) {
+                cambiarDia('lunes');
+            }
+        }, 200);
+    });
+}
             });
         }
     }
@@ -307,7 +411,9 @@ async function loadServicios() {
     let html = '<div class="cards-grid">';
     data.forEach(s => {
         const descLarga = s['Descripcion larga'] || s.DescripcionLarga || s['Descripcion corta'] || s.DescripcionCorta || '';
-        html += `<div class="card" data-titulo="${s.Nombre}" data-categoria="${s.Categoria||s.Categoría||''}" data-desc="${descLarga}" data-precio="${s.Precio||''}" data-duracion="${s.Duracion||s.Duración||''}" data-tipo="servicio">
+        const estadoClass = (s.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
+        html += `<div class="card" data-titulo="${s.Nombre}" data-categoria="${s.Categoria||s.Categoría||''}" data-desc="${descLarga}" data-precio="${s.Precio||''}" data-duracion="${s.Duracion||s.Duración||''}" data-estado="${s.Estado||''}" data-tipo="servicio">
+            <span class="badge ${estadoClass}">${s.Estado||'Disponible'}</span>
             <h3>${s.Nombre}</h3>
             <span class="categoria">${s.Categoria||s.Categoría||''}</span>
             <p>${s['Descripcion corta']||s.DescripcionCorta||''}</p>
@@ -326,7 +432,8 @@ async function loadServicios() {
                 categoria: card.dataset.categoria,
                 descripcion: card.dataset.desc,
                 precio: card.dataset.precio,
-                duracion: card.dataset.duracion
+                duracion: card.dataset.duracion,
+                estado: card.dataset.estado
             });
         });
     });
@@ -356,7 +463,7 @@ async function loadContacto() {
         <div class="contacto-card">
             <h2>Comunícate Conmigo</h2>
             
-            ${c.Ciudad || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text">${c.Ciudad ? `<strong>${c.Ciudad}</strong>` : ''}${c.Direccion||c.Dirección ? `<span>${c.Ciudad ? ', ' : ''}${c.Direccion||c.Dirección}</span>` : ''}</div></div>` : ''}
+            ${c.Ciudad || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text">${c.Ciudad ? `<strong>${c.Ciudad}</strong>` : ''}${c.Ciudad && (c.Direccion||c.Dirección) ? ', ' : ''}${(c.Direccion||c.Dirección)||''}</div></div>` : ''}
             ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono</strong><a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
             ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
             ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}
