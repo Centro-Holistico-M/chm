@@ -78,7 +78,7 @@ body {
 
 .slogan {
     font-family: 'Montserrat', sans-serif; color: var(--gold);
-    font-size: 0.85rem; margin-top: 8px; font-weight: 300;
+    font-size: 0.85rem; margin-top: 8px; font-weight: 600;
     opacity: 0; transition: opacity 0.5s;
     max-width: 95%;
     text-align: center;
@@ -88,10 +88,12 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     text-shadow: 0 0 8px rgba(212,175,55,0.3);
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.1), transparent);
+    background-size: 200% 100%;
 }
 .slogan.visible { 
     opacity: 1; 
-    animation: sloganAnimado 4s ease-in-out infinite;
+    animation: sloganAnimado 5s ease-in-out infinite, shimmer 3s ease-in-out infinite;
 }
 
 @keyframes sloganAnimado {
@@ -106,6 +108,11 @@ body {
     75% {
         text-shadow: 0 0 30px rgba(232,200,74,0.8);
     }
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 200% 0; }
+    50% { background-position: -200% 0; }
 }
 
 /* Nav */
