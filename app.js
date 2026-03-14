@@ -16,14 +16,40 @@ let serviciosData = [];
 // Datos para filtros
 let horariosCategories = [];
 let serviciosCategories = [];
+let cachedSlogan = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initNavigation();
     initSearchAndFilters();
+    loadSlogan(); // Cargar slogan al inicio
     loadTab('horarios');
     registerSW();
 });
+
+// Cargar slogan una sola vez
+async function loadSlogan() {
+    const sloganEl = document.getElementById('slogan');
+    if (!sloganEl) return;
+    
+    // Si ya tenemos el slogan en cache, mostrarlo
+    if (cachedSlogan) {
+        sloganEl.textContent = cachedSlogan;
+        sloganEl.classList.add('visible');
+        return;
+    }
+    
+    try {
+        const data = await fetchData(API.CONTACTO, 'chm_contacto');
+        if (data && data[0] && data[0].Slogan) {
+            cachedSlogan = data[0].Slogan;
+            sloganEl.textContent = cachedSlogan;
+            sloganEl.classList.add('visible');
+        }
+    } catch (e) {
+        console.warn('No se pudo cargar el slogan');
+    }
+}
 
 // ============================================
 // BUSCADOR Y FILTROS
@@ -367,42 +393,44 @@ async function loadHorarios() {
         return;
     }
     
+    console.log('API Response:', data);
+    
     horariosData = [];
     horariosCategories = [];
     
     const DAY_COLS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     
-    // Procesar cada fila y detectar tipo de tabla
+    // Analizar la estructura de los datos
     data.forEach(row => {
-        const keys = Object.keys(row).map(k => k.toLowerCase());
+        const keys = Object.keys(row);
         
-        // TABLA 1: HORARIO SEMANAL - tiene "Hora" y columnas de días
-        const hasHora = row.Hora || row.Horario;
-        const hasDias = DAY_COLS.some(dia => row[dia] || (row[dia.charAt(0).toUpperCase() + dia.slice(1)]));
+        // Verificar tipo de fila por las columnas que tiene
+        const hasHora = row.Hora !== undefined;
+        const hasNombre = row.Nombre !== undefined;
+        const hasCategoria = row.Categoria !== undefined;
+        const hasFecha = row.Fecha !== undefined;
         
-        if (hasHora && (hasDias || DAY_COLS.some(d => keys.includes(d)))) {
+        // TABLA 1: HORARIO SEMANAL - tiene Hora y al menos un día
+        if (hasHora) {
             const diasInfo = [];
             DAY_COLS.forEach(dia => {
-                const actividad = row[dia] || row[dia.charAt(0).toUpperCase() + dia.slice(1)] || '';
-                if (actividad) {
-                    diasInfo.push(`${dia.slice(0,3)}: ${actividad}`);
+                if (row[dia]) {
+                    diasInfo.push(`${dia.slice(0,3)}: ${row[dia]}`);
                 }
             });
             
-            if (diasInfo.length > 0 || hasHora) {
+            if (diasInfo.length > 0) {
                 horariosData.push({
                     seccion: 'semanal',
-                    titulo: row.Hora || row.Horario || 'Hora',
+                    titulo: row.Hora,
                     descripcion: diasInfo.join(' | '),
-                    hora: row.Hora || row.Horario
+                    hora: row.Hora
                 });
             }
-            return;
         }
-        
-        // TABLA 2: ACTIVIDADES - tiene "Nombre" y "Categoria"
-        if (row.Nombre && row.Categoria) {
-            const categoria = row.Categoria || '';
+        // TABLA 2: ACTIVIDADES - tiene Nombre y Categoria (sin Fecha)
+        else if (hasNombre && hasCategoria && !hasFecha) {
+            const categoria = row.Categoria;
             if (categoria && !horariosCategories.includes(categoria)) {
                 horariosCategories.push(categoria);
             }
@@ -417,29 +445,25 @@ async function loadHorarios() {
                 precio: row.Precio || '',
                 estado: row.Estado || ''
             });
-            return;
         }
-        
-        // TABLA 3: TALLERES - tiene "Nombre" y "Fecha"
-        if (row.Nombre && (row.Fecha || row.Dia || row.Día)) {
+        // TABLA 3: TALLERES - tiene Nombre y Fecha
+        else if (hasNombre && hasFecha) {
             horariosData.push({
                 seccion: 'talleres',
                 titulo: row.Nombre,
                 descripcion: row.DescripcionCorta || '',
                 descripcionLarga: row.DescripcionLarga || '',
-                fecha: row.Fecha || row.Dia || row.Día || '',
+                fecha: row.Fecha || '',
                 hora: row.Hora || '',
                 precio: row.Precio || '',
                 estado: row.Estado || ''
             });
-            return;
         }
     });
     
-    // Debug
-    console.log('Horario Semanal:', horariosData.filter(d => d.seccion === 'semanal').length);
-    console.log('Actividades:', horariosData.filter(d => d.seccion === 'actividades').length);
-    console.log('Talleres:', horariosData.filter(d => d.seccion === 'talleres').length);
+    console.log('Parsed - Semanal:', horariosData.filter(d => d.seccion === 'semanal').length);
+    console.log('Parsed - Actividades:', horariosData.filter(d => d.seccion === 'actividades').length);
+    console.log('Parsed - Talleres:', horariosData.filter(d => d.seccion === 'talleres').length);
     
     // Generar filtros
     updateFilterButtons('horarios', horariosCategories);
