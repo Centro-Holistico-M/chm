@@ -143,8 +143,8 @@ function cambiarDia(dia) {
                 <h3>${a.Nombre}</h3>
                 ${descCorta ? `<p class="timeline-desc">${descCorta}</p>` : ''}
                 <div class="timeline-badges">
-                    ${infoExtra}
                     <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
+                    ${infoExtra}
                 </div>
             </div>
         </div>`;
