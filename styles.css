@@ -383,3 +383,132 @@ body {
 .horario-tabla tr:hover td {
     background: rgba(212,175,55,0.05);
 }
+
+/* Selector de días */
+.dias-selector {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin: 20px 0;
+    padding: 10px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+}
+
+.dia-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 4px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.dia-btn.active {
+    background: rgba(212,175,55,0.15);
+    color: var(--gold);
+}
+
+.dia-nombre {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.dia-punto {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.dia-punto.active {
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold);
+}
+
+/* Timeline */
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0;
+}
+
+.timeline-dia {
+    color: var(--gold);
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    font-family: 'Cinzel', serif;
+}
+
+.timeline-card {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid rgba(212,175,55,0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.timeline-card:hover {
+    border-color: var(--gold);
+    transform: translateX(4px);
+}
+
+.timeline-hora {
+    color: var(--gold-light);
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-width: 50px;
+}
+
+.timeline-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.timeline-content h3 {
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.categoria-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
+.categoria-tag.yoga { background: rgba(76,175,80,0.2); color: #4caf50; }
+.categoria-tag.artes { background: rgba(244,67,54,0.2); color: #f44336; }
+.categoria-tag.movimiento { background: rgba(255,152,0,0.2); color: #ff9800; }
+.categoria-tag.ritual { background: rgba(156,39,176,0.2); color: #9c27b0; }
+.categoria-tag.terapia { background: rgba(33,150,243,0.2); color: #2196f3; }
+
+.no-actividades {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    margin: 20px 0;
+}
+
+.badge.evento {
+    background: rgba(212,175,55,0.3);
+    color: var(--gold-light);
+}

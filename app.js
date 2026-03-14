@@ -89,73 +89,126 @@ async function fetchAPI(url, cacheKey) {
 // ======================
 // HORARIOS
 // ======================
+const todasActividadesGlobal = [];
+
+function cambiarDia(dia) {
+    document.querySelectorAll('.dia-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.dia === dia);
+    });
+    
+    const container = document.getElementById('timeline-container');
+    if (!container) return;
+    
+    const actividades = todasActividadesGlobal.filter(a => a.Dia === dia);
+    
+    if (actividades.length === 0) {
+        container.innerHTML = `<p class="no-actividades">No hay actividades programadas para ${dia}</p>`;
+        return;
+    }
+    
+    actividades.sort((a, b) => (a.Hora||'').localeCompare(b.Hora||''));
+    
+    const nombreDia = dia.charAt(0).toUpperCase() + dia.slice(1);
+    let html = `<h4 class="timeline-dia">${nombreDia}</h4><div class="timeline">`;
+    
+    actividades.forEach(a => {
+        const descLarga = a.DescripcionLarga || a.DescripcionCorta || '';
+        const colorClass = getColorCategoria(a.Categoria);
+        html += `<div class="timeline-card" data-titulo="${a.Nombre}" data-categoria="${a.Categoria||''}" data-desc="${descLarga}" data-duracion="${a.Duracion||''}" data-estado="${a.Estado||''}" data-hora="${a.Hora||''}">
+            <div class="timeline-hora">${a.Hora||''}</div>
+            <div class="timeline-content">
+                <span class="categoria-tag ${colorClass}">${a.Categoria||'Actividad'}</span>
+                <h3>${a.Nombre}</h3>
+                <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+    
+    container.querySelectorAll('.timeline-card').forEach(card => {
+        card.addEventListener('click', () => {
+            showModal({
+                titulo: card.dataset.titulo,
+                categoria: card.dataset.categoria,
+                descripcion: card.dataset.desc,
+                duracion: card.dataset.duracion,
+                estado: card.dataset.estado,
+                hora: card.dataset.hora
+            });
+        });
+    });
+}
+
+function getColorCategoria(cat) {
+    const c = (cat||'').toLowerCase();
+    if (c.includes('yoga')) return 'yoga';
+    if (c.includes('marcial') || c.includes('taekwondo')) return 'artes';
+    if (c.includes('movimiento') || c.includes('danza')) return 'movimiento';
+    if (c.includes('ritual')) return 'ritual';
+    if (c.includes('terapia')) return 'terapia';
+    return '';
+}
+
 async function loadHorarios() {
     const container = document.getElementById('horarios-container');
     const [horarios, agenda] = await Promise.all([
         fetchAPI(API.HORARIOS, 'ch_horarios'),
         fetchAPI(API.AGENDA, 'ch_agenda')
     ]);
-
-    let html = '';
-
-    // Horario Semanal - Calendario
+    
+    const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+    const diasCorto = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    
+    const actividadesHorario = [];
     if (horarios && horarios.length > 1) {
-        html += '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
-        html += '<div class="calendario-semanal">';
-        
         const headerRow = horarios[0];
         const allKeys = Object.keys(headerRow);
-        
         const horaKey = allKeys.find(k => k.toLowerCase().includes('hora'));
         
-        const dayOrder = ['lunes', 'martes', 'miércoles', 'miercoles', 'jueves', 'viernes', 'sábado', 'sabado', 'domingo'];
-        const dayKeys = dayOrder.filter(d => allKeys.some(k => k.toLowerCase().includes(d)));
-        
-        // Header días
-        html += '<div class="calendario-header"><div class="hora-header"></div>';
-        dayKeys.forEach(d => {
-            const nombreDia = d.charAt(0).toUpperCase() + d.slice(1,3);
-            html += `<div class="dia-header">${nombreDia}</div>`;
-        });
-        html += '</div>';
-        
-        // Filas del calendario
         for (let i = 1; i < horarios.length; i++) {
             const row = horarios[i];
             if (!row) continue;
-            
             const hora = horaKey ? row[horaKey] : Object.values(row)[0];
             if (!hora) continue;
             
-            html += `<div class="calendario-fila"><div class="hora-label">${hora}</div>`;
-            dayKeys.forEach(diaKey => {
-                const contenido = row[diaKey] || '';
-                const clase = contenido ? 'celda-llena' : '';
-                html += `<div class="calendario-celda ${clase}">${contenido}</div>`;
+            diasSemana.forEach((dia) => {
+                const diaKey = allKeys.find(k => k.toLowerCase().includes(dia));
+                if (diaKey && row[diaKey]) {
+                    actividadesHorario.push({ Nombre: row[diaKey], Dia: dia, Hora: hora, Categoria: 'Actividad', Estado: 'Disponible' });
+                }
             });
-            html += '</div>';
         }
-        html += '</div>';
     }
-
-    // Actividades (Tipo = Actividad)
-    const actividades = agenda?.filter(r => r.Nombre && r.Tipo === 'Actividad') || [];
-    if (actividades.length) {
-        html += '<h3 class="section-subtitle">🎯 Actividades</h3>';
-        html += '<div class="cards-grid">';
-        actividades.forEach(a => {
-            const descLarga = a.DescripcionLarga || a.DescripcionCorta || '';
-            html += `<div class="card" data-titulo="${a.Nombre}" data-categoria="${a.Categoria||''}" data-desc="${descLarga}" data-precio="${a.Precio||''}" data-duracion="${a.Duracion||''}" data-estado="${a.Estado||''}" data-tipo="actividad">
-                <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
-                <h3>${a.Nombre}</h3>
-                <span class="categoria">${a.Categoria||''}</span>
-                <p>${a.DescripcionCorta||''}</p>
-            </div>`;
+    
+    todasActividadesGlobal.length = 0;
+    todasActividadesGlobal.push(...actividadesHorario);
+    
+    if (agenda) {
+        agenda.forEach(a => {
+            if (a.Nombre && a.Tipo !== 'Taller' && a.Tipo !== 'Evento' && !a.Fecha) {
+                todasActividadesGlobal.push({
+                    Nombre: a.Nombre,
+                    Dia: (a.Dia||'').toLowerCase(),
+                    Hora: a.Hora,
+                    Categoria: a.Categoria,
+                    Estado: a.Estado,
+                    DescripcionCorta: a.DescripcionCorta,
+                    DescripcionLarga: a.DescripcionLarga
+                });
+            }
         });
-        html += '</div>';
     }
-
-    // Talleres y Eventos
+    
+    let html = '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
+    html += '<div class="dias-selector">';
+    diasSemana.forEach((dia, idx) => {
+        const tieneActividades = todasActividadesGlobal.some(a => a.Dia === dia);
+        html += `<button class="dia-btn" data-dia="${dia}"><span class="dia-nombre">${diasCorto[idx]}</span><span class="dia-punto ${tieneActividades ? 'active' : ''}"></span></button>`;
+    });
+    html += '</div>';
+    html += '<div id="timeline-container"></div>';
+    
     const talleres = agenda?.filter(r => r.Nombre && (r.Tipo === 'Taller' || r.Tipo === 'Evento' || r.Fecha)) || [];
     if (talleres.length) {
         html += '<h3 class="section-subtitle">📚 Talleres y Eventos</h3>';
@@ -163,7 +216,7 @@ async function loadHorarios() {
         talleres.forEach(t => {
             const descLarga = t.DescripcionLarga || t.DescripcionCorta || '';
             html += `<div class="card" data-titulo="${t.Nombre}" data-categoria="${t.Categoria||''}" data-desc="${descLarga}" data-precio="${t.Precio||''}" data-duracion="${t.Duracion||''}" data-estado="${t.Estado||''}" data-fecha="${t.Fecha||''}" data-hora="${t.Hora||''}" data-tipo="taller">
-                <span class="badge ${(t.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${t.Estado||'Disponible'}</span>
+                <span class="badge evento">✨ ${t.Tipo||'Evento'}</span>
                 <h3>${t.Nombre}</h3>
                 <span class="categoria">${t.Fecha||''} ${t.Hora||''}</span>
                 <p>${t.DescripcionCorta||''}</p>
@@ -171,13 +224,12 @@ async function loadHorarios() {
         });
         html += '</div>';
     }
-
+    
     container.innerHTML = html || '<p class="error">No hay horarios disponibles</p>';
     
-    // Agregar eventos click
     container.querySelectorAll('.card').forEach(card => {
         card.addEventListener('click', () => {
-            const datos = {
+            showModal({
                 titulo: card.dataset.titulo,
                 categoria: card.dataset.categoria,
                 descripcion: card.dataset.desc,
@@ -187,103 +239,18 @@ async function loadHorarios() {
                 fecha: card.dataset.fecha,
                 hora: card.dataset.hora,
                 tipo: card.dataset.tipo
-            };
-            showModal(datos);
+            });
         });
     });
+    
+    container.querySelectorAll('.dia-btn').forEach(btn => {
+        btn.addEventListener('click', () => cambiarDia(btn.dataset.dia));
+    });
+    
+    setTimeout(() => cambiarDia('lunes'), 100);
 }
 
-// ======================
 // SERVICIOS
-// ======================
-async function loadServicios() {
-    const container = document.getElementById('servicios-container');
-    const data = await fetchAPI(API.SERVICIOS, 'ch_servicios');
-
-    let html = '<div class="cards-grid">';
-    data.forEach(s => {
-        const descLarga = s['Descripcion larga'] || s.DescripcionLarga || s['Descripcion corta'] || s.DescripcionCorta || '';
-        html += `<div class="card" data-titulo="${s.Nombre}" data-categoria="${s.Categoria||s.Categoría||''}" data-desc="${descLarga}" data-precio="${s.Precio||''}" data-duracion="${s.Duracion||s.Duración||''}" data-tipo="servicio">
-            <h3>${s.Nombre}</h3>
-            <span class="categoria">${s.Categoria||s.Categoría||''}</span>
-            <p>${s['Descripcion corta']||s.DescripcionCorta||''}</p>
-            <div class="card-footer">
-                <span>${s.Duracion||s.Duración||''}</span>
-            </div>
-        </div>`;
-    });
-    html += '</div>';
-    container.innerHTML = html || '<p class="error">No hay servicios disponibles</p>';
-    
-    container.querySelectorAll('.card').forEach(card => {
-        card.addEventListener('click', () => {
-            const datos = {
-                titulo: card.dataset.titulo,
-                categoria: card.dataset.categoria,
-                descripcion: card.dataset.desc,
-                precio: card.dataset.precio,
-                duracion: card.dataset.duracion
-            };
-            showModal(datos);
-        });
-    });
-}
-
-// ======================
-// CONTACTO
-// ======================
-async function loadContacto() {
-    const container = document.getElementById('contacto-container');
-    const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
-    if (!data.length) {
-        container.innerHTML = '<p class="error">No hay información de contacto</p>';
-        return;
-    }
-
-    const c = data[0];
-    const wa = (c.WhatsApp||'').replace(/\D/g,'');
-    
-    let redes = '';
-    if (c.Instagram) redes += `<a href="${c.Instagram}" target="_blank" title="Instagram">📷</a>`;
-    if (c.Facebook) redes += `<a href="${c.Facebook}" target="_blank" title="Facebook">📘</a>`;
-    if (c.YouTube||c.Youtube) redes += `<a href="${c.YouTube||c.Youtube}" target="_blank" title="YouTube">▶️</a>`;
-    if (c.TikTok) redes += `<a href="${c.TikTok}" target="_blank" title="TikTok">🎵</a>`;
-
-    container.innerHTML = `
-        <div class="contacto-card">
-            <h2>Comunícate Conmigo</h2>
-            
-            ${c.Ciudad || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text"><strong>${c.Ciudad ? c.Ciudad + (c.Direccion||c.Dirección) ? ', ' : '' : ''}</strong><span>${c.Direccion||c.Dirección||''}</span></div></div>` : ''}
-            ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono</strong><a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
-            ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
-            ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}
-            
-            ${redes ? `<div class="redes-sociales">${redes}</div>` : ''}
-            
-            ${wa ? `<a href="https://wa.me/${wa}" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>` : ''}
-        </div>
-    `;
-}
-
-async function loadSlogan() {
-    const el = document.getElementById('slogan');
-    if (!el) return;
-    if (cachedSlogan) {
-        el.textContent = cachedSlogan;
-        el.classList.add('visible');
-        return;
-    }
-    try {
-        const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
-        if (data[0]?.Slogan) {
-            cachedSlogan = data[0].Slogan;
-            el.textContent = cachedSlogan;
-            el.classList.add('visible');
-        }
-    } catch(e) {}
-}
-
-// Modal
 function showModal(datos) {
     const m = document.createElement('div');
     m.className = 'modal-overlay active';
