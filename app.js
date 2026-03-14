@@ -212,6 +212,7 @@ async function loadHorarios() {
                             Categoria: row.Categoria||'Actividad',
                             Estado: row.Estado||'Disponible',
                             Duracion: row.Duracion,
+                            Cupo: row.Cupo,
                             DescripcionCorta: row.DescripcionCorta,
                             DescripcionLarga: row.DescripcionLarga
                         });
