@@ -24,7 +24,7 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding-bottom: 140px;
+    padding-bottom: 60px;
     padding-top: calc(20px + var(--safe-area-inset-top));
     padding-left: var(--safe-area-inset-left);
     padding-right: var(--safe-area-inset-right);
@@ -639,8 +639,8 @@ body {
 
 .footer {
     text-align: center;
-    padding: 20px;
-    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    padding: 16px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     color: var(--text-muted);
     font-size: 0.75rem;
     border-top: 1px solid rgba(212,175,55,0.1);
