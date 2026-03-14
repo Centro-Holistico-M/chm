@@ -77,8 +77,8 @@ body {
 .logo { width: 60px; height: 60px; border-radius: 12px; border: 1px solid var(--gold); box-shadow: 0 0 25px rgba(212,175,55,0.5); }
 
 .slogan {
-    font-family: 'Cinzel', serif; color: var(--gold);
-    font-size: 0.85rem; margin-top: 8px; font-style: italic;
+    font-family: 'Montserrat', sans-serif; color: var(--gold);
+    font-size: 0.9rem; margin-top: 8px; font-weight: 300;
     opacity: 0; transition: opacity 0.5s;
 }
 .slogan.visible { opacity: 1; }
