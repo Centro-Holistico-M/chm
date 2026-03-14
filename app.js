@@ -367,84 +367,79 @@ async function loadHorarios() {
         return;
     }
     
-    // Limpiar datos vacíos
-    const cleanData = data.filter(row => {
-        const values = Object.values(row);
-        return values.some(v => v && v !== '');
-    });
-    
-    if (!cleanData.length) {
-        container.innerHTML = createErrorHTML('No hay horarios disponibles', 'horarios');
-        return;
-    }
-    
     horariosData = [];
     horariosCategories = [];
     
-    // Procesar cada fila
-    cleanData.forEach(row => {
-        // Verificar si es horario (tiene Hora)
-        if (row.Hora || row.Horario) {
-            const actividades = [];
-            DAYS.forEach(dia => {
-                if (row[dia]) actividades.push(`${dia.slice(0,3)}: ${row[dia]}`);
+    const DAY_COLS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+    
+    // Procesar cada fila y detectar tipo de tabla
+    data.forEach(row => {
+        const keys = Object.keys(row).map(k => k.toLowerCase());
+        
+        // TABLA 1: HORARIO SEMANAL - tiene "Hora" y columnas de días
+        const hasHora = row.Hora || row.Horario;
+        const hasDias = DAY_COLS.some(dia => row[dia] || (row[dia.charAt(0).toUpperCase() + dia.slice(1)]));
+        
+        if (hasHora && (hasDias || DAY_COLS.some(d => keys.includes(d)))) {
+            const diasInfo = [];
+            DAY_COLS.forEach(dia => {
+                const actividad = row[dia] || row[dia.charAt(0).toUpperCase() + dia.slice(1)] || '';
+                if (actividad) {
+                    diasInfo.push(`${dia.slice(0,3)}: ${actividad}`);
+                }
             });
             
-            horariosData.push({
-                seccion: 'semanal',
-                titulo: row.Hora || row.Horario,
-                descripcion: actividades.length ? actividades.join(' | ') : 'Sin actividades',
-                hora: row.Hora || row.Horario
-            });
+            if (diasInfo.length > 0 || hasHora) {
+                horariosData.push({
+                    seccion: 'semanal',
+                    titulo: row.Hora || row.Horario || 'Hora',
+                    descripcion: diasInfo.join(' | '),
+                    hora: row.Hora || row.Horario
+                });
+            }
+            return;
         }
-        // Verificar si es actividad (tiene Nombre y Categoría/Descripción)
-        else if ((row.Nombre || row.NombreActividad) && (row.Categoria || row['Descripcion corta'])) {
-            const categoria = row.Categoria || row.Categoría || '';
+        
+        // TABLA 2: ACTIVIDADES - tiene "Nombre" y "Categoria"
+        if (row.Nombre && row.Categoria) {
+            const categoria = row.Categoria || '';
             if (categoria && !horariosCategories.includes(categoria)) {
                 horariosCategories.push(categoria);
             }
             
             horariosData.push({
                 seccion: 'actividades',
-                titulo: row.Nombre || row.NombreActividad || 'Actividad',
-                descripcion: row['Descripcion corta'] || row.DescripcionCorta || '',
-                descripcionLarga: row['Descripcion larga'] || row.DescripcionLarga || row['Descripcion corta'] || row.DescripcionCorta || '',
+                titulo: row.Nombre,
+                descripcion: row.DescripcionCorta || '',
+                descripcionLarga: row.DescripcionLarga || row.DescripcionCorta || '',
                 categoria: categoria,
-                duracion: row.Duracion || row.Duración || '',
+                duracion: row.Duracion || '',
                 precio: row.Precio || '',
                 estado: row.Estado || ''
             });
+            return;
         }
-        // Verificar si es taller (tiene Taller, Evento, o nombre contiene taller/evento)
-        else if (row.Taller || row.Evento || (row.Nombre && (row.Nombre.toLowerCase().includes('taller') || row.Nombre.toLowerCase().includes('evento')))) {
+        
+        // TABLA 3: TALLERES - tiene "Nombre" y "Fecha"
+        if (row.Nombre && (row.Fecha || row.Dia || row.Día)) {
             horariosData.push({
                 seccion: 'talleres',
-                titulo: row.Nombre || row.Taller || row.Evento || 'Taller',
-                descripcion: row['Descripcion corta'] || row.DescripcionCorta || '',
-                descripcionLarga: row['Descripcion larga'] || row.DescripcionLarga || '',
+                titulo: row.Nombre,
+                descripcion: row.DescripcionCorta || '',
+                descripcionLarga: row.DescripcionLarga || '',
                 fecha: row.Fecha || row.Dia || row.Día || '',
-                hora: row.Hora || row.Horario || '',
+                hora: row.Hora || '',
                 precio: row.Precio || '',
                 estado: row.Estado || ''
             });
+            return;
         }
     });
     
-    // Si no hay datos agrupados, mostrar todo como tarjetas simples
-    if (horariosData.length === 0) {
-        cleanData.forEach((row, idx) => {
-            const values = Object.values(row).filter(v => v && v !== '');
-            if (values.length > 0) {
-                horariosData.push({
-                    seccion: 'semanal',
-                    titulo: values[0] || 'Actividad',
-                    descripcion: values.slice(1).join(' | ')
-                });
-            }
-        });
-    }
-    
-    console.log('Horarios data:', horariosData);
+    // Debug
+    console.log('Horario Semanal:', horariosData.filter(d => d.seccion === 'semanal').length);
+    console.log('Actividades:', horariosData.filter(d => d.seccion === 'actividades').length);
+    console.log('Talleres:', horariosData.filter(d => d.seccion === 'talleres').length);
     
     // Generar filtros
     updateFilterButtons('horarios', horariosCategories);
