@@ -247,7 +247,15 @@ async function loadHorarios() {
         btn.addEventListener('click', () => cambiarDia(btn.dataset.dia));
     });
     
-    setTimeout(() => cambiarDia('lunes'), 100);
+    // Renderizar timeline después de que el DOM esté listo
+    requestAnimationFrame(() => {
+        setTimeout(() => {
+            const timelineContainer = document.getElementById('timeline-container');
+            if (timelineContainer) {
+                cambiarDia('lunes');
+            }
+        }, 200);
+    });
 }
 
 // SERVICIOS
@@ -287,4 +295,93 @@ function registerSW() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('images/sw.js').catch(console.error);
     }
+}
+
+// ======================
+// SERVICIOS
+// ======================
+async function loadServicios() {
+    const container = document.getElementById('servicios-container');
+    const data = await fetchAPI(API.SERVICIOS, 'ch_servicios');
+
+    let html = '<div class="cards-grid">';
+    data.forEach(s => {
+        const descLarga = s['Descripcion larga'] || s.DescripcionLarga || s['Descripcion corta'] || s.DescripcionCorta || '';
+        html += `<div class="card" data-titulo="${s.Nombre}" data-categoria="${s.Categoria||s.Categoría||''}" data-desc="${descLarga}" data-precio="${s.Precio||''}" data-duracion="${s.Duracion||s.Duración||''}" data-tipo="servicio">
+            <h3>${s.Nombre}</h3>
+            <span class="categoria">${s.Categoria||s.Categoría||''}</span>
+            <p>${s['Descripcion corta']||s.DescripcionCorta||''}</p>
+            <div class="card-footer">
+                <span>${s.Duracion||s.Duración||''}</span>
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html || '<p class="error">No hay servicios disponibles</p>';
+    
+    container.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => {
+            showModal({
+                titulo: card.dataset.titulo,
+                categoria: card.dataset.categoria,
+                descripcion: card.dataset.desc,
+                precio: card.dataset.precio,
+                duracion: card.dataset.duracion
+            });
+        });
+    });
+}
+
+// ======================
+// CONTACTO
+// ======================
+async function loadContacto() {
+    const container = document.getElementById('contacto-container');
+    const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
+    if (!data.length) {
+        container.innerHTML = '<p class="error">No hay información de contacto</p>';
+        return;
+    }
+
+    const c = data[0];
+    const wa = (c.WhatsApp||'').replace(/\D/g,'');
+    
+    let redes = '';
+    if (c.Instagram) redes += `<a href="${c.Instagram}" target="_blank" title="Instagram">📷</a>`;
+    if (c.Facebook) redes += `<a href="${c.Facebook}" target="_blank" title="Facebook">📘</a>`;
+    if (c.YouTube||c.Youtube) redes += `<a href="${c.YouTube||c.Youtube}" target="_blank" title="YouTube">▶️</a>`;
+    if (c.TikTok) redes += `<a href="${c.TikTok}" target="_blank" title="TikTok">🎵</a>`;
+
+    container.innerHTML = `
+        <div class="contacto-card">
+            <h2>Comunícate Conmigo</h2>
+            
+            ${c.Ciudad || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text">${c.Ciudad ? `<strong>${c.Ciudad}</strong>` : ''}${c.Direccion||c.Dirección ? `<span>${c.Ciudad ? ', ' : ''}${c.Direccion||c.Dirección}</span>` : ''}</div></div>` : ''}
+            ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono</strong><a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
+            ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
+            ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}
+            
+            ${redes ? `<div class="redes-sociales">${redes}</div>` : ''}
+            
+            ${wa ? `<a href="https://wa.me/${wa}" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>` : ''}
+        </div>
+    `;
+}
+
+async function loadSlogan() {
+    const el = document.getElementById('slogan');
+    if (!el) return;
+    if (cachedSlogan) {
+        el.textContent = cachedSlogan;
+        el.classList.add('visible');
+        return;
+    }
+    try {
+        const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
+        if (data[0]?.Slogan) {
+            cachedSlogan = data[0].Slogan;
+            el.textContent = cachedSlogan;
+            el.classList.add('visible');
+        }
+    } catch(e) {}
 }
