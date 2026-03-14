@@ -7,14 +7,25 @@ const API = {
 
 const CACHE_DURATION = 3600000;
 let cachedSlogan = '';
+let cachedWhatsApp = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initNavigation();
     loadTab('horarios');
     loadSlogan();
+    loadWhatsApp();
     registerSW();
 });
+
+async function loadWhatsApp() {
+    try {
+        const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
+        if (data[0]?.WhatsApp) {
+            cachedWhatsApp = data[0].WhatsApp.replace(/\D/g,'');
+        }
+    } catch(e) {}
+}
 
 function initParticles() {
     const container = document.getElementById('particles');
@@ -144,7 +155,7 @@ function cambiarDia(dia) {
                 duracion: card.dataset.duracion,
                 estado: card.dataset.estado,
                 hora: card.dataset.hora
-            });
+            }, cachedWhatsApp);
         });
     });
 }
@@ -273,7 +284,7 @@ async function loadHorarios() {
                 fecha: card.dataset.fecha,
                 hora: card.dataset.hora,
                 tipo: card.dataset.tipo
-            });
+            }, cachedWhatsApp);
         });
     });
     
@@ -291,7 +302,7 @@ async function loadHorarios() {
     });
 }
 
-function showModal(datos) {
+function showModal(datos, waNumero) {
     const m = document.createElement('div');
     m.className = 'modal-overlay active';
     
@@ -313,8 +324,8 @@ function showModal(datos) {
             ${infoHtml ? `<div class="modal-info">${infoHtml}</div>` : ''}
             <p class="modal-desc">${datos.descripcion || 'Sin descripción disponible.'}</p>
             <div class="modal-buttons">
-                <a href="#contacto" onclick="document.querySelector('[data-tab=contacto]').click()" class="share-btn">📞 Ir a Contacto</a>
-                <a href="https://wa.me/?text=${waMsg}" target="_blank" class="share-btn wa-btn">💬 WhatsApp</a>
+                <a href="#contacto" class="share-btn btn-contacto">📞 Ir a Contacto</a>
+                <a href="${waNumero ? 'https://wa.me/' + waNumero + '?text=' + waMsg : '#'}" target="_blank" class="share-btn wa-btn">💬 WhatsApp</a>
             </div>
         </div>
     `;
@@ -322,6 +333,14 @@ function showModal(datos) {
     document.body.appendChild(m);
     
     m.querySelector('.modal-close').addEventListener('click', () => m.remove());
+    m.querySelector('.btn-contacto').addEventListener('click', () => {
+        m.remove();
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelector('[data-tab="contacto"]').classList.add('active');
+        document.getElementById('contacto').classList.add('active');
+        loadTab('contacto');
+    });
     m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') m.remove(); });
 }
@@ -365,7 +384,7 @@ async function loadServicios() {
                 precio: card.dataset.precio,
                 duracion: card.dataset.duracion,
                 estado: card.dataset.estado
-            });
+            }, cachedWhatsApp);
         });
     });
 }
@@ -382,7 +401,8 @@ async function loadContacto() {
     }
 
     const c = data[0];
-    const wa = (c.WhatsApp||'').replace(/\D/g,'');
+    cachedWhatsApp = (c.WhatsApp||'').replace(/\D/g,'');
+    const wa = cachedWhatsApp;
     
     let redes = '';
     if (c.Instagram) redes += `<a href="${c.Instagram}" target="_blank" title="Instagram">📷</a>`;
@@ -394,7 +414,7 @@ async function loadContacto() {
         <div class="contacto-card">
             <h2>Comunícate Conmigo</h2>
             
-            ${c.Ciudad || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text">${c.Ciudad ? `<strong>${c.Ciudad}</strong>` : ''}${c.Ciudad && (c.Direccion||c.Dirección) ? ', ' : ''}${(c.Direccion||c.Dirección)||''}</div></div>` : ''}
+            ${c.Ciudad || c.Estado || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text">${c.Direccion||c.Dirección ? `<strong>Dirección:</strong> ${c.Direccion||c.Dirección}` : ''}${c.Ciudad ? `<br><strong>Ciudad:</strong> ${c.Ciudad}` : ''}${c.Estado ? `<br><strong>Estado:</strong> ${c.Estado}` : ''}</div></div>` : ''}
             ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono</strong><a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
             ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
             ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}
