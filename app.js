@@ -103,20 +103,36 @@ async function loadHorarios() {
         html += '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
         html += '<div class="cards-grid">';
         
+        const headerRow = horarios[0];
+        const allKeys = Object.keys(headerRow);
+        
+        // Buscar columna de hora
+        const horaKey = allKeys.find(k => k.toLowerCase().includes('hora'));
+        
+        // Buscar columnas de días
+        const dayKeys = allKeys.filter(k => 
+            k.toLowerCase().includes('lunes') || k.toLowerCase().includes('martes') ||
+            k.toLowerCase().includes('miércoles') || k.toLowerCase().includes('miercoles') ||
+            k.toLowerCase().includes('jueves') || k.toLowerCase().includes('viernes') ||
+            k.toLowerCase().includes('sábado') || k.toLowerCase().includes('sabado') ||
+            k.toLowerCase().includes('domingo')
+        );
+        
+        console.log('Horario keys:', allKeys, 'Hora:', horaKey, 'Dias:', dayKeys);
+        
         for (let i = 1; i < horarios.length; i++) {
             const row = horarios[i];
             if (!row) continue;
             
-            // Buscar la hora
-            const keys = Object.keys(row);
-            const horaKey = keys.find(k => k.toLowerCase() === 'hora');
-            const hora = horaKey ? row[horaKey] : null;
-            
+            const hora = horaKey ? row[horaKey] : Object.values(row)[0];
             if (!hora) continue;
             
             const dias = [];
-            ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'].forEach(dia => {
-                if (row[dia]) dias.push(`${dia.slice(0,3)}: ${row[dia]}`);
+            dayKeys.forEach(diaKey => {
+                if (row[diaKey]) {
+                    const diaCorto = diaKey.toLowerCase().replace(/[^a-záéíóúñ]/g, '').slice(0,3);
+                    dias.push(`${diaCorto}: ${row[diaKey]}`);
+                }
             });
             
             if (dias.length > 0 || hora) {
@@ -280,7 +296,7 @@ async function loadSlogan() {
 // Modal
 function showModal(datos) {
     const m = document.createElement('div');
-    m.className = 'modal-overlay';
+    m.className = 'modal-overlay active';
     
     const badgeClass = (datos.estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
     const waMsg = encodeURIComponent(`Hola! Me interesa: ${datos.titulo}${datos.precio ? ` - $${datos.precio}` : ''}`);
