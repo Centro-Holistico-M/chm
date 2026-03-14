@@ -142,7 +142,7 @@ function cambiarDia(dia) {
                 <span class="categoria-tag ${colorClass}">${a.Categoria||'Actividad'}</span>
                 <h3>${a.Nombre}</h3>
                 ${descCorta ? `<p class="timeline-desc">${descCorta}</p>` : ''}
-                <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span> ${infoExtra}
+                <div class="timeline-badges"><span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span> ${infoExtra}</div>
             </div>
         </div>`;
     });
