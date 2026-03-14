@@ -5,723 +5,293 @@ const API = {
     CONTACTO: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto'
 };
 
-const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-const CACHE_DURATION = 3600000; // 1 hora en milisegundos
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 segundo
-
-let loadedTabs = { horarios: false, servicios: false, contacto: false };
-let horariosData = [];
-let serviciosData = [];
-
-// Datos para filtros
-let horariosCategories = [];
-let serviciosCategories = [];
+const CACHE_DURATION = 3600000;
 let cachedSlogan = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initNavigation();
-    initSearchAndFilters();
-    loadSlogan(); // Cargar slogan al inicio
     loadTab('horarios');
+    loadSlogan();
     registerSW();
 });
 
-// Cargar slogan una sola vez
-async function loadSlogan() {
-    const sloganEl = document.getElementById('slogan');
-    if (!sloganEl) return;
-    
-    // Si ya tenemos el slogan en cache, mostrarlo
-    if (cachedSlogan) {
-        sloganEl.textContent = cachedSlogan;
-        sloganEl.classList.add('visible');
-        return;
-    }
-    
-    try {
-        const data = await fetchData(API.CONTACTO, 'chm_contacto');
-        if (data && data[0] && data[0].Slogan) {
-            cachedSlogan = data[0].Slogan;
-            sloganEl.textContent = cachedSlogan;
-            sloganEl.classList.add('visible');
-        }
-    } catch (e) {
-        console.warn('No se pudo cargar el slogan');
-    }
-}
-
-// ============================================
-// BUSCADOR Y FILTROS
-// ============================================
-function initSearchAndFilters() {
-    // Buscador de Horarios
-    const searchHorarios = document.getElementById('search-input');
-    if (searchHorarios) {
-        searchHorarios.addEventListener('input', (e) => filterHorarios(e.target.value));
-    }
-    
-    // Buscador de Servicios
-    const searchServicios = document.getElementById('search-input-servicios');
-    if (searchServicios) {
-        searchServicios.addEventListener('input', (e) => filterServicios(e.target.value));
-    }
-}
-
-function filterHorarios(searchTerm = '', category = 'all') {
-    const container = document.getElementById('horarios-grid');
-    if (!container) return;
-    
-    const term = searchTerm.toLowerCase();
-    
-    // Recargar desde datos originales
-    if (horariosData.length === 0) return;
-    
-    let filtered = horariosData;
-    
-    // Filtrar por búsqueda
-    if (term) {
-        filtered = filtered.filter(item => 
-            (item.titulo && item.titulo.toLowerCase().includes(term)) ||
-            (item.descripcion && item.descripcion.toLowerCase().includes(term)) ||
-            (item.categoria && item.categoria.toLowerCase().includes(term))
-        );
-    }
-    
-    // Filtrar por categoría
-    if (category && category !== 'all') {
-        filtered = filtered.filter(item => 
-            item.categoria && item.categoria.toLowerCase() === category.toLowerCase()
-        );
-    }
-    
-    // Renderizar
-    renderFilteredHorarios(filtered);
-}
-
-function filterServicios(searchTerm = '', category = 'all') {
-    const container = document.getElementById('servicios-grid');
-    if (!container) return;
-    
-    const term = searchTerm.toLowerCase();
-    
-    if (serviciosData.length === 0) return;
-    
-    let filtered = serviciosData;
-    
-    if (term) {
-        filtered = filtered.filter(item => 
-            (item.titulo && item.titulo.toLowerCase().includes(term)) ||
-            (item.descripcion && item.descripcion.toLowerCase().includes(term)) ||
-            (item.categoria && item.categoria.toLowerCase().includes(term))
-        );
-    }
-    
-    if (category && category !== 'all') {
-        filtered = filtered.filter(item => 
-            item.categoria && item.categoria.toLowerCase() === category.toLowerCase()
-        );
-    }
-    
-    renderFilteredServicios(filtered);
-}
-
-function renderFilteredHorarios(data) {
-    const container = document.getElementById('horarios-grid');
-    if (!container) return;
-    
-    if (!data.length) {
-        container.innerHTML = '<p class="error-msg" style="text-align:center;grid-column:1/-1;">No se encontraron resultados</p>';
-        return;
-    }
-    
-    // Agrupar por sección
-    const sections = {
-        semanal: data.filter(d => d.seccion === 'semanal'),
-        actividades: data.filter(d => d.seccion === 'actividades'),
-        talleres: data.filter(d => d.seccion === 'talleres')
-    };
-    
-    let html = '';
-    
-    if (sections.semanal.length) {
-        html += createSection('semanal', '📅', 'Horario Semanal', 'Clases disponibles cada día', sections.semanal);
-    }
-    if (sections.actividades.length) {
-        html += createSection('actividades', '🎯', 'Nuestras Actividades', 'Clases y prácticas del centro', sections.actividades);
-    }
-    if (sections.talleres.length) {
-        html += createSection('talleres', '📚', 'Talleres y Eventos', 'Eventos especiales y talleres', sections.talleres);
-    }
-    
-    container.innerHTML = html;
-    attachCardListeners(container);
-}
-
-function renderFilteredServicios(data) {
-    const container = document.getElementById('servicios-grid');
-    if (!container) return;
-    
-    if (!data.length) {
-        container.innerHTML = '<p class="error-msg" style="text-align:center;grid-column:1/-1;">No se encontraron resultados</p>';
-        return;
-    }
-    
-    const html = data.map((item, idx) => createCard(item, idx)).join('');
-    container.innerHTML = html;
-    attachCardListeners(container);
-}
-
-function updateFilterButtons(type, categories) {
-    const container = document.getElementById(`filter-buttons-${type}`);
-    if (!container || !categories.length) return;
-    
-    let html = '<button class="filter-btn active" data-filter="all">Todos</button>';
-    
-    categories.forEach(cat => {
-        html += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`;
-    });
-    
-    container.innerHTML = html;
-    
-    // Agregar eventos
-    container.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            const searchInput = document.getElementById(type === 'horarios' ? 'search-input' : 'search-input-servicios');
-            const searchTerm = searchInput ? searchInput.value : '';
-            
-            if (type === 'horarios') {
-                filterHorarios(searchTerm, btn.dataset.filter);
-            } else {
-                filterServicios(searchTerm, btn.dataset.filter);
-            }
-        });
-    });
-}
-
-// ============================================
-// PARTÍCULAS DE FONDO
-// ============================================
 function initParticles() {
     const container = document.getElementById('particles');
     if (!container) return;
-    
-    const particleCount = 15;
-    const createParticle = () => {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        
-        const size = Math.random() * 3 + 2;
-        const left = Math.random() * 100;
-        const duration = Math.random() * 10 + 10;
-        const delay = Math.random() * 5;
-        
-        particle.style.cssText = `
-            width: ${size}px;
-            height: ${size}px;
-            left: ${left}vw;
-            animation-duration: ${duration}s;
-            animation-delay: ${delay}s;
-        `;
-        
-        container.appendChild(particle);
-        
-        setTimeout(() => particle.remove(), (duration + delay) * 1000);
-    };
-    
-    // Crear partículas periódicamente
-    for (let i = 0; i < particleCount; i++) {
-        setTimeout(createParticle, i * 300);
+    for (let i = 0; i < 15; i++) {
+        setTimeout(() => createParticle(container), i * 300);
     }
-    
-    setInterval(createParticle, 800);
+    setInterval(() => createParticle(container), 800);
 }
 
-function registerSW() {
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('images/sw.js')
-            .then(reg => console.log('SW registrado'))
-            .catch(err => console.warn('SW no disponible:', err));
-    }
+function createParticle(container) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `left:${Math.random()*100}vw;animation-duration:${Math.random()*10+10}s;width:${Math.random()*3+2}px;height:${Math.random()*3+2}px;`;
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 20000);
 }
 
-// ============================================
-// CACHE LOCAL (localStorage)
-// ============================================
-function getCache(key) {
-    try {
-        const cached = localStorage.getItem(key);
-        if (!cached) return null;
-        
-        const { data, timestamp } = JSON.parse(cached);
-        
-        // Verificar si el cache aún es válido
-        if (Date.now() - timestamp < CACHE_DURATION) {
-            return data;
-        }
-        
-        // Cache expirado
-        localStorage.removeItem(key);
-        return null;
-    } catch (e) {
-        return null;
-    }
-}
-
-function setCache(key, data) {
-    try {
-        localStorage.setItem(key, JSON.stringify({
-            data: data,
-            timestamp: Date.now()
-        }));
-    } catch (e) {
-        console.warn('No se pudo guardar cache:', e);
-    }
-}
-
-// ============================================
-// FETCH CON RETRY
-// ============================================
-async function fetchData(url, cacheKey = null) {
-    // 1. Intentar obtener del cache primero
-    if (cacheKey) {
-        const cached = getCache(cacheKey);
-        if (cached) {
-            console.log('📦 Usando cache para:', cacheKey);
-            return cached;
-        }
-    }
-    
-    // 2. Fetch con reintentos
-    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        try {
-            const res = await fetch(url);
-            
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}`);
-            }
-            
-            const data = await res.json();
-            
-            if (!Array.isArray(data) || data.length === 0) {
-                throw new Error('Datos vacíos');
-            }
-            
-            // 3. Guardar en cache si es exitoso
-            if (cacheKey) {
-                setCache(cacheKey, data);
-            }
-            
-            return data;
-            
-        } catch (error) {
-            console.warn(`⚠️ Intento ${attempt}/${MAX_RETRIES} falló:`, error.message);
-            
-            if (attempt < MAX_RETRIES) {
-                await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * attempt));
-            }
-        }
-    }
-    
-    // 4. Si todo falla, intentar usar cache aunque esté expirado
-    if (cacheKey) {
-        try {
-            const cached = localStorage.getItem(cacheKey);
-            if (cached) {
-                const { data } = JSON.parse(cached);
-                console.log('📦 Usando cache expirado para:', cacheKey);
-                return data;
-            }
-        } catch (e) {}
-    }
-    
-    throw new Error('No se pudo cargar los datos');
-}
-
-// ============================================
-// NAVEGACIÓN
-// ============================================
 function initNavigation() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const tab = btn.dataset.tab;
-            switchTab(tab);
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            loadTab(tab);
         });
     });
 }
 
-function switchTab(tabName) {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-    
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.getElementById(tabName).classList.add('active');
-    
-    if (!loadedTabs[tabName]) {
-        loadTab(tabName);
-    }
-}
-
-async function loadTab(tabName) {
+async function loadTab(tab) {
     showLoading(true);
     try {
-        switch(tabName) {
-            case 'horarios': await loadHorarios(); break;
-            case 'servicios': await loadServicios(); break;
-            case 'contacto': await loadContacto(); break;
-        }
-        loadedTabs[tabName] = true;
-    } catch (e) {
-        console.error('Error cargando:', e);
-        showError(tabName);
-    }
+        if (tab === 'horarios') await loadHorarios();
+        else if (tab === 'servicios') await loadServicios();
+        else if (tab === 'contacto') await loadContacto();
+    } catch (e) { console.error(e); }
     showLoading(false);
 }
 
-// ============================================
-// HORARIOS - Horario Semanal + Agenda (Actividades + Talleres)
-// ============================================
-async function loadHorarios() {
-    const container = document.getElementById('horarios-grid');
-    
-    // Cargar ambas APIs en paralelo
-    const [horariosRaw, agendaRaw] = await Promise.all([
-        fetchData(API.HORARIOS, 'chm_horarios'),
-        fetchData(API.AGENDA, 'chm_agenda')
-    ]);
-    
-    console.log('Horarios API:', horariosRaw);
-    console.log('Agenda API:', agendaRaw);
-    
-    if (!horariosRaw.length && !agendaRaw.length) {
-        container.innerHTML = createErrorHTML('No hay horarios disponibles', 'horarios');
-        return;
-    }
-    
-    horariosData = [];
-    horariosCategories = [];
-    
-    const DAY_COLS = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-    
-    // Procesar HORARIOS → Horario Semanal
-    // La primera fila son las cabeceras, las demás son datos
-    if (horariosRaw.length > 1) {
-        // Empezar desde la fila 1 (ignorar cabeceras)
-        for (let i = 1; i < horariosRaw.length; i++) {
-            const row = horariosRaw[i];
-            if (!row) continue;
-            
-            // Buscar la columna "Hora" (puede estar en cualquier posición)
-            const keys = Object.keys(row);
-            const horaKey = keys.find(k => k.toLowerCase() === 'hora');
-            
-            if (horaKey) {
-                const hora = row[horaKey];
-                // Si tiene hora, buscar los días
-                if (hora) {
-                    const diasInfo = [];
-                    DAY_COLS.forEach(dia => {
-                        if (row[dia]) {
-                            diasInfo.push(`${dia.slice(0,3)}: ${row[dia]}`);
-                        }
-                    });
-                    
-                    if (diasInfo.length > 0) {
-                        horariosData.push({
-                            seccion: 'semanal',
-                            titulo: hora,
-                            descripcion: diasInfo.join(' | '),
-                            hora: hora
-                        });
-                    }
-                }
-            }
-        }
-    }
-    
-    // Procesar AGENDA → Actividades y Talleres
-    // Primera fila son cabeceras
-    if (agendaRaw.length > 1) {
-        for (let i = 1; i < agendaRaw.length; i++) {
-            const row = agendaRaw[i];
-            if (!row || !row.Nombre) continue;
-            
-            const tipo = row.Tipo || '';
-            const tieneFecha = row.Fecha && row.Fecha.trim() !== '';
-            
-            // Talleres/Eventos: tienen Tipo="Taller" o Tipo="Evento" o tienen Fecha
-            if (tipo === 'Taller' || tipo === 'Evento' || tieneFecha) {
-                horariosData.push({
-                    seccion: 'talleres',
-                    titulo: row.Nombre,
-                    descripcion: row.DescripcionCorta || '',
-                    descripcionLarga: row.DescripcionLarga || row.DescripcionCorta || '',
-                    fecha: row.Fecha || row.Dia || '',
-                    hora: row.Hora || '',
-                    precio: row.Precio || '',
-                    estado: row.Estado || ''
-                });
-            }
-            // Actividades: tienen Tipo="Actividad" o no tienen Fecha
-            else if (tipo === 'Actividad') {
-                const categoria = row.Categoria || '';
-                if (categoria && !horariosCategories.includes(categoria)) {
-                    horariosCategories.push(categoria);
-                }
-                
-                horariosData.push({
-                    seccion: 'actividades',
-                    titulo: row.Nombre,
-                    descripcion: row.DescripcionCorta || '',
-                    descripcionLarga: row.DescripcionLarga || row.DescripcionCorta || '',
-                    categoria: categoria,
-                    duracion: row.Duracion || '',
-                    precio: row.Precio || '',
-                    estado: row.Estado || ''
-                });
-            }
-        }
-    }
-    
-    console.log('Parsed - Semanal:', horariosData.filter(d => d.seccion === 'semanal').length);
-    console.log('Parsed - Actividades:', horariosData.filter(d => d.seccion === 'actividades').length);
-    console.log('Parsed - Talleres:', horariosData.filter(d => d.seccion === 'talleres').length);
-    
-    // Renderizar
-    renderFilteredHorarios(horariosData);
-}
-
-function createSection(id, icon, titulo, desc, items) {
-    if (!items || !items.length) return '';
-    const cards = items.map((item, idx) => createCard(item, idx)).join('');
-    return `
-        <div class="schedule-section">
-            <h3 class="section-subtitle">${icon} ${titulo}</h3>
-            <p class="section-desc">${desc}</p>
-            <div class="grid">${cards}</div>
-        </div>
-    `;
-}
-
-function createCard(item, idx = 0) {
-    const info = {
-        titulo: item.titulo || item.Nombre || item.NombreActividad || 'Actividad',
-        descripcion: item.descripcionLarga || item.descripcion || '',
-        categoria: item.categoria || item.Categoria || item.Categoría || '',
-        duracion: item.duracion || item.Duracion || item.Duración || '',
-        precio: item.precio || item.Precio || '',
-        hora: item.hora || item.Hora || item.Horario || '',
-        fecha: item.fecha || item.Fecha || item.Dia || item.Día || '',
-        estado: item.estado || item.Estado || ''
-    };
-    
-    return `
-        <div class="card-item" data-info='${escapeHtml(JSON.stringify(info))}' style="animation-delay: ${idx * 0.05}s">
-            <span class="badge ${normalizeStatus(info.estado)}">${info.estado || 'Disponible'}</span>
-            <h3>${info.titulo}</h3>
-            <p>${info.descripcion}</p>
-            <div class="meta">
-                ${info.categoria ? `<span>${info.categoria}</span>` : ''}
-                ${info.duracion ? `<span>${info.duracion}</span>` : ''}
-                ${info.precio ? `<span>$${info.precio}</span>` : ''}
-            </div>
-        </div>
-    `;
-}
-
-// ============================================
-// SERVICIOS
-// ============================================
-async function loadServicios() {
-    const grid = document.getElementById('servicios-grid');
-    const data = await fetchData(API.SERVICIOS, 'chm_servicios');
-    
-    if (!data.length) {
-        grid.innerHTML = createErrorHTML('No hay servicios disponibles', 'servicios');
-        return;
-    }
-    
-    // Guardar datos para filtros
-    serviciosData = [];
-    serviciosCategories = [];
-    
-    data.forEach(item => {
-        const categoria = item.Categoria || item.Categoría || '';
-        if (categoria && !serviciosCategories.includes(categoria)) {
-            serviciosCategories.push(categoria);
-        }
-        
-        serviciosData.push({
-            titulo: item.Nombre || 'Servicio',
-            descripcion: item['Descripcion larga'] || item.DescripcionLarga || item['Descripcion corta'] || item.DescripcionCorta || '',
-            categoria: categoria,
-            duracion: item.Duracion || item.Duración || '',
-            precio: item.Precio || '',
-            estado: item.Estado || ''
-        });
-    });
-    
-    // Generar filtros
-    updateFilterButtons('servicios', serviciosCategories);
-    
-    // Renderizar
-    renderFilteredServicios(serviciosData);
-}
-
-// ============================================
-// CONTACTO
-// ============================================
-async function loadContacto() {
-    const card = document.getElementById('contacto-card');
-    const sloganEl = document.getElementById('slogan');
-    const data = await fetchData(API.CONTACTO, 'chm_contacto');
-    
-    if (!data.length) {
-        card.innerHTML = createErrorHTML('No hay información de contacto', 'contacto');
-        return;
-    }
-    
-    const c = data[0];
-    
-    if (c.Slogan) {
-        sloganEl.textContent = c.Slogan;
-        sloganEl.classList.add('visible');
-    }
-    
-    const tel = c.Telefono || c.Teléfono || '';
-    const wa = (c.WhatsApp || '').replace(/\D/g, '');
-    const email = c.Email || '';
-    const dir = c.Direccion || c.Dirección || '';
-    const hor = c.Horario || c.HorarioAtencion || '';
-    
-    const redes = [];
-    if (c.Instagram) redes.push({ nombre: 'instagram', url: c.Instagram, icono: '📷' });
-    if (c.Facebook) redes.push({ nombre: 'facebook', url: c.Facebook, icono: '📘' });
-    if (c.YouTube || c.Youtube) redes.push({ nombre: 'youtube', url: c.YouTube || c.Youtube, icono: '▶️' });
-    if (c.TikTok) redes.push({ nombre: 'tiktok', url: c.TikTok, icono: '🎵' });
-    
-    const redesHtml = redes.length ? `
-        <div class="social-links">
-            ${redes.map(r => `<a href="${r.url}" target="_blank" class="social-btn" title="${r.nombre}">${r.icono}</a>`).join('')}
-        </div>
-    ` : '';
-    
-    card.innerHTML = `
-        <p><strong>📍 Dirección:</strong> ${dir}</p>
-        <p><strong>📞 Teléfono:</strong> <a href="tel:${tel}">${tel}</a></p>
-        <p><strong>✉️ Email:</strong> <a href="mailto:${email}">${email}</a></p>
-        <p><strong>🕰️ Horario:</strong> ${hor}</p>
-        ${redesHtml}
-        ${wa ? `<a href="https://wa.me/${wa}" target="_blank" class="btn-whatsapp">WhatsApp</a>` : ''}
-    `;
-}
-
-// ============================================
-// UTILIDADES
-// ============================================
-function attachCardListeners(container) {
-    container.querySelectorAll('.card-item').forEach(card => {
-        card.addEventListener('click', () => {
-            const data = JSON.parse(card.dataset.info);
-            showModal(data);
-        });
-    });
-}
-
-function normalizeStatus(s) {
-    if (!s) return 'disponible';
-    s = s.toString().toLowerCase();
-    if (s.includes('no') || s.includes('cerrado') || s.includes('agotado')) return 'nodisponible';
-    if (s.includes('prox') || s.includes('próxim') || s.includes('pronto')) return 'proximamente';
-    return 'disponible';
-}
-
-function escapeHtml(text) {
-    if (!text) return '';
-    return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-}
-
-// ============================================
-// MODAL
-// ============================================
-function showModal(data) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    
-    const estado = normalizeStatus(data.estado);
-    const estadoTexto = estado === 'disponible' ? 'Disponible' : estado === 'nodisponible' ? 'No disponible' : 'Próximamente';
-    
-    let infoHtml = '';
-    if (data.categoria) infoHtml += createInfoRow('Categoría', data.categoria);
-    if (data.duracion) infoHtml += createInfoRow('Duración', data.duracion);
-    if (data.precio) infoHtml += createInfoRow('Precio', '$' + data.precio);
-    if (data.hora) infoHtml += createInfoRow('Hora', data.hora);
-    if (data.fecha) infoHtml += createInfoRow('Fecha', data.fecha);
-    
-    // Generar mensaje para WhatsApp
-    const whatsappMsg = encodeURIComponent(`Hola! Me interesa: ${data.titulo}${data.precio ? ` - $${data.precio}` : ''}${data.duracion ? ` - ${data.duracion}` : ''}`);
-    const shareWhatsApp = data.titulo ? `<a href="https://wa.me/?text=${whatsappMsg}" target="_blank" class="share-btn">💬 Consultar por WhatsApp</a>` : '';
-    
-    modal.innerHTML = `
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <span class="badge ${estado}">${estadoTexto}</span>
-            <h2 class="modal-title">${data.titulo}</h2>
-            ${infoHtml ? `<div class="modal-info">${infoHtml}</div>` : ''}
-            <p class="modal-desc">${data.descripcion || 'Sin descripción disponible.'}</p>
-            ${shareWhatsApp}
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
-    modal.querySelector('.modal-close').addEventListener('click', () => closeModal(modal));
-    document.addEventListener('keydown', function handleEscape(e) {
-        if (e.key === 'Escape') { closeModal(modal); document.removeEventListener('keydown', handleEscape); }
-    });
-    
-    requestAnimationFrame(() => modal.classList.add('active'));
-}
-
-function createInfoRow(label, value) {
-    if (!value) return '';
-    return `<div class="info-row"><span class="info-label">${label}</span><span class="info-value">${value}</span></div>`;
-}
-
-function closeModal(modal) {
-    modal.classList.remove('active');
-    setTimeout(() => modal.remove(), 300);
-}
-
-// ============================================
-// LOADING Y ERRORES
-// ============================================
 function showLoading(show) {
     document.getElementById('loading').style.display = show ? 'flex' : 'none';
 }
 
-function createErrorHTML(message, tabName) {
-    return `
-        <div class="error-container">
-            <p class="error-msg">${message}</p>
-            <p class="error-submsg">Verifica tu conexión a internet</p>
-            <button class="retry-btn" onclick="retryLoad('${tabName}')">Reintentar</button>
+// Cache
+function getCache(key) {
+    try {
+        const c = localStorage.getItem(key);
+        if (!c) return null;
+        const { data, time } = JSON.parse(c);
+        if (Date.now() - time < CACHE_DURATION) return data;
+        localStorage.removeItem(key);
+    } catch(e) {}
+    return null;
+}
+
+function setCache(key, data) {
+    try { localStorage.setItem(key, JSON.stringify({ data, time: Date.now() })); } catch(e) {}
+}
+
+async function fetchAPI(url, cacheKey) {
+    if (cacheKey) {
+        const cached = getCache(cacheKey);
+        if (cached) return cached;
+    }
+    const res = await fetch(url);
+    const data = await res.json();
+    if (cacheKey) setCache(cacheKey, data);
+    return data;
+}
+
+// ======================
+// HORARIOS
+// ======================
+async function loadHorarios() {
+    const container = document.getElementById('horarios-container');
+    const [horarios, agenda] = await Promise.all([
+        fetchAPI(API.HORARIOS, 'ch_horarios'),
+        fetchAPI(API.AGENDA, 'ch_agenda')
+    ]);
+
+    let html = '';
+
+    // Horario Semanal (empezar desde fila 1)
+    if (horarios && horarios.length > 1) {
+        html += '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
+        html += '<div class="cards-grid">';
+        
+        for (let i = 1; i < horarios.length; i++) {
+            const row = horarios[i];
+            if (!row) continue;
+            const hora = Object.values(row)[0];
+            if (!hora) continue;
+            
+            const dias = [];
+            ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'].forEach(dia => {
+                if (row[dia]) dias.push(`${dia.slice(0,3)}: ${row[dia]}`);
+            });
+            
+            if (dias.length > 0) {
+                html += `
+                <div class="card" onclick="showModal('${hora}', '', '${dias.join(' | ')}', '', '', '')">
+                    <h3>${hora}</h3>
+                    <p>${dias.join(' | ')}</p>
+                </div>`;
+            }
+        }
+        html += '</div>';
+    }
+
+    // Actividades (Tipo = Actividad)
+    const actividades = agenda?.filter(r => r.Nombre && r.Tipo === 'Actividad') || [];
+    if (actividades.length) {
+        html += '<h3 class="section-subtitle">🎯 Actividades</h3>';
+        html += '<div class="cards-grid">';
+        actividades.forEach(a => {
+            html += `
+            <div class="card" onclick="showModal('${a.Nombre}', '${a.Categoria||''}', '${a.DescripcionCorta||''}', '${a.DescripcionLarga||a.DescripcionCorta||''}', '${a.Duracion||''}', '${a.Precio||''}', '${a.Estado||''}')">
+                <span class="badge ${(a.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${a.Estado||'Disponible'}</span>
+                <h3>${a.Nombre}</h3>
+                <span class="categoria">${a.Categoria||''}</span>
+                <p>${a.DescripcionCorta||''}</p>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    // Talleres y Eventos
+    const talleres = agenda?.filter(r => r.Nombre && (r.Tipo === 'Taller' || r.Tipo === 'Evento' || r.Fecha)) || [];
+    if (talleres.length) {
+        html += '<h3 class="section-subtitle">📚 Talleres y Eventos</h3>';
+        html += '<div class="cards-grid">';
+        talleres.forEach(t => {
+            html += `
+            <div class="card" onclick="showModal('${t.Nombre}', '${t.Categoria||''}', '${t.DescripcionCorta||''}', '${t.DescripcionLarga||t.DescripcionCorta||''}', '${t.Duracion||''}', '${t.Precio||''}', '${t.Estado||''}', '${t.Fecha||''}', '${t.Hora||''}')">
+                <span class="badge ${(t.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible'}">${t.Estado||'Disponible'}</span>
+                <h3>${t.Nombre}</h3>
+                <span class="categoria">${t.Fecha||''} ${t.Hora||''}</span>
+                <p>${t.DescripcionCorta||''}</p>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    container.innerHTML = html || '<p class="error">No hay horarios disponibles</p>';
+}
+
+// ======================
+// SERVICIOS
+// ======================
+async function loadServicios() {
+    const container = document.getElementById('servicios-container');
+    const data = await fetchAPI(API.SERVICIOS, 'ch_servicios');
+
+    let html = '<div class="cards-grid">';
+    data.forEach(s => {
+        html += `
+        <div class="card" onclick="showModal('${s.Nombre}', '${s.Categoria||''}', '${s['Descripcion corta']||s.DescripcionCorta||''}', '${s['Descripcion larga']||s.DescripcionLarga||s['Descripcion corta']||''}', '${s.Duracion||s.Duración||''}', '${s.Precio||''}', '${s.Estado||''}')">
+            <h3>${s.Nombre}</h3>
+            <span class="categoria">${s.Categoria||s.Categoría||''}</span>
+            <p>${s['Descripcion corta']||s.DescripcionCorta||''}</p>
+        </div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html || '<p class="error">No hay servicios disponibles</p>';
+}
+
+// ======================
+// CONTACTO
+// ======================
+async function loadContacto() {
+    const container = document.getElementById('contacto-container');
+    const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
+    if (!data.length) {
+        container.innerHTML = '<p class="error">No hay información de contacto</p>';
+        return;
+    }
+
+    const c = data[0];
+    const wa = (c.WhatsApp||'').replace(/\D/g,'');
+    
+    let redes = '';
+    if (c.Instagram) redes += `<a href="${c.Instagram}" target="_blank" title="Instagram">📷</a>`;
+    if (c.Facebook) redes += `<a href="${c.Facebook}" target="_blank" title="Facebook">📘</a>`;
+    if (c.YouTube||c.Youtube) redes += `<a href="${c.YouTube||c.Youtube}" target="_blank" title="YouTube">▶️</a>`;
+    if (c.TikTok) redes += `<a href="${c.TikTok}" target="_blank" title="TikTok">🎵</a>`;
+
+    container.innerHTML = `
+        <div class="contacto-card">
+            <h2>Comunícate Conmigo</h2>
+            
+            ${c.Direccion||c.Dirección ? `
+            <div class="info-row">
+                <span class="icon">📍</span>
+                <div class="text"><strong>Dirección</strong><span>${c.Direccion||c.Dirección}</span></div>
+            </div>` : ''}
+            
+            ${c.Telefono||c.Teléfono ? `
+            <div class="info-row">
+                <span class="icon">📞</span>
+                <div class="text"><strong>Teléfono</strong><a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div>
+            </div>` : ''}
+            
+            ${c.Email ? `
+            <div class="info-row">
+                <span class="icon">✉️</span>
+                <div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div>
+            </div>` : ''}
+            
+            ${c.Horario ? `
+            <div class="info-row">
+                <span class="icon">🕰️</span>
+                <div class="text"><strong>Horario</strong><span>${c.Horario}</span></div>
+            </div>` : ''}
+            
+            ${redes ? `<div class="redes-sociales">${redes}</div>` : ''}
+            
+            ${wa ? `<a href="https://wa.me/${wa}" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>` : ''}
         </div>
     `;
 }
 
-function showError(tabName) {
-    const el = document.getElementById(tabName + '-grid') || document.getElementById(tabName + '-card');
-    if (el) el.innerHTML = createErrorHTML('Error al cargar los datos', tabName);
+async function loadSlogan() {
+    const el = document.getElementById('slogan');
+    if (!el) return;
+    if (cachedSlogan) {
+        el.textContent = cachedSlogan;
+        el.classList.add('visible');
+        return;
+    }
+    try {
+        const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
+        if (data[0]?.Slogan) {
+            cachedSlogan = data[0].Slogan;
+            el.textContent = cachedSlogan;
+            el.classList.add('visible');
+        }
+    } catch(e) {}
 }
 
-// Función global para retry
-window.retryLoad = function(tabName) {
-    loadedTabs[tabName] = false;
-    loadTab(tabName);
-};
+// Modal
+function showModal(titulo, categoria, descCorta, descLarga, duracion, precio, estado, fecha, hora) {
+    const m = document.createElement('div');
+    m.className = 'modal-overlay';
+    
+    const desc = descLarga || descCorta || 'Sin descripción';
+    const badgeClass = (estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
+    const waMsg = encodeURIComponent(`Hola! Me interesa: ${titulo}${precio ? ` - $${precio}` : ''}`);
+    
+    m.innerHTML = `
+        <div class="modal-content">
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+            <span class="badge ${badgeClass}">${estado||'Disponible'}</span>
+            <h2 class="modal-title">${titulo}</h2>
+            
+            <div class="modal-info">
+                ${categoria ? `<p><span class="label">Categoría</span><span class="value">${categoria}</span></p>` : ''}
+                ${duracion ? `<p><span class="label">Duración</span><span class="value">${duracion}</span></p>` : ''}
+                ${precio ? `<p><span class="label">Precio</span><span class="value">$${precio}</span></p>` : ''}
+                ${fecha ? `<p><span class="label">Fecha</span><span class="value">${fecha}</span></p>` : ''}
+                ${hora ? `<p><span class="label">Hora</span><span class="value">${hora}</span></p>` : ''}
+            </div>
+            
+            <p class="modal-desc">${desc}</p>
+            
+            <a href="https://wa.me/?text=${waMsg}" target="_blank" class="share-btn">💬 Consultar por WhatsApp</a>
+        </div>
+    `;
+    
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m) m.remove(); });
+    document.addEventListener('keydown', f => { if (f.key === 'Escape') m.remove(); });
+}
+
+function registerSW() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('images/sw.js').catch(console.error);
+    }
+}
