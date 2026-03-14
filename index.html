@@ -34,12 +34,36 @@
         <!-- Horarios -->
         <section id="horarios" class="tab-content active">
             <h2 class="section-title">Horario Semanal</h2>
+            
+            <!-- Buscador y Filtros -->
+            <div class="search-filter">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Buscar actividad..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="filter-buttons" id="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">Todos</button>
+                </div>
+            </div>
+            
             <div id="horarios-grid" class="grid"></div>
         </section>
 
         <!-- Servicios -->
         <section id="servicios" class="tab-content">
             <h2 class="section-title">Nuestros Servicios</h2>
+            
+            <!-- Buscador y Filtros -->
+            <div class="search-filter">
+                <div class="search-box">
+                    <input type="text" id="search-input-servicios" placeholder="Buscar servicio..." class="search-input">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="filter-buttons" id="filter-buttons-servicios">
+                    <button class="filter-btn active" data-filter="all">Todos</button>
+                </div>
+            </div>
+            
             <div id="servicios-grid" class="grid"></div>
         </section>
 

@@ -10,13 +10,171 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 segundo
 
 let loadedTabs = { horarios: false, servicios: false, contacto: false };
+let horariosData = [];
+let serviciosData = [];
+
+// Datos para filtros
+let horariosCategories = [];
+let serviciosCategories = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     initNavigation();
+    initSearchAndFilters();
     loadTab('horarios');
     registerSW();
 });
+
+// ============================================
+// BUSCADOR Y FILTROS
+// ============================================
+function initSearchAndFilters() {
+    // Buscador de Horarios
+    const searchHorarios = document.getElementById('search-input');
+    if (searchHorarios) {
+        searchHorarios.addEventListener('input', (e) => filterHorarios(e.target.value));
+    }
+    
+    // Buscador de Servicios
+    const searchServicios = document.getElementById('search-input-servicios');
+    if (searchServicios) {
+        searchServicios.addEventListener('input', (e) => filterServicios(e.target.value));
+    }
+}
+
+function filterHorarios(searchTerm = '', category = 'all') {
+    const container = document.getElementById('horarios-grid');
+    if (!container) return;
+    
+    const term = searchTerm.toLowerCase();
+    
+    // Recargar desde datos originales
+    if (horariosData.length === 0) return;
+    
+    let filtered = horariosData;
+    
+    // Filtrar por búsqueda
+    if (term) {
+        filtered = filtered.filter(item => 
+            (item.titulo && item.titulo.toLowerCase().includes(term)) ||
+            (item.descripcion && item.descripcion.toLowerCase().includes(term)) ||
+            (item.categoria && item.categoria.toLowerCase().includes(term))
+        );
+    }
+    
+    // Filtrar por categoría
+    if (category && category !== 'all') {
+        filtered = filtered.filter(item => 
+            item.categoria && item.categoria.toLowerCase() === category.toLowerCase()
+        );
+    }
+    
+    // Renderizar
+    renderFilteredHorarios(filtered);
+}
+
+function filterServicios(searchTerm = '', category = 'all') {
+    const container = document.getElementById('servicios-grid');
+    if (!container) return;
+    
+    const term = searchTerm.toLowerCase();
+    
+    if (serviciosData.length === 0) return;
+    
+    let filtered = serviciosData;
+    
+    if (term) {
+        filtered = filtered.filter(item => 
+            (item.titulo && item.titulo.toLowerCase().includes(term)) ||
+            (item.descripcion && item.descripcion.toLowerCase().includes(term)) ||
+            (item.categoria && item.categoria.toLowerCase().includes(term))
+        );
+    }
+    
+    if (category && category !== 'all') {
+        filtered = filtered.filter(item => 
+            item.categoria && item.categoria.toLowerCase() === category.toLowerCase()
+        );
+    }
+    
+    renderFilteredServicios(filtered);
+}
+
+function renderFilteredHorarios(data) {
+    const container = document.getElementById('horarios-grid');
+    if (!container) return;
+    
+    if (!data.length) {
+        container.innerHTML = '<p class="error-msg" style="text-align:center;grid-column:1/-1;">No se encontraron resultados</p>';
+        return;
+    }
+    
+    // Agrupar por sección
+    const sections = {
+        semanal: data.filter(d => d.seccion === 'semanal'),
+        actividades: data.filter(d => d.seccion === 'actividades'),
+        talleres: data.filter(d => d.seccion === 'talleres')
+    };
+    
+    let html = '';
+    
+    if (sections.semanal.length) {
+        html += createSection('semanal', '📅', 'Horario Semanal', 'Clases disponibles cada día', sections.semanal);
+    }
+    if (sections.actividades.length) {
+        html += createSection('actividades', '🎯', 'Nuestras Actividades', 'Clases y prácticas del centro', sections.actividades);
+    }
+    if (sections.talleres.length) {
+        html += createSection('talleres', '📚', 'Talleres y Eventos', 'Eventos especiales y talleres', sections.talleres);
+    }
+    
+    container.innerHTML = html;
+    attachCardListeners(container);
+}
+
+function renderFilteredServicios(data) {
+    const container = document.getElementById('servicios-grid');
+    if (!container) return;
+    
+    if (!data.length) {
+        container.innerHTML = '<p class="error-msg" style="text-align:center;grid-column:1/-1;">No se encontraron resultados</p>';
+        return;
+    }
+    
+    const html = data.map((item, idx) => createCard(item, idx)).join('');
+    container.innerHTML = html;
+    attachCardListeners(container);
+}
+
+function updateFilterButtons(type, categories) {
+    const container = document.getElementById(`filter-buttons-${type}`);
+    if (!container || !categories.length) return;
+    
+    let html = '<button class="filter-btn active" data-filter="all">Todos</button>';
+    
+    categories.forEach(cat => {
+        html += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`;
+    });
+    
+    container.innerHTML = html;
+    
+    // Agregar eventos
+    container.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const searchInput = document.getElementById(type === 'horarios' ? 'search-input' : 'search-input-servicios');
+            const searchTerm = searchInput ? searchInput.value : '';
+            
+            if (type === 'horarios') {
+                filterHorarios(searchTerm, btn.dataset.filter);
+            } else {
+                filterServicios(searchTerm, btn.dataset.filter);
+            }
+        });
+    });
+}
 
 // ============================================
 // PARTÍCULAS DE FONDO
@@ -212,19 +370,23 @@ async function loadHorarios() {
     const keys = Object.keys(data[0] || {});
     const hasMatrix = keys.some(k => DAYS.some(d => k.toLowerCase() === d.toLowerCase()));
     
-    let html = '';
+    horariosData = [];
+    horariosCategories = [];
     
+    // Procesar datos y guardarlos
     // TABLA 1: HORARIO SEMANAL
     if (hasMatrix) {
         const rows = data.filter(row => row.Hora || row.Horario);
-        if (rows.length) {
-            html += createSection('semanal', '📅', 'Horario Semanal', 'Clases disponibles cada día', rows.map(row => ({
+        rows.forEach(row => {
+            const item = {
+                seccion: 'semanal',
                 titulo: row.Hora || row.Horario,
                 descripcion: DAYS.map(d => row[d] || '-').join(' | '),
                 hora: row.Hora || row.Horario,
                 dias: DAYS.map(d => ({ dia: d, actividad: row[d] || '' })).filter(d => d.actividad !== '-')
-            })).filter(r => r.titulo));
-        }
+            };
+            horariosData.push(item);
+        });
     }
     
     // TABLA 2: ACTIVIDADES
@@ -232,24 +394,30 @@ async function loadHorarios() {
         (row.Nombre || row.NombreActividad) && 
         (row.Categoria || row.Categoría || row['Descripcion corta'] || row.DescripcionCorta)
     );
-    if (actividadesRows.length) {
-        html += createSection('actividades', '🎯', 'Nuestras Actividades', 'Clases y prácticas del centro', actividadesRows.map(row => ({
+    actividadesRows.forEach(row => {
+        const categoria = row.Categoria || row.Categoría || '';
+        if (categoria && !horariosCategories.includes(categoria)) {
+            horariosCategories.push(categoria);
+        }
+        horariosData.push({
+            seccion: 'actividades',
             titulo: row.Nombre || row.NombreActividad || 'Actividad',
             descripcion: row['Descripcion corta'] || row.DescripcionCorta || '',
             descripcionLarga: row['Descripcion larga'] || row.DescripcionLarga || row['Descripcion corta'] || row.DescripcionCorta || '',
-            categoria: row.Categoria || row.Categoría || '',
+            categoria: categoria,
             duracion: row.Duracion || row.Duración || '',
             precio: row.Precio || '',
             estado: row.Estado || ''
-        })));
-    }
+        });
+    });
     
     // TABLA 3: TALLERES
     const talleresRows = data.filter(row => 
         row.Taller || row.Evento || row.Nombre?.toLowerCase().includes('taller') || row.Nombre?.toLowerCase().includes('evento')
     );
-    if (talleresRows.length) {
-        html += createSection('talleres', '📚', 'Talleres y Eventos', 'Eventos especiales y talleres', talleresRows.map(row => ({
+    talleresRows.forEach(row => {
+        horariosData.push({
+            seccion: 'talleres',
             titulo: row.Nombre || row.Taller || row.Evento || 'Taller',
             descripcion: row['Descripcion corta'] || row.DescripcionCorta || '',
             descripcionLarga: row['Descripcion larga'] || row.DescripcionLarga || '',
@@ -257,15 +425,14 @@ async function loadHorarios() {
             hora: row.Hora || row.Horario || '',
             precio: row.Precio || '',
             estado: row.Estado || ''
-        })));
-    }
+        });
+    });
     
-    if (!html) {
-        html = createErrorHTML('No se pudieron cargar los horarios', 'horarios');
-    }
+    // Generar filtros
+    updateFilterButtons('horarios', horariosCategories);
     
-    container.innerHTML = html;
-    attachCardListeners(container);
+    // Renderizar
+    renderFilteredHorarios(horariosData);
 }
 
 function createSection(id, icon, titulo, desc, items) {
@@ -318,31 +485,31 @@ async function loadServicios() {
         return;
     }
     
-    const html = data.map((item, idx) => {
-        const info = {
+    // Guardar datos para filtros
+    serviciosData = [];
+    serviciosCategories = [];
+    
+    data.forEach(item => {
+        const categoria = item.Categoria || item.Categoría || '';
+        if (categoria && !serviciosCategories.includes(categoria)) {
+            serviciosCategories.push(categoria);
+        }
+        
+        serviciosData.push({
             titulo: item.Nombre || 'Servicio',
             descripcion: item['Descripcion larga'] || item.DescripcionLarga || item['Descripcion corta'] || item.DescripcionCorta || '',
-            categoria: item.Categoria || item.Categoría || '',
+            categoria: categoria,
             duracion: item.Duracion || item.Duración || '',
             precio: item.Precio || '',
             estado: item.Estado || ''
-        };
-        
-        return `
-            <div class="card-item" data-info='${escapeHtml(JSON.stringify(info))}' style="animation-delay: ${idx * 0.05}s">
-                <span class="badge ${normalizeStatus(info.estado)}">${info.estado || 'Disponible'}</span>
-                <h3>${info.titulo}</h3>
-                <p>${item['Descripcion corta'] || item.DescripcionCorta || ''}</p>
-                <div class="meta">
-                    <span>${info.duracion}</span>
-                    <span>${info.precio ? '$' + info.precio : ''}</span>
-                </div>
-            </div>
-        `;
-    }).join('');
+        });
+    });
     
-    grid.innerHTML = html;
-    attachCardListeners(grid);
+    // Generar filtros
+    updateFilterButtons('servicios', serviciosCategories);
+    
+    // Renderizar
+    renderFilteredServicios(serviciosData);
 }
 
 // ============================================
@@ -435,6 +602,10 @@ function showModal(data) {
     if (data.hora) infoHtml += createInfoRow('Hora', data.hora);
     if (data.fecha) infoHtml += createInfoRow('Fecha', data.fecha);
     
+    // Generar mensaje para WhatsApp
+    const whatsappMsg = encodeURIComponent(`Hola! Me interesa: ${data.titulo}${data.precio ? ` - $${data.precio}` : ''}${data.duracion ? ` - ${data.duracion}` : ''}`);
+    const shareWhatsApp = data.titulo ? `<a href="https://wa.me/?text=${whatsappMsg}" target="_blank" class="share-btn">💬 Consultar por WhatsApp</a>` : '';
+    
     modal.innerHTML = `
         <div class="modal-content">
             <button class="modal-close">&times;</button>
@@ -442,6 +613,7 @@ function showModal(data) {
             <h2 class="modal-title">${data.titulo}</h2>
             ${infoHtml ? `<div class="modal-info">${infoHtml}</div>` : ''}
             <p class="modal-desc">${data.descripcion || 'Sin descripción disponible.'}</p>
+            ${shareWhatsApp}
         </div>
     `;
     

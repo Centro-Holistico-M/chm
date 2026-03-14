@@ -221,6 +221,101 @@ body {
     font-size: 1.3rem;
 }
 
+/* ============================================
+   BUSCADOR Y FILTROS
+   ============================================ */
+.search-filter {
+    margin-bottom: 24px;
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 14px 20px 14px 45px;
+    background: var(--bg-card);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    opacity: 0.6;
+}
+
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.filter-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.filter-btn.active {
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
+    font-weight: 600;
+}
+
+/* ============================================
+   BOTÓN COMPARTIR
+   ============================================ */
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: var(--gold);
+    font-size: 0.85rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 16px;
+}
+
+.share-btn:hover {
+    background: var(--gold);
+    color: var(--bg);
+}
+
 .section-subtitle {
     font-family: 'Cinzel', serif;
     color: var(--gold-light);
