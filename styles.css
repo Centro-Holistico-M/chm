@@ -78,12 +78,15 @@ body {
 
 .slogan {
     font-family: 'Montserrat', sans-serif; color: var(--gold);
-    font-size: 1.1rem; margin-top: 8px; font-weight: 300;
+    font-size: 0.85rem; margin-top: 8px; font-weight: 300;
     opacity: 0; transition: opacity 0.5s;
-    max-width: 90%;
+    max-width: 95%;
     text-align: center;
     margin-left: auto;
     margin-right: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .slogan.visible { 
     opacity: 1; 
