@@ -66,20 +66,35 @@ body {
     position: fixed; top: 0; left: 0; right: 0;
     background: rgba(10,10,10,0.98);
     backdrop-filter: blur(10px);
-    padding: calc(8px + var(--safe-area-inset-top)) 20px 12px;
-    padding-left: calc(16px + var(--safe-area-inset-left));
-    padding-right: calc(16px + var(--safe-area-inset-right));
+    padding: calc(6px + var(--safe-area-inset-top)) 16px 8px;
+    padding-left: calc(12px + var(--safe-area-inset-left));
+    padding-right: calc(12px + var(--safe-area-inset-right));
     text-align: center;
     z-index: 100;
     border-bottom: 1px solid rgba(212,175,55,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
 }
 
-.logo { width: 44px; height: 44px; border-radius: 0; border: 1px solid var(--gold); box-shadow: 0 0 15px rgba(212,175,55,0.4); }
+.logo { 
+    width: 40px; height: 40px; 
+    border-radius: 4px; 
+    border: 1px solid var(--gold); 
+    box-shadow: 0 0 12px rgba(212,175,55,0.4);
+    animation: logoEntry 0.6s ease-out;
+}
+
+@keyframes logoEntry {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
 
 .slogan {
     font-family: 'Montserrat', sans-serif; color: var(--gold);
-    font-size: 0.8rem; margin-top: 8px; font-weight: 600;
-    opacity: 0; transition: opacity 0.5s;
+    font-size: 0.8rem; margin-top: 4px; font-weight: 600;
+    opacity: 0;
     max-width: 100%;
     text-align: center;
     margin-left: auto;
@@ -96,7 +111,13 @@ body {
 }
 .slogan.visible { 
     opacity: 1; 
-    animation: sloganPulse 3s ease-in-out infinite;
+    animation: sloganEntry 0.5s ease-out, sloganPulse 3s ease-in-out 0.5s infinite;
+}
+
+@keyframes sloganEntry {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 }
 
 @keyframes sloganPulse {
@@ -106,12 +127,12 @@ body {
 
 /* Nav */
 .nav {
-    position: fixed; top: 110px; left: 0; right: 0;
+    position: fixed; top: 85px; left: 0; right: 0;
     display: flex; justify-content: center; gap: 8px;
-    padding: 10px 16px;
-    padding-left: calc(16px + var(--safe-area-inset-left));
-    padding-right: calc(16px + var(--safe-area-inset-right));
-    padding-bottom: calc(10px + var(--safe-area-inset-bottom));
+    padding: 8px 16px;
+    padding-left: calc(12px + var(--safe-area-inset-left));
+    padding-right: calc(12px + var(--safe-area-inset-right));
+    padding-bottom: calc(8px + var(--safe-area-inset-bottom));
     background: rgba(10,10,10,0.95); z-index: 99;
     border-bottom: 1px solid rgba(212,175,55,0.1);
 }
