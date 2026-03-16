@@ -76,6 +76,7 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 4px;
+    animation: headerFadeIn 0.6s ease-out both;
 }
 
 .logo { 
@@ -83,12 +84,17 @@ body {
     border-radius: 4px; 
     border: 1px solid var(--gold); 
     box-shadow: 0 0 12px rgba(212,175,55,0.4);
-    animation: logoEntry 0.6s ease-out;
+    animation: logoEntry 0.7s ease-out 0.2s both;
 }
 
 @keyframes logoEntry {
-    from { opacity: 0; transform: scale(0.8); }
-    to { opacity: 1; transform: scale(1); }
+    from { opacity: 0; transform: scale(0.5) rotate(-15deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes headerFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .slogan {
@@ -102,6 +108,7 @@ body {
     white-space: nowrap;
     overflow: visible;
     padding: 0 10px;
+    animation: sloganEntry 0.5s ease-out 0.5s both;
 }
 
 @media (min-width: 400px) {
@@ -111,13 +118,12 @@ body {
 }
 .slogan.visible { 
     opacity: 1; 
-    animation: sloganEntry 0.5s ease-out, sloganPulse 3s ease-in-out 0.5s infinite;
+    animation: sloganPulse 3s ease-in-out 1s infinite;
 }
 
 @keyframes sloganEntry {
-    from { opacity: 0; transform: translateY(-10px); }
+    from { opacity: 0; transform: translateY(-15px); }
     to { opacity: 1; transform: translateY(0); }
-}
 }
 
 @keyframes sloganPulse {
@@ -135,6 +141,12 @@ body {
     padding-bottom: calc(8px + var(--safe-area-inset-bottom));
     background: rgba(10,10,10,0.95); z-index: 99;
     border-bottom: 1px solid rgba(212,175,55,0.1);
+    animation: navEntry 0.5s ease-out 0.8s both;
+}
+
+@keyframes navEntry {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .nav-btn {
@@ -149,11 +161,32 @@ body {
 .nav-btn:active { transform: scale(0.95); }
 
 /* Content */
-.content { margin-top: 190px; padding: 20px 16px; }
+.content { margin-top: 130px; padding: 20px 16px; }
 
-.tab-content { display: none; animation: fadeIn 0.4s; }
+.tab-content { display: none; animation: contentEntry 0.6s ease-out 1s both; }
 .tab-content.active { display: block; }
+
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes contentEntry {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Partículas especiales de entrada */
+.special-particle {
+    position: absolute;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 15px var(--gold), 0 0 30px rgba(212,175,55,0.5);
+    pointer-events: none;
+}
+
+@keyframes specialFloat {
+    0% { opacity: 0; transform: translateY(100vh) scale(0); }
+    15% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-150px) scale(1.5); }
+}
 
 /* Section Title */
 .section-title {

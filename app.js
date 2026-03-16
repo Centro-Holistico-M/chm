@@ -30,10 +30,31 @@ async function loadWhatsApp() {
 function initParticles() {
     const container = document.getElementById('particles');
     if (!container) return;
+    
+    // Partículas especiales de entrada
+    for (let i = 0; i < 8; i++) {
+        setTimeout(() => createSpecialParticle(container), 200 + i * 150);
+    }
+    
+    // Partículas normales
     for (let i = 0; i < 15; i++) {
-        setTimeout(() => createParticle(container), i * 300);
+        setTimeout(() => createParticle(container), 2500 + i * 300);
     }
     setInterval(() => createParticle(container), 800);
+}
+
+function createSpecialParticle(container) {
+    const p = document.createElement('div');
+    p.className = 'special-particle';
+    const size = Math.random() * 6 + 4;
+    p.style.cssText = `
+        left:${Math.random() * 100}vw;
+        animation:specialFloat 2.5s ease-out forwards;
+        width:${size}px;
+        height:${size}px;
+    `;
+    container.appendChild(p);
+    setTimeout(() => p.remove(), 2500);
 }
 
 function createParticle(container) {
