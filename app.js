@@ -135,9 +135,10 @@ function cambiarDia(dia) {
         const descLarga = a.DescripcionLarga || a.DescripcionCorta || '';
         const descCorta = a.DescripcionCorta || '';
         const colorClass = getColorCategoria(a.Categoria);
+        const icono = getIconoCategoria(a.Categoria);
         const infoExtra = a.Cupo ? `<span class="cupo">Cupo: ${a.Cupo}</span>` : '';
         html += `<div class="timeline-card" data-titulo="${a.Nombre}" data-categoria="${a.Categoria||''}" data-desc="${descLarga}" data-duracion="${a.Duracion||''}" data-estado="${a.Estado||''}" data-hora="${a.Hora||''}" data-cupo="${a.Cupo||''}">
-            <div class="timeline-hora">${a.Hora||''}</div>
+            <div class="timeline-hora"><span class="hora-icono">${icono}</span>${a.Hora||''}</div>
             <div class="timeline-content">
                 <span class="categoria-tag ${colorClass}">${a.Categoria||'Actividad'}</span>
                 <h3>${a.Nombre}</h3>
@@ -172,6 +173,19 @@ function getColorCategoria(cat) {
     if (c.includes('ritual')) return 'ritual';
     if (c.includes('terapia')) return 'terapia';
     return '';
+}
+
+function getIconoCategoria(cat) {
+    const c = (cat||'').toLowerCase();
+    if (c.includes('yoga')) return '🧘';
+    if (c.includes('marcial') || c.includes('taekwondo')) return '🥋';
+    if (c.includes('movimiento') || c.includes('danza')) return '💃';
+    if (c.includes('ritual')) return '✨';
+    if (c.includes('terapia') || c.includes('ayurveda')) return '🌿';
+    if (c.includes('crecimiento') || c.includes('lectura')) return '📚';
+    if (c.includes('expresión') || c.includes('teatro')) return '🎭';
+    if (c.includes('bienestar')) return '💫';
+    return '🌀';
 }
 
 async function loadHorarios() {
