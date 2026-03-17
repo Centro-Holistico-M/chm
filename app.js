@@ -368,7 +368,6 @@ function showModal(datos, waNumero) {
             ${infoHtml ? `<div class="modal-info">${infoHtml}</div>` : ''}
             <p class="modal-desc">${datos.descripcion || 'Sin descripción disponible.'}</p>
             <div class="modal-buttons">
-                <a href="#contacto" class="share-btn btn-contacto">📞 Ir a Contacto</a>
                 <a href="${waNumero ? 'https://wa.me/' + waNumero + '?text=' + waMsg : '#'}" target="_blank" class="share-btn wa-btn">💬 WhatsApp</a>
             </div>
         </div>
@@ -377,14 +376,6 @@ function showModal(datos, waNumero) {
     document.body.appendChild(m);
     
     m.querySelector('.modal-close').addEventListener('click', () => m.remove());
-    m.querySelector('.btn-contacto').addEventListener('click', () => {
-        m.remove();
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelector('[data-tab="contacto"]').classList.add('active');
-        document.getElementById('contacto').classList.add('active');
-        loadTab('contacto');
-    });
     m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') m.remove(); });
 }
@@ -453,26 +444,72 @@ async function loadContacto() {
     const wa = cachedWhatsApp;
     
     let redes = '';
-    if (c.Instagram) redes += `<a href="${c.Instagram}" target="_blank" title="Instagram">📷</a>`;
-    if (c.Facebook) redes += `<a href="${c.Facebook}" target="_blank" title="Facebook">📘</a>`;
-    if (c.YouTube||c.Youtube) redes += `<a href="${c.YouTube||c.Youtube}" target="_blank" title="YouTube">▶️</a>`;
-    if (c.TikTok) redes += `<a href="${c.TikTok}" target="_blank" title="TikTok">🎵</a>`;
+    if (c.Instagram) redes += `<a href="${c.Instagram}" target="_blank" title="Instagram"><div class="icono-red"><i data-lucide="instagram"></i></div><span class="nombre-red">Instagram</span></a>`;
+    if (c.Facebook) redes += `<a href="${c.Facebook}" target="_blank" title="Facebook"><div class="icono-red"><i data-lucide="facebook"></i></div><span class="nombre-red">Facebook</span></a>`;
+    if (c.YouTube || c.Youtube) redes += `<a href="${c.YouTube || c.Youtube}" target="_blank" title="YouTube"><div class="icono-red"><i data-lucide="youtube"></i></div><span class="nombre-red">YouTube</span></a>`;
+    if (wa) redes += `<a href="https://wa.me/${wa}" target="_blank" title="WhatsApp"><div class="icono-red"><i data-lucide="message-circle"></i></div><span class="nombre-red">WhatsApp</span></a>`;
 
     container.innerHTML = `
         <div class="contacto-card">
-            <h2>Comunícate Conmigo</h2>
+            <div class="contacto-icono-grande">🧘</div>
+            <h2>Centro Holístico M</h2>
             
-            ${c.Ciudad || c.Estado || (c.Direccion||c.Dirección) ? `<div class="info-row"><span class="icon">📍</span><div class="text">${c.Direccion||c.Dirección ? `<strong>Dirección:</strong> ${c.Direccion||c.Dirección}` : ''}${c.Ciudad ? `<br><strong>Ciudad:</strong> ${c.Ciudad}` : ''}${c.Estado ? `<br><strong>Estado:</strong> ${c.Estado}` : ''}</div></div>` : ''}
-            ${c.GoogleMaps ? `<a href="${c.GoogleMaps}" target="_blank" class="mapa-btn">🗺️ Ver ubicación en mapa</a>` : ''}
-            ${c.Telefono||c.Teléfono ? `<div class="info-row"><span class="icon">📞</span><div class="text"><strong>Teléfono:</strong> <a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a></div></div>` : ''}
-            ${c.Email ? `<div class="info-row"><span class="icon">✉️</span><div class="text"><strong>Email</strong><a href="mailto:${c.Email}">${c.Email}</a></div></div>` : ''}
-            ${c.Horario ? `<div class="info-row"><span class="icon">🕰️</span><div class="text"><strong>Horario</strong><span>${c.Horario}</span></div></div>` : ''}
+            <div class="contacto-grid">
+                ${(c.Direccion||c.Dirección) ? `<div class="contacto-item">
+                    <div class="icono">📍</div>
+                    <div class="detalle">
+                        <strong>Dirección</strong>
+                        <span>${c.Direccion||c.Dirección}</span>
+                    </div>
+                </div>` : ''}
+                
+                ${(c.Ciudad || c.Estado) ? `<div class="contacto-item">
+                    <div class="icono">🏙️</div>
+                    <div class="detalle">
+                        <strong>Ubicación</strong>
+                        <span>${[c.Ciudad, c.Estado].filter(Boolean).join(', ')}</span>
+                    </div>
+                </div>` : ''}
+                
+                ${c.Telefono||c.Teléfono ? `<div class="contacto-item">
+                    <div class="icono">📞</div>
+                    <div class="detalle">
+                        <strong>Teléfono</strong>
+                        <a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a>
+                    </div>
+                </div>` : ''}
+                
+                ${c.Email ? `<div class="contacto-item">
+                    <div class="icono">✉️</div>
+                    <div class="detalle">
+                        <strong>Email</strong>
+                        <a href="mailto:${c.Email}">${c.Email}</a>
+                    </div>
+                </div>` : ''}
+                
+                ${c.Horario ? `<div class="contacto-item">
+                    <div class="icono">🕰️</div>
+                    <div class="detalle">
+                        <strong>Horario</strong>
+                        <span>${c.Horario}</span>
+                    </div>
+                </div>` : ''}
+            </div>
             
-            ${redes ? `<div class="redes-sociales">${redes}</div>` : ''}
+            ${c.GoogleMaps ? `<a href="${c.GoogleMaps}" target="_blank" class="contacto-mapa-btn">
+                🗺️ Ver ubicación en mapa
+            </a>` : ''}
             
-            ${wa ? `<a href="https://wa.me/${wa}" target="_blank" class="btn-whatsapp">💬 WhatsApp</a>` : ''}
+            ${redes ? `<p class="contacto-titulo-sección">Síguenos</p>
+            <div class="redes-sociales">${redes}</div>` : ''}
         </div>
     `;
+    
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+        setTimeout(() => {
+            lucide.createIcons({ root: container });
+        }, 100);
+    }
 }
 
 async function loadSlogan() {
