@@ -444,7 +444,7 @@ body {
     letter-spacing: 2px;
 }
 
-/* Redes - Lucide Icons */
+/* Redes - SVGs inline */
 .redes-sociales {
     display: flex; justify-content: center; gap: 24px;
     margin: 24px 0; padding: 20px 0;
@@ -456,27 +456,32 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-.redes-sociales a {
+.redes-sociales .social-link {
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     text-decoration: none;
     transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.redes-sociales .icono-red {
-    width: 52px; height: 52px;
+.redes-sociales .social-icon {
+    width: 48px; height: 48px;
     display: flex; align-items: center; justify-content: center;
     background: transparent;
     border: 1.5px solid rgba(212,175,55,0.35);
     border-radius: 50%;
     color: var(--gold);
-    position: relative;
+    padding: 12px;
     transition: all 0.35s;
 }
 
-.redes-sociales .icono-red svg {
-    width: 22px; height: 22px;
-    stroke-width: 1.5;
-    transition: all 0.35s;
+.redes-sociales .social-link:hover .social-icon { 
+    border-color: var(--gold);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(212,175,55,0.35), 0 0 40px rgba(212,175,55,0.15);
+    background: rgba(212,175,55,0.08);
+}
+
+.redes-sociales .social-link:hover .social-icon {
+    filter: drop-shadow(0 0 6px rgba(212,175,55,0.8));
 }
 
 .redes-sociales .nombre-red {
@@ -488,18 +493,7 @@ body {
     opacity: 0.6;
 }
 
-.redes-sociales a:hover .icono-red { 
-    border-color: var(--gold);
-    transform: scale(1.1);
-    box-shadow: 0 0 20px rgba(212,175,55,0.35), 0 0 40px rgba(212,175,55,0.15);
-    background: rgba(212,175,55,0.08);
-}
-
-.redes-sociales a:hover .icono-red svg {
-    filter: drop-shadow(0 0 6px rgba(212,175,55,0.8));
-}
-
-.redes-sociales a:hover .nombre-red {
+.redes-sociales .social-link:hover .nombre-red {
     color: var(--gold);
     opacity: 1;
 }
@@ -507,20 +501,21 @@ body {
 /* Responsive móvil */
 @media (max-width: 480px) {
     .redes-sociales {
-        gap: 16px;
+        gap: 12px;
         padding: 16px 8px;
     }
     
-    .redes-sociales .icono-red {
-        width: 44px; height: 44px;
+    .redes-sociales .social-icon {
+        width: 40px; height: 40px;
+        padding: 10px;
     }
     
-    .redes-sociales .icono-red svg {
-        width: 18px; height: 18px;
+    .redes-sociales .social-icon svg {
+        width: 16px; height: 16px;
     }
     
     .redes-sociales .nombre-red {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
     }
 }
 
