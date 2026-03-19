@@ -548,11 +548,33 @@ let cachedDescodificacion = [];
 async function loadDescodificacion() {
     const container = document.getElementById('descodificacion-container');
     
-    if (cachedDescodificacion.length === 0) {
-        cachedDescodificacion = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
+    try {
+        if (cachedDescodificacion.length === 0) {
+            cachedDescodificacion = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
+        }
+        
+        if (cachedDescodificacion.length === 0) {
+            container.innerHTML = `
+                <div class="desc-empty">
+                    <div class="empty-icon">📋</div>
+                    <p>No hay datos disponibles</p>
+                    <p style="font-size:0.8rem;margin-top:8px;">Verifica que la hoja 'Descodificacion' tenga datos</p>
+                </div>
+            `;
+            return;
+        }
+        
+        renderNivel1(container);
+    } catch (e) {
+        console.error('Error cargando descodificación:', e);
+        container.innerHTML = `
+            <div class="desc-empty">
+                <div class="empty-icon">❌</div>
+                <p>Error al cargar datos</p>
+                <p style="font-size:0.8rem;margin-top:8px;">Verifica el nombre de la hoja: 'Descodificacion'</p>
+            </div>
+        `;
     }
-    
-    renderNivel1(container);
 }
 
 function renderNivel1(container) {
