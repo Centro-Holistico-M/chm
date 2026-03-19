@@ -1,5 +1,5 @@
-const CACHE_NAME = 'chm-v8';
-const API_CACHE_NAME = 'chm-api-v8';
+const CACHE_NAME = 'chm-v9';
+const API_CACHE_NAME = 'chm-api-v9';
 
 const ASSETS = [
     '/',
@@ -53,15 +53,15 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
     const url = event.request.url;
     
-    // APIs: Network-first con cache fallback
-    if (url.includes('opensheet.elk.sh')) {
-        event.respondWith(networkFirstAPI(url));
-        return;
-    }
-    
     // Fuentes de Google: Cache-first
     if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com')) {
         event.respondWith(cacheFirst(url));
+        return;
+    }
+    
+    // APIs: Cache-first con datos guardados
+    if (url.includes('opensheet.elk.sh')) {
+        event.respondWith(apiCacheFirst(url));
         return;
     }
     
@@ -70,9 +70,17 @@ self.addEventListener('fetch', event => {
 });
 
 // ============================================
-// ESTRATEGIA: Network-first para APIs
+// ESTRATEGIA: Cache-first para APIs
 // ============================================
-async function networkFirstAPI(url) {
+async function apiCacheFirst(url) {
+    // 1. Buscar en cache primero
+    const cached = await caches.match(url);
+    if (cached) {
+        console.log('📦 API desde cache:', url.substring(url.lastIndexOf('/') + 1));
+        return cached;
+    }
+    
+    // 2. Si no está en cache, intentar red
     try {
         const response = await fetch(url);
         
@@ -80,18 +88,12 @@ async function networkFirstAPI(url) {
             const clone = response.clone();
             const cache = await caches.open(API_CACHE_NAME);
             cache.put(url, clone);
-            console.log('✅ API online:', url.substring(url.lastIndexOf('/') + 1));
+            console.log('✅ API guardada:', url.substring(url.lastIndexOf('/') + 1));
         }
         
         return response;
     } catch (error) {
-        console.log('⚠️ Sin conexión, buscando en cache:', url.substring(url.lastIndexOf('/') + 1));
-        
-        const cached = await caches.match(url);
-        if (cached) {
-            return cached;
-        }
-        
+        console.log('❌ Sin conexión ni cache para:', url);
         return new Response(JSON.stringify({ error: 'offline' }), {
             status: 503,
             headers: { 'Content-Type': 'application/json' }
