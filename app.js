@@ -558,11 +558,13 @@ async function loadSlogan() {
 let cachedDescodificacion = [];
 
 function parseDescId(id) {
-    const parts = (id || '').split('-');
+    const str = (id || '').trim().toLowerCase();
+    const parts = str.split('-').filter(p => p.length > 0);
+    
     return {
-        nivel1: parts[0] || '',
-        nivel2: parts[1] || '',
-        nivel3: parts[2] || ''
+        nivel1: parts[0] ? capitalize(parts[0]) : '',
+        nivel2: parts[1] ? capitalize(parts[1]) : '',
+        nivel3: parts[2] ? capitalize(parts[2]) : (parts[1] ? capitalize(parts[1]) : '')
     };
 }
 
@@ -604,24 +606,24 @@ async function loadDescodificacion() {
 }
 
 function getNiveles(item) {
-    const parsed = parseDescId(item.id);
-    return {
-        nivel1: capitalize(parsed.nivel1),
-        nivel2: capitalize(parsed.nivel2),
-        nivel3: capitalize(parsed.nivel3)
-    };
+    return parseDescId(item.id);
 }
 
 function renderNivel1(container) {
     const data = cachedDescodificacion;
     
+    console.log('Datos cargados:', data.length);
+    console.log('Primer item:', data[0]);
+    
     // Obtener zonas únicas de nivel 1 usando el ID
     const zonasSet = new Set();
     data.forEach(item => {
         const niveles = getNiveles(item);
+        console.log('Parsed:', item.id, '->', niveles);
         if (niveles.nivel1) zonasSet.add(niveles.nivel1);
     });
     const zonasNivel1 = Array.from(zonasSet);
+    console.log('Zonas nivel 1:', zonasNivel1);
     
     const iconosNivel1 = {
         'Cabeza': '🧠',
