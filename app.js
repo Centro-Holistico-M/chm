@@ -557,20 +557,20 @@ async function loadSlogan() {
 // ================================
 let cachedDescodificacion = [];
 
-function parseDescId(id) {
-    const str = (id || '').trim().toLowerCase();
-    const parts = str.split('-').filter(p => p.length > 0);
-    
-    return {
-        nivel1: parts[0] ? capitalize(parts[0]) : '',
-        nivel2: parts[1] ? capitalize(parts[1]) : '',
-        nivel3: parts[2] ? capitalize(parts[2]) : (parts[1] ? capitalize(parts[1]) : '')
-    };
-}
-
 function capitalize(str) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function parseDescId(id) {
+    const str = String(id || '').trim().toLowerCase();
+    const parts = str.split('-').filter(p => p && p.length > 0);
+    
+    return {
+        nivel1: capitalize(parts[0] || ''),
+        nivel2: capitalize(parts[1] || ''),
+        nivel3: capitalize(parts[2] || parts[1] || '')
+    };
 }
 
 async function loadDescodificacion() {
@@ -581,7 +581,7 @@ async function loadDescodificacion() {
             cachedDescodificacion = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
         }
         
-        if (cachedDescodificacion.length === 0) {
+        if (!cachedDescodificacion || cachedDescodificacion.length === 0) {
             container.innerHTML = `
                 <div class="desc-empty">
                     <div class="empty-icon">📋</div>
@@ -605,25 +605,20 @@ async function loadDescodificacion() {
     }
 }
 
-function getNiveles(item) {
-    return parseDescId(item.id);
-}
-
 function renderNivel1(container) {
     const data = cachedDescodificacion;
     
-    console.log('Datos cargados:', data.length);
-    console.log('Primer item:', data[0]);
-    
-    // Obtener zonas únicas de nivel 1 usando el ID
     const zonasSet = new Set();
     data.forEach(item => {
-        const niveles = getNiveles(item);
-        console.log('Parsed:', item.id, '->', niveles);
-        if (niveles.nivel1) zonasSet.add(niveles.nivel1);
+        if (item && item.id) {
+            const niveles = parseDescId(item.id);
+            if (niveles.nivel1) {
+                zonasSet.add(niveles.nivel1);
+            }
+        }
     });
+    
     const zonasNivel1 = Array.from(zonasSet);
-    console.log('Zonas nivel 1:', zonasNivel1);
     
     const iconosNivel1 = {
         'Cabeza': '🧠',
@@ -644,16 +639,30 @@ function renderNivel1(container) {
         <div class="desc-zonas-nivel1">
     `;
     
-    zonasNivel1.forEach(nivel1 => {
-        const count = data.filter(item => getNiveles(item).nivel1 === nivel1).length;
+    if (zonasNivel1.length === 0) {
         html += `
-            <div class="desc-zona" onclick="renderNivel2('${nivel1}')">
-                <span class="zona-icono">${iconosNivel1[nivel1] || '🔘'}</span>
-                <div class="zona-nombre">${nivel1}</div>
-                <div class="zona-count">${count} partes</div>
+            <div class="desc-empty">
+                <div class="empty-icon">❓</div>
+                <p>No se encontraron zonas</p>
             </div>
         `;
-    });
+    } else {
+        zonasNivel1.forEach(nivel1 => {
+            const count = data.filter(item => {
+                if (!item || !item.id) return false;
+                const niveles = parseDescId(item.id);
+                return niveles.nivel1 === nivel1;
+            }).length;
+            
+            html += `
+                <div class="desc-zona" onclick="renderNivel2('${nivel1}')">
+                    <span class="zona-icono">${iconosNivel1[nivel1] || '🔘'}</span>
+                    <div class="zona-nombre">${nivel1}</div>
+                    <div class="zona-count">${count} partes</div>
+                </div>
+            `;
+        });
+    }
     
     html += '</div>';
     container.innerHTML = html;
@@ -661,29 +670,26 @@ function renderNivel1(container) {
 
 function renderNivel2(nivel1) {
     const container = document.getElementById('descodificacion-container');
-    const filteredData = cachedDescodificacion.filter(item => getNiveles(item).nivel1 === nivel1);
+    const filteredData = cachedDescodificacion.filter(item => {
+        if (!item || !item.id) return false;
+        const niveles = parseDescId(item.id);
+        return niveles.nivel1 === nivel1;
+    });
     
-    // Obtener zonas únicas de nivel 2
     const zonasNivel2Set = new Set();
     filteredData.forEach(item => {
-        const niveles = getNiveles(item);
-        if (niveles.nivel2) zonasNivel2Set.add(niveles.nivel2);
+        const niveles = parseDescId(item.id);
+        if (niveles.nivel2) {
+            zonasNivel2Set.add(niveles.nivel2);
+        }
     });
+    
     const zonasNivel2 = Array.from(zonasNivel2Set);
     
     const iconosNivel2 = {
-        'Cara': '😊',
-        'Cráneo': '💭',
-        'Cuello': '🔗',
-        'Sentidos': '👁️',
-        'Pecho': '💗',
-        'Abdomen': '🫃',
-        'Espalda': '🔙',
-        'Caderas': '🦴',
-        'Brazos': '💪',
-        'Manos': '🤲',
-        'Piernas': '🦵',
-        'Pies': '🦶'
+        'Cara': '😊', 'Craneo': '💭', 'Cuello': '🔗', 'Sentidos': '👁️',
+        'Pecho': '💗', 'Abdomen': '🫃', 'Espalda': '🔙', 'Caderas': '🦴',
+        'Brazos': '💪', 'Manos': '🤲', 'Piernas': '🦵', 'Pies': '🦶'
     };
     
     let html = `
@@ -697,7 +703,11 @@ function renderNivel2(nivel1) {
     `;
     
     zonasNivel2.forEach(nivel2 => {
-        const count = filteredData.filter(item => getNiveles(item).nivel2 === nivel2).length;
+        const count = filteredData.filter(item => {
+            const niveles = parseDescId(item.id);
+            return niveles.nivel2 === nivel2;
+        }).length;
+        
         html += `
             <div class="desc-zona" onclick="renderNivel3('${nivel1}', '${nivel2}')">
                 <span class="zona-icono">${iconosNivel2[nivel2] || '🔘'}</span>
@@ -713,8 +723,9 @@ function renderNivel2(nivel1) {
 
 function renderNivel3(nivel1, nivel2) {
     const container = document.getElementById('descodificacion-container');
-    const data = cachedDescodificacion.filter(item => {
-        const niveles = getNiveles(item);
+    const filteredData = cachedDescodificacion.filter(item => {
+        if (!item || !item.id) return false;
+        const niveles = parseDescId(item.id);
         return niveles.nivel1 === nivel1 && niveles.nivel2 === nivel2;
     });
     
@@ -728,12 +739,14 @@ function renderNivel3(nivel1, nivel2) {
         <div class="desc-zonas-nivel2">
     `;
     
-    data.forEach(item => {
-        const niveles = getNiveles(item);
+    filteredData.forEach(item => {
+        const niveles = parseDescId(item.id);
+        const nombre = item.nombre || niveles.nivel3;
+        
         html += `
             <div class="desc-zona" onclick="showDescDetail('${item.id}')">
                 <span class="zona-icono">🔍</span>
-                <div class="zona-nombre">${item.nombre || niveles.nivel3}</div>
+                <div class="zona-nombre">${nombre}</div>
             </div>
         `;
     });
@@ -746,17 +759,20 @@ function showDescDetail(id) {
     const item = cachedDescodificacion.find(i => i.id === id);
     if (!item) return;
     
+    const niveles = parseDescId(item.id);
+    const nombre = item.nombre || niveles.nivel3;
+    
     const m = document.createElement('div');
     m.className = 'modal-overlay active';
     
-    // Preparar listas
-    const conflictoList = item.conflicto ? item.conflicto.split('|').map(c => c.trim()).filter(Boolean) : [];
-    const sintomaList = item.sintoma ? item.sintoma.split('|').map(s => s.trim()).filter(Boolean) : [];
-    const bloqueoList = item.bloqueo ? item.bloqueo.split('|').map(b => b.trim()).filter(Boolean) : [];
+    const conflictoList = item.conflicto ? item.conflicto.split(/[|,]/).map(c => c.trim()).filter(Boolean) : [];
+    const sintomaList = item.sintoma ? item.sintoma.split(/[|,]/).map(s => s.trim()).filter(Boolean) : [];
+    const bloqueoList = item.bloqueo ? item.bloqueo.split(/[|,]/).map(b => b.trim()).filter(Boolean) : [];
     
-    let conflictoHtml = '';
+    let cardsHtml = '';
+    
     if (conflictoList.length) {
-        conflictoHtml = `
+        cardsHtml += `
             <div class="desc-info-card">
                 <div class="info-header">
                     <span class="info-icon">⚡</span>
@@ -769,9 +785,8 @@ function showDescDetail(id) {
         `;
     }
     
-    let sintomaHtml = '';
     if (sintomaList.length) {
-        sintomaHtml = `
+        cardsHtml += `
             <div class="desc-info-card">
                 <div class="info-header">
                     <span class="info-icon">🔍</span>
@@ -784,9 +799,8 @@ function showDescDetail(id) {
         `;
     }
     
-    let bloqueoHtml = '';
     if (bloqueoList.length) {
-        bloqueoHtml = `
+        cardsHtml += `
             <div class="desc-info-card">
                 <div class="info-header">
                     <span class="info-icon">🔒</span>
@@ -799,27 +813,15 @@ function showDescDetail(id) {
         `;
     }
     
-    const niveles = getNiveles(item);
-    
     m.innerHTML = `
         <div class="modal-content">
             <button class="modal-close">&times;</button>
             <div class="desc-detalle">
                 <div class="desc-detalle-header">
-                    <h3>${item.nombre || niveles.nivel3}</h3>
+                    <h3>${nombre}</h3>
                     <span class="subtitulo">${niveles.nivel1} › ${niveles.nivel2}</span>
                 </div>
-                
-                ${conflictoHtml}
-                ${sintomaHtml}
-                ${bloqueoHtml}
-                
-                ${!conflictoHtml && !sintomaHtml && !bloqueoHtml ? `
-                    <div class="desc-empty">
-                        <div class="empty-icon">📋</div>
-                        <p>Información no disponible</p>
-                    </div>
-                ` : ''}
+                ${cardsHtml || '<p style="color:var(--text-muted);text-align:center;">Sin información disponible</p>'}
             </div>
         </div>
     `;
