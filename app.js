@@ -201,7 +201,13 @@ function getColorCategoria(cat) {
     if (c.includes('movimiento') || c.includes('danza')) return 'movimiento';
     if (c.includes('ritual')) return 'ritual';
     if (c.includes('terapia')) return 'terapia';
-    return '';
+    if (c.includes('crecimiento') || c.includes('desarrollo')) return 'crecimiento';
+    if (c.includes('lectura') || c.includes('libro')) return 'lectura';
+    if (c.includes('expresión') || c.includes('teatro') || c.includes('expresion')) return 'expresion';
+    if (c.includes('bienestar')) return 'bienestar';
+    if (c.includes('taller')) return 'taller';
+    if (c.includes('evento')) return 'evento';
+    return 'default';
 }
 
 function getIconoCategoria(cat) {

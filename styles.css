@@ -793,6 +793,13 @@ body {
 .categoria-tag.movimiento { background: rgba(255,152,0,0.2); color: #ff9800; }
 .categoria-tag.ritual { background: rgba(156,39,176,0.2); color: #9c27b0; }
 .categoria-tag.terapia { background: rgba(33,150,243,0.2); color: #2196f3; }
+.categoria-tag.crecimiento { background: rgba(76,175,80,0.25); color: #66bb6a; }
+.categoria-tag.lectura { background: rgba(121,85,72,0.2); color: #a1887f; }
+.categoria-tag.expresion { background: rgba(233,30,99,0.2); color: #f06292; }
+.categoria-tag.bienestar { background: rgba(0,188,212,0.2); color: #4dd0e1; }
+.categoria-tag.taller { background: rgba(212,175,55,0.25); color: var(--gold-light); }
+.categoria-tag.evento { background: rgba(212,175,55,0.25); color: var(--gold-light); }
+.categoria-tag.default { background: rgba(158,158,158,0.2); color: #bdbdbd; }
 
 .no-actividades {
     text-align: center;
