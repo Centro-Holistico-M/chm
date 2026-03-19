@@ -16,6 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSlogan();
     loadWhatsApp();
     registerSW();
+    
+    // Ocultar splash después de la animación
+    setTimeout(() => {
+        const splash = document.getElementById('splash');
+        if (splash) {
+            splash.style.display = 'none';
+        }
+    }, 2600);
 });
 
 async function loadWhatsApp() {
