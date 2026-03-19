@@ -81,9 +81,9 @@ body {
 
 .logo { 
     width: 40px; height: 40px; 
-    border-radius: 4px; 
-    border: 1px solid var(--gold); 
-    box-shadow: 0 0 12px rgba(212,175,55,0.4);
+    border-radius: 0; 
+    border: none; 
+    box-shadow: none;
     animation: logoEntry 0.7s ease-out 0.2s both;
 }
 
@@ -848,9 +848,9 @@ body {
 .splash-logo {
     width: 80px;
     height: 80px;
-    border-radius: 8px;
-    border: 2px solid var(--gold);
-    box-shadow: 0 0 30px rgba(212,175,55,0.5);
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
     animation: splashLogoIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
