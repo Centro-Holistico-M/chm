@@ -545,6 +545,20 @@ async function loadSlogan() {
 // ================================
 let cachedDescodificacion = [];
 
+function parseDescId(id) {
+    const parts = (id || '').split('-');
+    return {
+        nivel1: parts[0] || '',
+        nivel2: parts[1] || '',
+        nivel3: parts[2] || ''
+    };
+}
+
+function capitalize(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 async function loadDescodificacion() {
     const container = document.getElementById('descodificacion-container');
     
@@ -577,11 +591,25 @@ async function loadDescodificacion() {
     }
 }
 
+function getNiveles(item) {
+    const parsed = parseDescId(item.id);
+    return {
+        nivel1: capitalize(parsed.nivel1),
+        nivel2: capitalize(parsed.nivel2),
+        nivel3: capitalize(parsed.nivel3)
+    };
+}
+
 function renderNivel1(container) {
     const data = cachedDescodificacion;
     
-    // Obtener zonas únicas de nivel 1
-    const zonasNivel1 = [...new Set(data.map(item => item.nivel1))];
+    // Obtener zonas únicas de nivel 1 usando el ID
+    const zonasSet = new Set();
+    data.forEach(item => {
+        const niveles = getNiveles(item);
+        if (niveles.nivel1) zonasSet.add(niveles.nivel1);
+    });
+    const zonasNivel1 = Array.from(zonasSet);
     
     const iconosNivel1 = {
         'Cabeza': '🧠',
@@ -603,12 +631,12 @@ function renderNivel1(container) {
     `;
     
     zonasNivel1.forEach(nivel1 => {
-        const count = data.filter(item => item.nivel1 === nivel1).length;
+        const count = data.filter(item => getNiveles(item).nivel1 === nivel1).length;
         html += `
             <div class="desc-zona" onclick="renderNivel2('${nivel1}')">
                 <span class="zona-icono">${iconosNivel1[nivel1] || '🔘'}</span>
                 <div class="zona-nombre">${nivel1}</div>
-                <div class="zona-count">${count} zonas</div>
+                <div class="zona-count">${count} partes</div>
             </div>
         `;
     });
@@ -619,10 +647,15 @@ function renderNivel1(container) {
 
 function renderNivel2(nivel1) {
     const container = document.getElementById('descodificacion-container');
-    const data = cachedDescodificacion.filter(item => item.nivel1 === nivel1);
+    const filteredData = cachedDescodificacion.filter(item => getNiveles(item).nivel1 === nivel1);
     
     // Obtener zonas únicas de nivel 2
-    const zonasNivel2 = [...new Set(data.map(item => item.nivel2))];
+    const zonasNivel2Set = new Set();
+    filteredData.forEach(item => {
+        const niveles = getNiveles(item);
+        if (niveles.nivel2) zonasNivel2Set.add(niveles.nivel2);
+    });
+    const zonasNivel2 = Array.from(zonasNivel2Set);
     
     const iconosNivel2 = {
         'Cara': '😊',
@@ -650,7 +683,7 @@ function renderNivel2(nivel1) {
     `;
     
     zonasNivel2.forEach(nivel2 => {
-        const count = data.filter(item => item.nivel2 === nivel2).length;
+        const count = filteredData.filter(item => getNiveles(item).nivel2 === nivel2).length;
         html += `
             <div class="desc-zona" onclick="renderNivel3('${nivel1}', '${nivel2}')">
                 <span class="zona-icono">${iconosNivel2[nivel2] || '🔘'}</span>
@@ -666,7 +699,10 @@ function renderNivel2(nivel1) {
 
 function renderNivel3(nivel1, nivel2) {
     const container = document.getElementById('descodificacion-container');
-    const data = cachedDescodificacion.filter(item => item.nivel1 === nivel1 && item.nivel2 === nivel2);
+    const data = cachedDescodificacion.filter(item => {
+        const niveles = getNiveles(item);
+        return niveles.nivel1 === nivel1 && niveles.nivel2 === nivel2;
+    });
     
     let html = `
         <div class="desc-nav-back" onclick="renderNivel2('${nivel1}')">
@@ -679,10 +715,11 @@ function renderNivel3(nivel1, nivel2) {
     `;
     
     data.forEach(item => {
+        const niveles = getNiveles(item);
         html += `
             <div class="desc-zona" onclick="showDescDetail('${item.id}')">
                 <span class="zona-icono">🔍</span>
-                <div class="zona-nombre">${item.nombre || item.nivel3}</div>
+                <div class="zona-nombre">${item.nombre || niveles.nivel3}</div>
             </div>
         `;
     });
@@ -748,13 +785,15 @@ function showDescDetail(id) {
         `;
     }
     
+    const niveles = getNiveles(item);
+    
     m.innerHTML = `
         <div class="modal-content">
             <button class="modal-close">&times;</button>
             <div class="desc-detalle">
                 <div class="desc-detalle-header">
-                    <h3>${item.nombre || item.nivel3}</h3>
-                    <span class="subtitulo">${item.nivel1} › ${item.nivel2}</span>
+                    <h3>${item.nombre || niveles.nivel3}</h3>
+                    <span class="subtitulo">${niveles.nivel1} › ${niveles.nivel2}</span>
                 </div>
                 
                 ${conflictoHtml}
