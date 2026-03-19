@@ -442,6 +442,18 @@ async function loadServicios() {
             }, cachedWhatsApp);
         });
     });
+    
+    // Botón para ir a Descodificación
+    const btnDesc = document.createElement('button');
+    btnDesc.className = 'btn-descodificacion';
+    btnDesc.innerHTML = '🧠 Explora tu cuerpo - Descodificación';
+    btnDesc.onclick = () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('descodificacion').classList.add('active');
+        loadTab('descodificacion');
+    };
+    container.appendChild(btnDesc);
 }
 
 // ======================

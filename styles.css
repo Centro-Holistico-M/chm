@@ -1145,3 +1145,27 @@ body {
     font-size: 0.85rem;
     margin: 0;
 }
+
+/* Botón Descodificación en Servicios */
+.btn-descodificacion {
+    display: block;
+    width: 100%;
+    margin-top: 24px;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.08));
+    border: 1.5px solid rgba(212,175,55,0.4);
+    border-radius: var(--radius);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.btn-descodificacion:hover {
+    background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.15));
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212,175,55,0.2);
+}
