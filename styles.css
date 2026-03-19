@@ -888,3 +888,260 @@ body {
     0% { opacity: 1; }
     100% { opacity: 0; pointer-events: none; }
 }
+
+/* ================================
+   DESCODIFICACIÓN - Mapa Corporal
+   ================================ */
+
+.desc-intro {
+    text-align: center;
+    margin-bottom: 24px;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.desc-intro h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+}
+
+.desc-intro p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Breadcrumb / Navegación */
+.desc-nav-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gold);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.desc-nav-back:hover {
+    opacity: 0.8;
+}
+
+.desc-nav-back span {
+    font-size: 1.2rem;
+}
+
+/* Título de nivel */
+.desc-level-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+}
+
+/* Grid de zonas - Nivel 1 */
+.desc-zonas-nivel1 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+}
+
+@media (max-width: 400px) {
+    .desc-zonas-nivel1 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+/* Grid de zonas - Nivel 2 */
+.desc-zonas-nivel2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 16px;
+}
+
+@media (max-width: 400px) {
+    .desc-zonas-nivel2 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+}
+
+/* Tarjeta de zona */
+.desc-zona {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.desc-zona::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transform: scaleX(0);
+    transition: transform 0.3s;
+}
+
+.desc-zona:hover {
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.desc-zona:hover::before {
+    transform: scaleX(1);
+}
+
+.desc-zona .zona-icono {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.desc-zona .zona-nombre {
+    font-family: 'Cinzel', serif;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.desc-zona .zona-count {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Detalle de zona - Nivel 3 */
+.desc-detalle {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.desc-detalle-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.desc-detalle-header h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.3rem;
+    margin-bottom: 4px;
+}
+
+.desc-detalle-header .subtitulo {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Cards de información */
+.desc-info-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+    transition: all 0.3s;
+}
+
+.desc-info-card:hover {
+    border-color: rgba(212,175,55,0.3);
+}
+
+.desc-info-card .info-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.desc-info-card .info-icon {
+    font-size: 1.3rem;
+}
+
+.desc-info-card .info-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1rem;
+}
+
+.desc-info-card .info-content {
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.desc-info-card .info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.desc-info-card .info-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text);
+    font-size: 0.9rem;
+    position: relative;
+    padding-left: 16px;
+}
+
+.desc-info-card .info-list li:last-child {
+    border-bottom: none;
+}
+
+.desc-info-card .info-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+}
+
+/* Estado vacío */
+.desc-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.desc-empty .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Instrucciones */
+.desc-instrucciones {
+    background: rgba(212,175,55,0.08);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.desc-instrucciones p {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0;
+}

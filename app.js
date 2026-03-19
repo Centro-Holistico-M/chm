@@ -2,7 +2,8 @@ const API = {
     HORARIOS: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Horarios',
     AGENDA: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Agenda',
     SERVICIOS: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Servicios',
-    CONTACTO: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto'
+    CONTACTO: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto',
+    DESCODIFICACION: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Descodificacion'
 };
 
 const CACHE_DURATION = 300000; // 5 minutos
@@ -92,6 +93,7 @@ async function loadTab(tab) {
         if (tab === 'horarios') await loadHorarios();
         else if (tab === 'servicios') await loadServicios();
         else if (tab === 'contacto') await loadContacto();
+        else if (tab === 'descodificacion') await loadDescodificacion();
     } catch (e) { console.error(e); }
     showLoading(false);
 }
@@ -537,3 +539,225 @@ async function loadSlogan() {
         }
     } catch(e) {}
 }
+
+// ================================
+// DESCODIFICACIÓN
+// ================================
+let cachedDescodificacion = [];
+
+async function loadDescodificacion() {
+    const container = document.getElementById('descodificacion-container');
+    
+    if (cachedDescodificacion.length === 0) {
+        cachedDescodificacion = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
+    }
+    
+    renderNivel1(container);
+}
+
+function renderNivel1(container) {
+    const data = cachedDescodificacion;
+    
+    // Obtener zonas únicas de nivel 1
+    const zonasNivel1 = [...new Set(data.map(item => item.nivel1))];
+    
+    const iconosNivel1 = {
+        'Cabeza': '🧠',
+        'Tronco': '❤️',
+        'Extremidades': '💪'
+    };
+    
+    let html = `
+        <div class="desc-intro">
+            <h2>🧠 Descodificación</h2>
+            <p>Tu cuerpo es un mapa de emociones</p>
+        </div>
+        
+        <div class="desc-instrucciones">
+            <p>Selecciona una zona del cuerpo para explorar su significado emocional</p>
+        </div>
+        
+        <div class="desc-zonas-nivel1">
+    `;
+    
+    zonasNivel1.forEach(nivel1 => {
+        const count = data.filter(item => item.nivel1 === nivel1).length;
+        html += `
+            <div class="desc-zona" onclick="renderNivel2('${nivel1}')">
+                <span class="zona-icono">${iconosNivel1[nivel1] || '🔘'}</span>
+                <div class="zona-nombre">${nivel1}</div>
+                <div class="zona-count">${count} zonas</div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function renderNivel2(nivel1) {
+    const container = document.getElementById('descodificacion-container');
+    const data = cachedDescodificacion.filter(item => item.nivel1 === nivel1);
+    
+    // Obtener zonas únicas de nivel 2
+    const zonasNivel2 = [...new Set(data.map(item => item.nivel2))];
+    
+    const iconosNivel2 = {
+        'Cara': '😊',
+        'Cráneo': '💭',
+        'Cuello': '🔗',
+        'Sentidos': '👁️',
+        'Pecho': '💗',
+        'Abdomen': '🫃',
+        'Espalda': '🔙',
+        'Caderas': '🦴',
+        'Brazos': '💪',
+        'Manos': '🤲',
+        'Piernas': '🦵',
+        'Pies': '🦶'
+    };
+    
+    let html = `
+        <div class="desc-nav-back" onclick="renderNivel1(document.getElementById('descodificacion-container'))">
+            <span>←</span> Volver
+        </div>
+        
+        <h3 class="desc-level-title">🗺️ ${nivel1}</h3>
+        
+        <div class="desc-zonas-nivel2">
+    `;
+    
+    zonasNivel2.forEach(nivel2 => {
+        const count = data.filter(item => item.nivel2 === nivel2).length;
+        html += `
+            <div class="desc-zona" onclick="renderNivel3('${nivel1}', '${nivel2}')">
+                <span class="zona-icono">${iconosNivel2[nivel2] || '🔘'}</span>
+                <div class="zona-nombre">${nivel2}</div>
+                <div class="zona-count">${count} partes</div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function renderNivel3(nivel1, nivel2) {
+    const container = document.getElementById('descodificacion-container');
+    const data = cachedDescodificacion.filter(item => item.nivel1 === nivel1 && item.nivel2 === nivel2);
+    
+    let html = `
+        <div class="desc-nav-back" onclick="renderNivel2('${nivel1}')">
+            <span>←</span> ${nivel1}
+        </div>
+        
+        <h3 class="desc-level-title">📍 ${nivel2}</h3>
+        
+        <div class="desc-zonas-nivel2">
+    `;
+    
+    data.forEach(item => {
+        html += `
+            <div class="desc-zona" onclick="showDescDetail('${item.id}')">
+                <span class="zona-icono">🔍</span>
+                <div class="zona-nombre">${item.nombre || item.nivel3}</div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function showDescDetail(id) {
+    const item = cachedDescodificacion.find(i => i.id === id);
+    if (!item) return;
+    
+    const m = document.createElement('div');
+    m.className = 'modal-overlay active';
+    
+    // Preparar listas
+    const conflictoList = item.conflicto ? item.conflicto.split('|').map(c => c.trim()).filter(Boolean) : [];
+    const sintomaList = item.sintoma ? item.sintoma.split('|').map(s => s.trim()).filter(Boolean) : [];
+    const bloqueoList = item.bloqueo ? item.bloqueo.split('|').map(b => b.trim()).filter(Boolean) : [];
+    
+    let conflictoHtml = '';
+    if (conflictoList.length) {
+        conflictoHtml = `
+            <div class="desc-info-card">
+                <div class="info-header">
+                    <span class="info-icon">⚡</span>
+                    <span class="info-title">Conflicto Emocional</span>
+                </div>
+                <ul class="info-list">
+                    ${conflictoList.map(c => `<li>${c}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    let sintomaHtml = '';
+    if (sintomaList.length) {
+        sintomaHtml = `
+            <div class="desc-info-card">
+                <div class="info-header">
+                    <span class="info-icon">🔍</span>
+                    <span class="info-title">Síntomas Asociados</span>
+                </div>
+                <ul class="info-list">
+                    ${sintomaList.map(s => `<li>${s}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    let bloqueoHtml = '';
+    if (bloqueoList.length) {
+        bloqueoHtml = `
+            <div class="desc-info-card">
+                <div class="info-header">
+                    <span class="info-icon">🔒</span>
+                    <span class="info-title">Bloqueo Energético</span>
+                </div>
+                <ul class="info-list">
+                    ${bloqueoList.map(b => `<li>${b}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    m.innerHTML = `
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <div class="desc-detalle">
+                <div class="desc-detalle-header">
+                    <h3>${item.nombre || item.nivel3}</h3>
+                    <span class="subtitulo">${item.nivel1} › ${item.nivel2}</span>
+                </div>
+                
+                ${conflictoHtml}
+                ${sintomaHtml}
+                ${bloqueoHtml}
+                
+                ${!conflictoHtml && !sintomaHtml && !bloqueoHtml ? `
+                    <div class="desc-empty">
+                        <div class="empty-icon">📋</div>
+                        <p>Información no disponible</p>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(m);
+    
+    m.querySelector('.modal-close').addEventListener('click', () => m.remove());
+    m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') m.remove(); });
+}
+
+// Funciones globales para onclick
+window.renderNivel1 = renderNivel1;
+window.renderNivel2 = renderNivel2;
+window.renderNivel3 = renderNivel3;
+window.showDescDetail = showDescDetail;
