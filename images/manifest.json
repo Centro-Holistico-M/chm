@@ -1,6 +1,7 @@
 {
     "name": "Centro Holístico M",
     "short_name": "M",
+    "description": "Centro Holístico M - Bienestar integral",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#0a0a0a",
@@ -21,5 +22,6 @@
             "type": "image/png",
             "purpose": "any maskable"
         }
-    ]
+    ],
+    "categories": ["health", "lifestyle"]
 }
