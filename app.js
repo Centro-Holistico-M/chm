@@ -460,18 +460,8 @@ async function loadServicios() {
     catalogoSection.className = 'catalogo-section';
     catalogoSection.innerHTML = `
         <h3 class="section-subtitle">📖 Catálogo Living Light</h3>
-        <div class="catalogo-viewer">
-            <iframe 
-                src="https://drive.google.com/file/d/1ztiy1Nt2lZhRLA-BmBx1x_4AQ84ilMmy/preview" 
-                width="100%" 
-                height="600" 
-                allow="autoplay" 
-                allowfullscreen
-                title="Catálogo Living Light">
-            </iframe>
-        </div>
-        <a href="https://drive.google.com/file/d/1ztiy1Nt2lZhRLA-BmBx1x_4AQ84ilMmy/view" target="_blank" class="catalogo-fullscreen-btn">
-            🔗 Abrir en pantalla completa
+        <a href="https://drive.google.com/file/d/1ztiy1Nt2lZhRLA-BmBx1x_4AQ84ilMmy/view" target="_blank" class="catalogo-btn">
+            🖼️ Ver Catálogo de Productos
         </a>
     `;
     container.appendChild(catalogoSection);

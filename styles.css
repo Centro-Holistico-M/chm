@@ -1177,41 +1177,27 @@ body {
     border-top: 1px solid rgba(212,175,55,0.2);
 }
 
-.catalogo-viewer {
-    background: var(--bg-card);
-    border: 1px solid rgba(212,175,55,0.2);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin: 16px 0;
-}
-
-.catalogo-viewer iframe {
-    display: block;
-    border: none;
-    min-height: 500px;
-}
-
-.catalogo-fullscreen-btn {
-    display: block;
+.catalogo-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     width: 100%;
-    padding: 14px;
-    background: transparent;
-    border: 1px solid rgba(212,175,55,0.3);
-    border-radius: 8px;
+    padding: 18px 24px;
+    background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.08));
+    border: 1.5px solid rgba(212,175,55,0.4);
+    border-radius: var(--radius);
     color: var(--gold);
-    font-size: 0.9rem;
-    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
     text-decoration: none;
+    text-align: center;
     transition: all 0.3s;
 }
 
-.catalogo-fullscreen-btn:hover {
-    background: rgba(212,175,55,0.1);
+.catalogo-btn:hover {
+    background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.15));
     border-color: var(--gold);
-}
-
-@media (max-width: 480px) {
-    .catalogo-viewer iframe {
-        min-height: 400px;
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212,175,55,0.2);
 }
