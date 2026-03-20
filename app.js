@@ -3,7 +3,7 @@ const API = {
     AGENDA: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Agenda',
     SERVICIOS: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Servicios',
     CONTACTO: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto',
-    DESCODIFICACION: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Descodificacion'
+    DESCODIFICACION: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Horarios'
 };
 
 const CACHE_DURATION = 300000; // 5 minutos
@@ -578,7 +578,7 @@ async function loadDescodificacion() {
     
     try {
         if (cachedDescodificacion.length === 0) {
-            cachedDescodificacion = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
+            cachedDescodificacion = await fetchAPI(API.DESCODIFICACION, 'ch_horarios_descodif');
         }
         
         if (!cachedDescodificacion || cachedDescodificacion.length === 0) {
