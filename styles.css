@@ -1169,3 +1169,49 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(212,175,55,0.2);
 }
+
+/* Catálogo Living Light */
+.catalogo-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(212,175,55,0.2);
+}
+
+.catalogo-viewer {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 16px 0;
+}
+
+.catalogo-viewer iframe {
+    display: block;
+    border: none;
+    min-height: 500px;
+}
+
+.catalogo-fullscreen-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 8px;
+    color: var(--gold);
+    font-size: 0.9rem;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.catalogo-fullscreen-btn:hover {
+    background: rgba(212,175,55,0.1);
+    border-color: var(--gold);
+}
+
+@media (max-width: 480px) {
+    .catalogo-viewer iframe {
+        min-height: 400px;
+    }
+}
