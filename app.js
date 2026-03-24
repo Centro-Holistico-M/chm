@@ -40,38 +40,50 @@ function initParticles() {
     const container = document.getElementById('particles');
     if (!container) return;
     
-    // Partículas especiales de entrada
-    for (let i = 0; i < 8; i++) {
-        setTimeout(() => createSpecialParticle(container), 200 + i * 150);
+    // Partículas especiales de entrada (más grandes)
+    for (let i = 0; i < 12; i++) {
+        setTimeout(() => createSpecialParticle(container), 200 + i * 120);
     }
     
-    // Partículas normales
-    for (let i = 0; i < 15; i++) {
-        setTimeout(() => createParticle(container), 2500 + i * 300);
+    // Partículas normales (más partículas, más variety)
+    for (let i = 0; i < 30; i++) {
+        setTimeout(() => createParticle(container), 2000 + i * 200);
     }
-    setInterval(() => createParticle(container), 800);
+    // Más partículas fluyendo constantemente
+    setInterval(() => createParticle(container), 400);
 }
 
 function createSpecialParticle(container) {
     const p = document.createElement('div');
     p.className = 'special-particle';
-    const size = Math.random() * 6 + 4;
+    const size = Math.random() * 8 + 4;
+    const duration = Math.random() * 2 + 2;
     p.style.cssText = `
         left:${Math.random() * 100}vw;
-        animation:specialFloat 2.5s ease-out forwards;
+        animation:specialFloat ${duration}s ease-out forwards;
         width:${size}px;
         height:${size}px;
     `;
     container.appendChild(p);
-    setTimeout(() => p.remove(), 2500);
+    setTimeout(() => p.remove(), duration * 1000);
 }
 
 function createParticle(container) {
     const p = document.createElement('div');
     p.className = 'particle';
-    p.style.cssText = `left:${Math.random()*100}vw;animation-duration:${Math.random()*10+10}s;width:${Math.random()*3+2}px;height:${Math.random()*3+2}px;`;
+    const size = Math.random() * 4 + 2;
+    const duration = Math.random() * 12 + 8;
+    const left = Math.random() * 100;
+    const delay = Math.random() * 2;
+    p.style.cssText = `
+        left:${left}vw;
+        animation-duration:${duration}s;
+        animation-delay:${-delay}s;
+        width:${size}px;
+        height:${size}px;
+    `;
     container.appendChild(p);
-    setTimeout(() => p.remove(), 20000);
+    setTimeout(() => p.remove(), (duration + delay) * 1000);
 }
 
 function initNavigation() {
