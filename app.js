@@ -1,9 +1,8 @@
 const API = {
     HORARIOS: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Horarios',
-    AGENDA: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Agenda',
     SERVICIOS: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Servicios',
     CONTACTO: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Contacto',
-    DESCODIFICACION: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Horarios'
+    DESCODIFICACION: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Descodificacion'
 };
 
 const CACHE_DURATION = 300000; // 5 minutos
@@ -239,27 +238,36 @@ function getIconoCategoria(cat) {
 
 async function loadHorarios() {
     const container = document.getElementById('horarios-container');
-    const [horarios, agenda] = await Promise.all([
-        fetchAPI(API.HORARIOS, 'ch_horarios'),
-        fetchAPI(API.AGENDA, 'ch_agenda')
-    ]);
+    const horarios = await fetchAPI(API.HORARIOS, 'ch_horarios');
     
     const diasSemana = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
     const diasCorto = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     
-    // Limpiar array global
     todasActividadesGlobal.length = 0;
+    let eventos = [];
     
-    // Procesar hoja Agenda
-    if (agenda && agenda.length > 0) {
-        agenda.forEach(row => {
+    if (horarios && horarios.length > 0) {
+        horarios.forEach(row => {
             if (!row.Nombre) return;
             
-            // Si tiene Fecha o es Evento/Taller -> es evento especial
-            if (row.Tipo === 'Evento' || row.Tipo === 'Taller' || row.Fecha) {
-                // Ya se maneja después como eventos
-            } else if (row.Tipo === 'Actividad' || !row.Tipo) {
-                // Es actividad regular - puede tener múltiples horas separadas por espacio
+            const tieneFecha = row.Fecha && row.Fecha.trim();
+            const esEventoOTaller = row.Tipo === 'Evento' || row.Tipo === 'Taller';
+            
+            if (tieneFecha || esEventoOTaller) {
+                eventos.push({
+                    Nombre: row.Nombre,
+                    Tipo: row.Tipo || 'Evento',
+                    Fecha: row.Fecha || '',
+                    Hora: row.Hora || '',
+                    Categoria: row.Categoria || '',
+                    Estado: row.Estado || 'Disponible',
+                    Duracion: row.Duracion || '',
+                    Precio: row.Precio || '',
+                    Cupo: row.Cupo || '',
+                    DescripcionCorta: row.DescripcionCorta || '',
+                    DescripcionLarga: row.DescripcionLarga || ''
+                });
+            } else {
                 const horas = (row.Hora||'').split(/\s+/).filter(h => h);
                 const dia = (row.Dia||'').toLowerCase();
                 
@@ -269,44 +277,17 @@ async function loadHorarios() {
                             Nombre: row.Nombre,
                             Dia: dia,
                             Hora: hora,
-                            Categoria: row.Categoria||'Actividad',
-                            Estado: row.Estado||'Disponible',
-                            Duracion: row.Duracion,
-                            Cupo: row.Cupo,
-                            DescripcionCorta: row.DescripcionCorta,
-                            DescripcionLarga: row.DescripcionLarga
+                            Categoria: row.Categoria || 'Actividad',
+                            Estado: row.Estado || 'Disponible',
+                            Duracion: row.Duracion || '',
+                            Cupo: row.Cupo || '',
+                            DescripcionCorta: row.DescripcionCorta || '',
+                            DescripcionLarga: row.DescripcionLarga || ''
                         });
                     }
                 });
             }
         });
-    }
-    
-    // También procesar hoja Horarios (estructura clásica: Hora, lunes, martes...)
-    if (horarios && horarios.length > 1) {
-        const headerRow = horarios[0];
-        const allKeys = Object.keys(headerRow);
-        const horaKey = allKeys.find(k => k.toLowerCase().includes('hora'));
-        
-        for (let i = 1; i < horarios.length; i++) {
-            const row = horarios[i];
-            if (!row) continue;
-            const hora = horaKey ? row[horaKey] : Object.values(row)[0];
-            if (!hora) continue;
-            
-            diasSemana.forEach((dia) => {
-                const diaKey = allKeys.find(k => k.toLowerCase().includes(dia));
-                if (diaKey && row[diaKey]) {
-                    todasActividadesGlobal.push({
-                        Nombre: row[diaKey],
-                        Dia: dia,
-                        Hora: hora,
-                        Categoria: 'Actividad',
-                        Estado: 'Disponible'
-                    });
-                }
-            });
-        }
     }
     
     // Generar HTML
@@ -320,7 +301,6 @@ async function loadHorarios() {
     html += '<div id="timeline-container" class="timeline-list"></div>';
     
     // Eventos y Talleres
-    const eventos = agenda?.filter(r => r.Nombre && (r.Tipo === 'Taller' || r.Tipo === 'Evento' || r.Fecha)) || [];
     if (eventos.length) {
         html += '<h3 class="section-subtitle">📚 Talleres y Eventos</h3>';
         html += '<div class="cards-grid">';
@@ -328,8 +308,9 @@ async function loadHorarios() {
             const descLarga = t.DescripcionLarga || t.DescripcionCorta || '';
             const estadoClass = (t.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
             const infoExtra = t.Cupo ? `<span class="cupo">Cupo: ${t.Cupo}</span>` : '';
+            const tipoMostrar = t.Tipo && t.Categoria ? `${t.Tipo} · ${t.Categoria}` : (t.Categoria || t.Tipo || 'Evento');
             html += `<div class="card" data-titulo="${t.Nombre}" data-categoria="${t.Categoria||''}" data-desc="${descLarga}" data-precio="${t.Precio||''}" data-duracion="${t.Duracion||''}" data-estado="${t.Estado||''}" data-fecha="${t.Fecha||''}" data-hora="${t.Hora||''}" data-cupo="${t.Cupo||''}" data-tipo="taller">
-                <span class="badge evento">✨ ${t.Tipo||'Evento'}</span>
+                <span class="badge evento">✨ ${tipoMostrar}</span>
                 <h3>${t.Nombre}</h3>
                 <span class="categoria">${t.Fecha||''} ${t.Hora||''}</span>
                 ${infoExtra}
@@ -388,6 +369,10 @@ function showModal(datos, waNumero) {
     if (datos.hora) infoHtml += `<p><span class="label">Hora</span><span class="value">${datos.hora}</span></p>`;
     if (datos.cupo) infoHtml += `<p><span class="label">Cupo</span><span class="value">${datos.cupo}</span></p>`;
     
+    const waButton = waNumero && waNumero.length > 0 
+        ? `<a href="https://wa.me/${waNumero}?text=${waMsg}" target="_blank" class="share-btn wa-btn">💬 Contactar por WhatsApp</a>`
+        : `<p class="wa-fallback">WhatsApp no disponible. Puedes contactarnos en la sección Contacto.</p>`;
+    
     m.innerHTML = `
         <div class="modal-content">
             <button class="modal-close">&times;</button>
@@ -396,7 +381,7 @@ function showModal(datos, waNumero) {
             ${infoHtml ? `<div class="modal-info">${infoHtml}</div>` : ''}
             <p class="modal-desc">${datos.descripcion || 'Sin descripción disponible.'}</p>
             <div class="modal-buttons">
-                <a href="${waNumero ? 'https://wa.me/' + waNumero + '?text=' + waMsg : '#'}" target="_blank" class="share-btn wa-btn">💬 WhatsApp</a>
+                ${waButton}
             </div>
         </div>
     `;

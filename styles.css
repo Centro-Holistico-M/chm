@@ -20,6 +20,74 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+/* SPLASH SCREEN */
+.splash {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: splashFadeOut 0.5s ease-out 2.5s forwards;
+}
+
+@keyframes splashFadeOut {
+    to { opacity: 0; pointer-events: none; }
+}
+
+.splash-content {
+    text-align: center;
+    position: relative;
+}
+
+.splash-aura {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(212,175,55,0.3) 0%, transparent 70%);
+    animation: splashAura 2s ease-in-out infinite;
+}
+
+@keyframes splashAura {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+}
+
+.splash-logo {
+    width: 80px;
+    height: 80px;
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(212,175,55,0.4);
+    animation: splashLogo 2s ease-out both;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes splashLogo {
+    0% { opacity: 0; transform: scale(0.5); }
+    20% { opacity: 1; transform: scale(1.05); }
+    40% { transform: scale(1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.splash-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1rem;
+    margin-top: 16px;
+    opacity: 0;
+    animation: splashTitle 1s ease-out 0.5s both;
+}
+
+@keyframes splashTitle {
+    to { opacity: 1; }
+}
+
 html, body {
     -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
@@ -129,10 +197,10 @@ body {
 
 /* NAV */
 .nav {
-    position: fixed; top: 88px; left: 0; right: 0;
-    display: flex; justify-content: center; gap: 10px;
-    padding: 10px 16px;
-    padding-bottom: calc(10px + var(--safe-area-inset-bottom));
+    position: fixed; top: 84px; left: 0; right: 0;
+    display: flex; justify-content: center; gap: 6px;
+    padding: 8px 12px;
+    padding-bottom: calc(8px + var(--safe-area-inset-bottom));
     background: rgba(10,10,10,0.98);
     z-index: 99;
     border-bottom: 1px solid rgba(212,175,55,0.1);
@@ -146,18 +214,18 @@ body {
 
 .nav-btn {
     flex: 1; 
-    max-width: 120px; 
-    padding: 10px 12px;
+    max-width: 90px; 
+    padding: 8px 6px;
     background: transparent; 
     border: 1px solid rgba(212,175,55,0.25);
     color: var(--text-muted); 
     font-family: 'Cinzel', serif;
-    font-size: 0.7rem; 
+    font-size: 0.6rem; 
     border-radius: var(--radius-sm); 
     cursor: pointer;
     transition: all 0.3s;
     text-transform: uppercase; 
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .nav-btn:hover {
@@ -177,7 +245,7 @@ body {
 
 /* CONTENT */
 .content { 
-    margin-top: 135px; 
+    margin-top: 125px; 
     padding: 16px; 
 }
 
@@ -377,6 +445,40 @@ body {
     font-size: 0.95rem; 
 }
 
+.modal-buttons {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.wa-btn {
+    display: inline-block;
+    padding: 14px 24px;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.wa-btn:hover {
+    background: #20BD56;
+    transform: translateY(-2px);
+}
+
+.wa-fallback {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 14px;
+    background: rgba(212,175,55,0.1);
+    border-radius: var(--radius-sm);
+    border: 1px dashed rgba(212,175,55,0.3);
+}
+
 /* FOOTER */
 .footer {
     text-align: center;
@@ -462,4 +564,486 @@ body {
     .modal-title {
         font-size: 1.1rem;
     }
+}
+
+/* =====================================================
+   HORARIOS - SELECTOR DE DÍAS
+   ===================================================== */
+
+.dias-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.dia-btn {
+    flex: 1;
+    min-width: 48px;
+    padding: 12px 8px;
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.dia-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.dia-btn.active {
+    background: var(--gold);
+    color: #000;
+    border-color: var(--gold);
+}
+
+.dia-nombre {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dia-punto {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: transparent;
+    transition: all 0.3s;
+}
+
+.dia-punto.active {
+    background: #000;
+}
+
+/* =====================================================
+   HORARIOS - TIMELINE
+   ===================================================== */
+
+.timeline-list {
+    margin-top: 16px;
+}
+
+.timeline-dia {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1rem;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+}
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.timeline-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    gap: 14px;
+}
+
+.timeline-card:hover {
+    border-color: var(--gold);
+    transform: translateX(4px);
+}
+
+.timeline-hora {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+    color: var(--gold);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.hora-icono {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+}
+
+.timeline-content {
+    flex: 1;
+}
+
+.timeline-content h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--text);
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+}
+
+.categoria-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.categoria-tag.yoga { background: rgba(156,39,176,0.2); color: #ce93d8; border: 1px solid rgba(156,39,176,0.3); }
+.categoria-tag.artes { background: rgba(244,67,54,0.2); color: #ef9a9a; border: 1px solid rgba(244,67,54,0.3); }
+.categoria-tag.movimiento { background: rgba(33,150,243,0.2); color: #90caf9; border: 1px solid rgba(33,150,243,0.3); }
+.categoria-tag.ritual { background: rgba(255,193,7,0.2); color: #ffe082; border: 1px solid rgba(255,193,7,0.3); }
+.categoria-tag.terapia { background: rgba(76,175,80,0.2); color: #a5d6a7; border: 1px solid rgba(76,175,80,0.3); }
+.categoria-tag.crecimiento { background: rgba(0,188,212,0.2); color: #80deea; border: 1px solid rgba(0,188,212,0.3); }
+.categoria-tag.lectura { background: rgba(121,85,72,0.2); color: #bcaaa4; border: 1px solid rgba(121,85,72,0.3); }
+.categoria-tag.expresion { background: rgba(233,30,99,0.2); color: #f48fb1; border: 1px solid rgba(233,30,99,0.3); }
+.categoria-tag.bienestar { background: rgba(255,152,0,0.2); color: #ffcc80; border: 1px solid rgba(255,152,0,0.3); }
+.categoria-tag.taller { background: rgba(103,58,183,0.2); color: #b39ddb; border: 1px solid rgba(103,58,183,0.3); }
+.categoria-tag.evento { background: rgba(255,193,7,0.2); color: #ffe082; border: 1px solid rgba(255,193,7,0.3); }
+.categoria-tag.default { background: rgba(158,158,158,0.2); color: #bdbdbd; border: 1px solid rgba(158,158,158,0.3); }
+
+.timeline-desc {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.timeline-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.no-actividades {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Badge evento */
+.badge.evento {
+    background: rgba(255,193,7,0.15);
+    color: #ffc107;
+    border: 1px solid rgba(255,193,7,0.2);
+}
+
+/* =====================================================
+   CONTACTO
+   ===================================================== */
+
+.contacto-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: var(--radius);
+    padding: 28px;
+    text-align: center;
+}
+
+.contacto-icono-grande {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.contacto-card h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.3rem;
+    margin-bottom: 24px;
+}
+
+.contacto-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.contacto-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    background: rgba(0,0,0,0.2);
+    border-radius: var(--radius-sm);
+}
+
+.contacto-item .icono {
+    font-size: 1.3rem;
+    min-width: 28px;
+}
+
+.contacto-item .detalle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.contacto-item strong {
+    color: var(--gold);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.contacto-item span,
+.contacto-item a {
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.contacto-item a {
+    color: var(--gold-light);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.contacto-item a:hover {
+    color: var(--gold);
+}
+
+.contacto-mapa-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-sm);
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    margin-bottom: 20px;
+}
+
+.contacto-mapa-btn:hover {
+    background: var(--gold);
+    color: #000;
+}
+
+.contacto-titulo-sección {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+}
+
+.redes-sociales {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(212,175,55,0.08);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.social-link:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(212,175,55,0.12);
+}
+
+.social-icon {
+    color: inherit;
+}
+
+.nombre-red {
+    font-size: 0.8rem;
+}
+
+/* =====================================================
+   DESCODIFICACIÓN (minimal)
+   ===================================================== */
+
+.desc-intro {
+    text-align: center;
+    padding: 20px;
+}
+
+.desc-intro h2 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    margin-bottom: 8px;
+}
+
+.desc-intro p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Descodificación */
+.desc-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+}
+
+.desc-instrucciones {
+    text-align: center;
+    padding: 12px 20px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+.desc-zonas-nivel1,
+.desc-zonas-nivel2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 14px;
+    padding: 10px;
+}
+
+.desc-zona {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.desc-zona:hover {
+    border-color: var(--gold);
+    transform: translateY(-3px);
+}
+
+.zona-icono {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.zona-nombre {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+}
+
+.zona-count {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.desc-nav-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(212,175,55,0.1);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: var(--radius-sm);
+    color: var(--gold);
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+}
+
+.desc-nav-back:hover {
+    background: rgba(212,175,55,0.2);
+}
+
+.desc-level-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+}
+
+.desc-info-card {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.info-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.info-icon {
+    font-size: 1.3rem;
+}
+
+.info-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-light);
+    font-size: 0.9rem;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-list li {
+    color: var(--text);
+    font-size: 0.85rem;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.info-list li:last-child {
+    border-bottom: none;
+}
+
+.desc-detalle {
+    padding: 10px;
+}
+
+.desc-detalle-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.desc-detalle-header h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.4rem;
+    margin-bottom: 8px;
+}
+
+.desc-detalle-header .subtitulo {
+    color: var(--text-muted);
+    font-size: 0.85rem;
 }
