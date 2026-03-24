@@ -454,29 +454,6 @@ async function loadServicios() {
             }, cachedWhatsApp);
         });
     });
-    
-    // Botón para ir a Descodificación
-    const btnDesc = document.createElement('button');
-    btnDesc.className = 'btn-descodificacion';
-    btnDesc.innerHTML = '🧠 Explora tu cuerpo - Descodificación';
-    btnDesc.onclick = () => {
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.getElementById('descodificacion').classList.add('active');
-        loadTab('descodificacion');
-    };
-    container.appendChild(btnDesc);
-    
-    // Catálogo Living Light
-    const catalogoSection = document.createElement('div');
-    catalogoSection.className = 'catalogo-section';
-    catalogoSection.innerHTML = `
-        <h3 class="section-subtitle">📖 Catálogo Living Light</h3>
-        <a href="https://drive.google.com/file/d/1ztiy1Nt2lZhRLA-BmBx1x_4AQ84ilMmy/view" target="_blank" class="catalogo-btn">
-            🖼️ Ver Catálogo de Productos
-        </a>
-    `;
-    container.appendChild(catalogoSection);
 }
 
 // ======================
