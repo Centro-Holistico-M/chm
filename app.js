@@ -263,9 +263,6 @@ function calculateLunarEvents(year) {
         const key = `${year}-${String(month + 1).padStart(2, '0')}`;
         LUNAR_EVENTS[key] = {};
         
-        let phaseIndex = 0;
-        let currentPhase = 0;
-        const baseDate = new Date(year, month, 1);
         const knownNewMoon = getKnownNewMoon(year, month);
         
         for (let day = 1; day <= daysInMonth; day++) {
@@ -273,14 +270,15 @@ function calculateLunarEvents(year) {
             const daysSinceNew = Math.floor((date - knownNewMoon) / (1000 * 60 * 60 * 24));
             const lunation = daysSinceNew % 29.53;
             
-            if (lunation < 1 || lunation > 28.5) {
-                LUNAR_EVENTS[key][day] = phases[0];
-            } else if (lunation >= 7.38 && lunation < 8.38) {
-                LUNAR_EVENTS[key][day] = phases[1];
-            } else if (lunation >= 14.77 && lunation < 15.77) {
-                LUNAR_EVENTS[key][day] = phases[2];
-            } else if (lunation >= 22.15 && lunation < 23.15) {
-                LUNAR_EVENTS[key][day] = phases[3];
+            // Only mark specific days for each phase (±1 day)
+            if (lunation >= 0 && lunation <= 1) {
+                LUNAR_EVENTS[key][day] = phases[0]; // Luna nueva
+            } else if (lunation >= 6.38 && lunation <= 8.38) {
+                LUNAR_EVENTS[key][day] = phases[1]; // Cuarto creciente
+            } else if (lunation >= 13.77 && lunation <= 15.77) {
+                LUNAR_EVENTS[key][day] = phases[2]; // Luna llena
+            } else if (lunation >= 21.15 && lunation <= 23.15) {
+                LUNAR_EVENTS[key][day] = phases[3]; // Cuarto menguante
             }
         }
     }
