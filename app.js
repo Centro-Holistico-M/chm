@@ -520,8 +520,10 @@ function registerSW() {
 async function loadServicios() {
     const container = document.getElementById('servicios-container');
     const data = await fetchAPI(API.SERVICIOS, 'ch_servicios');
-
-    let html = '<h3 class="section-subtitle">💆 Servicios</h3>';
+    
+    const now = new Date();
+    let html = renderCalendario(now.getFullYear(), now.getMonth());
+    html += '<h3 class="section-subtitle">💆 Servicios</h3>';
     html += '<div class="cards-grid cards-horizontal">';
     data.forEach(s => {
         const descLarga = s['Descripcion larga'] || s.DescripcionLarga || s['Descripcion corta'] || s.DescripcionCorta || '';
