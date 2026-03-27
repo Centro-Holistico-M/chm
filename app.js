@@ -241,82 +241,130 @@ function getIconoCategoria(cat) {
 // ============================================
 
 // Dataset estructurado con fechas específicas para fases lunares y eventos solares
-const LUNAR_EVENTS_2026 = [
-    { date: "2026-01-03", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-01-10", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-01-18", name: "Luna llena", icon: "🌕" },
-    { date: "2026-01-25", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-02-01", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-02-09", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-02-17", name: "Luna llena", icon: "🌕" },
-    { date: "2026-02-24", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-03-02", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-03-09", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-03-18", name: "Luna llena", icon: "🌕" },
-    { date: "2026-03-25", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-04-01", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-04-08", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-04-16", name: "Luna llena", icon: "🌕" },
-    { date: "2026-04-23", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-05-01", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-05-07", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-05-15", name: "Luna llena", icon: "🌕" },
-    { date: "2026-05-22", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-05-30", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-06-06", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-06-14", name: "Luna llena", icon: "🌕" },
-    { date: "2026-06-21", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-06-29", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-07-06", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-07-13", name: "Luna llena", icon: "🌕" },
-    { date: "2026-07-20", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-07-28", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-08-04", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-08-12", name: "Luna llena", icon: "🌕" },
-    { date: "2026-08-19", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-08-27", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-09-02", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-09-10", name: "Luna llena", icon: "🌕" },
-    { date: "2026-09-18", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-09-25", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-10-02", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-10-10", name: "Luna llena", icon: "🌕" },
-    { date: "2026-10-17", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-10-24", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-11-01", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-11-08", name: "Luna llena", icon: "🌕" },
-    { date: "2026-11-15", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-11-23", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-12-01", name: "Cuarto creciente", icon: "🌓" },
-    { date: "2026-12-07", name: "Luna llena", icon: "🌕" },
-    { date: "2026-12-14", name: "Cuarto menguante", icon: "🌗" },
-    { date: "2026-12-22", name: "Luna nueva", icon: "🌑" },
-    { date: "2026-12-30", name: "Cuarto creciente", icon: "🌓" }
+const EVENTS_DATA = [
+    // Luna Nueva
+    { date: "2026-01-03", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo. La energía es introspectiva y propicia para la meditación.", message: "Es momento de sembrar las semillas de tus deseos." },
+    { date: "2026-02-01", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Visualiza lo que quieres crear este mes." },
+    { date: "2026-03-02", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Un nuevo ciclo lunar te invita a comenzar de nuevo." },
+    { date: "2026-04-01", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "honra la energía de los nuevos comienzazados." },
+    { date: "2026-05-01", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Abre espacio para nueva energía en tu vida." },
+    { date: "2026-05-30", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Confía en el proceso de los nuevos ciclos." },
+    { date: "2026-06-29", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "La oscuridad precede a la luz." },
+    { date: "2026-07-28", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Todo comienza con una intención." },
+    { date: "2026-08-27", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "El universo te apoya en tus nuevos comienzoes." },
+    { date: "2026-09-25", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Es momento de plantar semillas para el futuro." },
+    { date: "2026-10-24", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Lo que imagines puede manifestarse." },
+    { date: "2026-11-23", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Un nuevo capítulo te espera." },
+    { date: "2026-12-22", type: "new_moon", title: "Luna Nueva", icon: "🌑", short: "Nuevos inicios, establecer intenciones", description: "Momento de renovación y nuevos ciclos. Ideal para establecer intenciones, comenzar proyectos y limpiar lo viejo.", message: "Honra el ciclo que termina y el que comienza." },
+    
+    // Cuarto Creciente
+    { date: "2026-01-10", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "Es momento de actuar en tus intenciones." },
+    { date: "2026-02-09", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "El crecimiento requiere movimiento." },
+    { date: "2026-03-09", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "Tus acciones dan forma a tu realidad." },
+    { date: "2026-04-08", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "La energía aumenta, aprovéchala." },
+    { date: "2026-05-07", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "Decide y actúa con propósito." },
+    { date: "2026-06-06", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "El momentum te lleva hacia adelante." },
+    { date: "2026-07-06", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "Confía en tu capacidad de actuar." },
+    { date: "2026-08-04", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "El momento de actuar es ahora." },
+    { date: "2026-09-02", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "Construye sobre lo que comenzaste." },
+    { date: "2026-10-02", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "El crecimiento se acelera." },
+    { date: "2026-11-01", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "Tus decisiones importan ahora." },
+    { date: "2026-12-01", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "Avanza con determinación." },
+    { date: "2026-12-30", type: "first_quarter", title: "Cuarto Creciente", icon: "🌓", short: "Acción y decisión", description: "Fase de crecimiento y acumulación de energía. Es momento de tomar acción, hacer ajustes y mover lo que sembraste en la luna nueva.", message: "La luz crece, aprovéchala." },
+    
+    // Luna Llena
+    { date: "2026-01-18", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Tu luz brilla más fuerte esta noche." },
+    { date: "2026-02-17", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Celebra lo que has logrado." },
+    { date: "2026-03-18", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "La verdad se revela bajo la luz plena." },
+    { date: "2026-04-16", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Es momento de agradecer y soltar." },
+    { date: "2026-05-15", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Tu intuición está en su punto más alto." },
+    { date: "2026-06-14", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Abunda en gratitud y amor." },
+    { date: "2026-07-13", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "La luz revela lo que necesitas ver." },
+    { date: "2026-08-12", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Honra tu brillo interior." },
+    { date: "2026-09-10", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Equilibra dar y recibir." },
+    { date: "2026-10-10", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Tu propósito se clarifica." },
+    { date: "2026-11-08", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Libera lo que ya no te sirve." },
+    { date: "2026-12-07", type: "full_moon", title: "Luna Llena", icon: "🌕", short: "Energía máxima, claridad y liberación", description: "Pico de energía donde las emociones y procesos alcanzan su máxima expresión. Ideal para cerrar ciclos, obtener claridad y celebrating logros.", message: "Celebra el año que has vivido." },
+    
+    // Cuarto Menguante
+    { date: "2026-01-25", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Lo que sueltas crea espacio para lo nuevo." },
+    { date: "2026-02-24", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "El soltar es un acto de amor propio." },
+    { date: "2026-03-25", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Reflexiona antes de actuar." },
+    { date: "2026-04-23", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Libera lo que teweigh down." },
+    { date: "2026-05-22", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Permítete descansar y integrar." },
+    { date: "2026-06-21", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "El silencio interne contien answers." },
+    { date: "2026-07-20", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Honra tu proceso de transformación." },
+    { date: "2026-08-19", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Lo que saneas hoy, tomorrow is libre." },
+    { date: "2026-09-18", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Perdona y libera." },
+    { date: "2026-10-17", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "La liberación trae paz." },
+    { date: "2026-11-15", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Suelta con gratitud." },
+    { date: "2026-12-14", type: "last_quarter", title: "Cuarto Menguante", icon: "🌗", short: "Reflexión y liberación", description: "Fase deRelease and reflexión. Es momento de perdonar, soltar y preparar terreno para el nuevo ciclo que viene.", message: "Lo que sueñas puede hacerse realidad." },
+    
+    // Eventos Solares
+    { date: "2026-03-20", type: "equinox", title: "Equinoccio de Primavera", icon: "🌅", short: "Equilibrio y transición", description: "Momento de equilibrio perfecto entre día y noche. Marca el inicio de la primavera en el hemisferio norte. Energía de balance y nuevos comienzoes.", message: "La luz y oscuridad están en armonía." },
+    { date: "2026-06-21", type: "solstice", title: "Solsticio de Verano", icon: "☀️", short: "Punto de máxima luz", description: "Día más largo del año. Máxima expresión de luz y energía yang. Celebración del fuego interior y vitalidad.", message: "Tu luz interior brilla con máxima intensidad." },
+    { date: "2026-09-22", type: "equinox", title: "Equinoccio de Otoño", icon: "🌅", short: "Equilibrio y transición", description: "Momento de equilibrio entre día y noche. Marca el inicio del otoño. Tiempo de agradecimiento por la cosecha y preparación para el descanso.", message: "Honra los frutos de tu trabajo." },
+    { date: "2026-12-21", type: "solstice", title: "Solsticio de Invierno", icon: "❄️", short: "Renovación desde la oscuridad", description: "Noche más larga del año. Momento de máxima introspección y renovación. La luz renace desde la oscuridad más profunda.", message: "En la oscuridad nace la nueva luz." }
 ];
-
-const SOLAR_EVENTS = {
-    "2026-03-20": { name: "Equinoccio Primavera", icon: "🌅" },
-    "2026-06-21": { name: "Solsticio Verano", icon: "☀️" },
-    "2026-09-22": { name: "Equinoccio Otoño", icon: "🌅" },
-    "2026-12-21": { name: "Solsticio Invierno", icon: "❄️" }
-};
 
 const EVENT_MAP = {};
 
-// Función helper para buscar evento por fecha
 function getEventForDate(dateStr) {
     return EVENT_MAP[dateStr] || null;
 }
 
-function initCalendario() {
-    // Build event map for 2026
-    LUNAR_EVENTS_2026.forEach(event => {
-        EVENT_MAP[event.date] = event;
+function formatDate(dateStr) {
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const [year, month, day] = dateStr.split('-');
+    return `${parseInt(day)} de ${meses[parseInt(month) - 1]} de ${year}`;
+}
+
+function showEventModal(dateStr) {
+    const event = getEventForDate(dateStr);
+    if (!event) return;
+    
+    const existing = document.getElementById('event-modal');
+    if (existing) existing.remove();
+    
+    const modal = document.createElement('div');
+    modal.id = 'event-modal';
+    modal.className = 'event-modal-overlay';
+    modal.innerHTML = `
+        <div class="event-modal-content">
+            <button class="event-modal-close" onclick="closeEventModal()">✕</button>
+            <div class="event-modal-icon">${event.icon}</div>
+            <h3 class="event-modal-title">${event.title}</h3>
+            <p class="event-modal-date">${formatDate(event.date)}</p>
+            <p class="event-modal-desc">${event.description}</p>
+            <div class="event-modal-message">
+                <span class="event-modal-message-label">✨ Mensaje energetico</span>
+                <p>${event.message}</p>
+            </div>
+        </div>
+    `;
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeEventModal();
     });
     
-    // Add solar events
-    Object.keys(SOLAR_EVENTS).forEach(date => {
-        EVENT_MAP[date] = SOLAR_EVENTS[date];
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function closeEventModal() {
+    const modal = document.getElementById('event-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
+window.showEventModal = showEventModal;
+window.closeEventModal = closeEventModal;
+
+function initCalendario() {
+    EVENTS_DATA.forEach(event => {
+        EVENT_MAP[event.date] = event;
     });
 }
 
@@ -348,7 +396,7 @@ function renderCalendario(year, month) {
         
         let eventIcon = '';
         if (event) {
-            eventIcon = `<span class="cal-icon" title="${event.name}">${event.icon}</span>`;
+            eventIcon = `<span class="cal-icon" title="${event.short}" onclick="showEventModal('${event.date}')" style="cursor:pointer;">${event.icon}</span>`;
         }
         
         html += `<span class="cal-dia">${day}${eventIcon}</span>`;
