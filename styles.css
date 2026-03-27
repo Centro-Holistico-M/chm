@@ -361,26 +361,30 @@ body {
 
 /* CARDS */
 .cards-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 600px) {
-    .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .cards-grid { gap: 16px; }
 }
 
 @media (min-width: 900px) {
-    .cards-grid { max-width: 800px; margin: 0 auto; }
+    .cards-grid { flex-wrap: wrap; justify-content: center; }
 }
 
 .card {
     background: var(--bg-card);
     border: 1px solid rgba(212,175,55,0.15);
     border-radius: var(--radius);
-    padding: 20px;
+    padding: 16px;
     cursor: pointer;
     transition: all 0.3s;
+    min-width: 240px;
+    flex-shrink: 0;
 }
 
 .card:hover { 
@@ -729,17 +733,14 @@ body {
 
 .dias-selector {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     margin-bottom: 20px;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    -webkit-overflow-scrolling: touch;
+    justify-content: space-between;
 }
 
 .dia-btn {
     flex: 1;
-    min-width: 48px;
-    padding: 12px 8px;
+    padding: 10px 2px;
     background: var(--bg-card);
     border: 1px solid rgba(212,175,55,0.2);
     border-radius: var(--radius-sm);
@@ -749,7 +750,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
 .dia-btn:hover {
@@ -764,10 +765,10 @@ body {
 }
 
 .dia-nombre {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 .dia-punto {
@@ -995,6 +996,33 @@ body {
 .contacto-mapa-btn:hover {
     background: var(--gold);
     color: #000;
+}
+
+.install-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--gold);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #000;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s;
+}
+
+.install-btn:hover {
+    background: var(--gold-light);
+}
+
+.install-help {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 8px;
+    line-height: 1.4;
 }
 
 .contacto-titulo-sección {

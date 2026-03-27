@@ -507,6 +507,49 @@ function registerSW() {
     }
 }
 
+let deferredPrompt;
+function setupInstallButton() {
+    const installBtn = document.getElementById('install-btn');
+    const installHelp = document.getElementById('install-help');
+    
+    if (!installBtn) return;
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+        installBtn.style.display = 'block';
+        installHelp.style.display = 'block';
+        return;
+    }
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+    });
+}
+
+function installApp() {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isIOS) {
+        alert('Para instalar en iOS:\n1. Abre Safari\n2. Toca el botón Compartir (cuadrado con flecha)\n3. Toca "Añadir a pantalla de inicio"');
+        return;
+    }
+    
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((result) => {
+            if (result.outcome === 'accepted') {
+                console.log('App instalada');
+            }
+            deferredPrompt = null;
+        });
+    } else {
+        alert('Para instalar:\n1. Abre el menú del navegador\n2. Toca "Instalar app" o "Añadir a pantalla de inicio"');
+    }
+}
+
 // ======================
 // SERVICIOS
 // ======================
@@ -623,8 +666,17 @@ async function loadContacto() {
             
             ${redes ? `<p class="contacto-titulo-sección">Síguenos</p>
             <div class="redes-sociales">${redes}</div>` : ''}
+            
+            <button id="install-btn" class="install-btn" style="display:none;" onclick="installApp()">
+                📲 Instalar App
+            </button>
+            <p id="install-help" class="install-help" style="display:none;">
+                En iOS: Safari → Compartir → Añadir a pantalla de inicio
+            </p>
         </div>
     `;
+    
+    setupInstallButton();
 }
 
 async function loadSlogan() {
