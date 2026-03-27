@@ -522,7 +522,7 @@ async function loadServicios() {
     const data = await fetchAPI(API.SERVICIOS, 'ch_servicios');
 
     let html = '<h3 class="section-subtitle">💆 Servicios</h3>';
-    html += '<div class="cards-grid">';
+    html += '<div class="cards-grid cards-horizontal">';
     data.forEach(s => {
         const descLarga = s['Descripcion larga'] || s.DescripcionLarga || s['Descripcion corta'] || s.DescripcionCorta || '';
         const estadoClass = (s.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
