@@ -801,24 +801,29 @@ body {
 
 .timeline {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .timeline-card {
     background: var(--bg-card);
     border: 1px solid rgba(212,175,55,0.15);
     border-radius: var(--radius);
-    padding: 16px;
+    padding: 12px;
     cursor: pointer;
     transition: all 0.3s;
     display: flex;
-    gap: 14px;
+    gap: 10px;
+    min-width: 200px;
+    flex-shrink: 0;
 }
 
 .timeline-card:hover {
     border-color: var(--gold);
-    transform: translateX(4px);
+    transform: translateY(-2px);
 }
 
 .timeline-hora {
