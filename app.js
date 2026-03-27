@@ -243,9 +243,11 @@ const LUNAR_EVENTS = {};
 const SOLAR_EVENTS = {};
 
 function initCalendario() {
-    const year = new Date().getFullYear();
-    calculateLunarEvents(year);
-    calculateSolarEvents(year);
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear - 1; y <= currentYear + 2; y++) {
+        calculateLunarEvents(y);
+        calculateSolarEvents(y);
+    }
 }
 
 function calculateLunarEvents(year) {
@@ -310,9 +312,9 @@ function renderCalendario(year, month) {
     let html = `
         <div class="calendario-widget">
             <div class="calendario-header">
-                <button class="cal-nav-btn" onclick="renderCalendario(${year}, ${month - 1})">◀</button>
+                <button class="cal-nav-btn" onclick="navegarMes(${year}, ${month - 1})">◀</button>
                 <span class="cal-mes">${meses[month]} ${year}</span>
-                <button class="cal-nav-btn" onclick="renderCalendario(${year}, ${month + 1})">▶</button>
+                <button class="cal-nav-btn" onclick="navegarMes(${year}, ${month + 1})">▶</button>
             </div>
             <div class="cal-dias-header">`;
     
@@ -327,12 +329,12 @@ function renderCalendario(year, month) {
         let eventIcon = '';
         
         if (LUNAR_EVENTS[key]?.[day]) {
-            eventIcon = `<span class="cal-icon">${LUNAR_EVENTS[key][day].icon}</span>`;
+            eventIcon = `<span class="cal-icon" title="${LUNAR_EVENTS[key][day].name}">${LUNAR_EVENTS[key][day].icon}</span>`;
         }
         
         const solarKey = `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         if (SOLAR_EVENTS[year]?.[solarKey]) {
-            eventIcon = `<span class="cal-icon">${SOLAR_EVENTS[year][solarKey].icon}</span>`;
+            eventIcon = `<span class="cal-icon" title="${SOLAR_EVENTS[year][solarKey].name}">${SOLAR_EVENTS[year][solarKey].icon}</span>`;
         }
         
         html += `<span class="cal-dia">${day}${eventIcon}</span>`;
@@ -341,6 +343,23 @@ function renderCalendario(year, month) {
     html += '</div></div>';
     return html;
 }
+
+function navegarMes(year, month) {
+    if (month < 0) { month = 11; year--; }
+    if (month > 11) { month = 0; year++; }
+    
+    const container = document.getElementById('calendario-container');
+    if (container) {
+        container.innerHTML = renderCalendario(year, month);
+    } else {
+        document.querySelectorAll('.calendario-widget').forEach(el => {
+            el.outerHTML = renderCalendario(year, month);
+        });
+    }
+}
+
+window.renderCalendario = renderCalendario;
+window.navegarMes = navegarMes;
 
 initCalendario();
 
@@ -522,7 +541,7 @@ async function loadServicios() {
     const data = await fetchAPI(API.SERVICIOS, 'ch_servicios');
     
     const now = new Date();
-    let html = renderCalendario(now.getFullYear(), now.getMonth());
+    let html = '<div id="calendario-container">' + renderCalendario(now.getFullYear(), now.getMonth()) + '</div>';
     html += '<h3 class="section-subtitle">💆 Servicios</h3>';
     html += '<div class="cards-grid cards-horizontal">';
     data.forEach(s => {
