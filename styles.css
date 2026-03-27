@@ -810,7 +810,7 @@ body {
 .horario-semana {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .dia-bloque {
@@ -822,48 +822,58 @@ body {
 }
 
 .dia-header {
-    min-width: 50px;
-    max-width: 50px;
+    min-width: 48px;
+    max-width: 48px;
     background: rgba(212,175,55,0.1);
     color: var(--gold);
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 4px;
+    padding: 6px 4px;
     text-align: center;
     border-right: 1px solid rgba(212,175,55,0.15);
+    flex-shrink: 0;
 }
 
 .dia-actividades {
     flex: 1;
-    padding: 6px 10px;
+    padding: 6px 8px;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    align-items: center;
 }
 
 .actividad-item {
     display: flex;
-    gap: 8px;
-    font-size: 0.8rem;
+    gap: 4px;
+    font-size: 0.75rem;
     color: var(--text);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .actividad-hora {
     color: var(--gold);
     font-weight: 500;
-    min-width: 45px;
 }
 
 .actividad-nombre {
-    flex: 1;
+    flex-shrink: 0;
+}
+
+.actividad-separator {
+    color: var(--gold);
+    flex-shrink: 0;
 }
 
 .sin-actividad {
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-style: italic;
 }
 

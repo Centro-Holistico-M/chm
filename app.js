@@ -413,11 +413,14 @@ async function loadHorarios() {
         if (actividadesDia.length === 0) {
             html += `<span class="sin-actividad">-</span>`;
         } else {
-            actividadesDia.forEach(a => {
+            actividadesDia.forEach((a, i) => {
                 html += `<div class="actividad-item">
                     <span class="actividad-hora">${a.Hora}</span>
                     <span class="actividad-nombre">${a.Nombre}</span>
                 </div>`;
+                if (i < actividadesDia.length - 1) {
+                    html += `<span class="actividad-separator">|</span>`;
+                }
             });
         }
         
