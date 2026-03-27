@@ -697,24 +697,8 @@ body {
         min-height: 50px;
     }
 }
-    
-    .header {
-        padding: calc(6px + var(--safe-area-inset-top)) 12px 8px;
-    }
-    
-    .logo {
-        width: 38px;
-        height: 38px;
-    }
-    
-    .slogan {
-        font-size: 0.75rem;
-    }
-    
-    .nav {
-        gap: 6px;
-        padding: 8px 10px;
-    }
+
+/* FOOTER */
     
     .nav-btn {
         padding: 8px 6px;

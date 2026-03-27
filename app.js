@@ -399,9 +399,7 @@ async function loadHorarios() {
     }
     
     // Generar HTML
-    const now = new Date();
-    let html = renderCalendario(now.getFullYear(), now.getMonth());
-    html += '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
+    let html = '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
     html += '<div class="dias-selector">';
     diasSemana.forEach((dia, idx) => {
         const tieneActividades = todasActividadesGlobal.some(a => a.Dia === dia);
