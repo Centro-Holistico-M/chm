@@ -389,8 +389,8 @@ body {
 }
 
 .cards-horizontal .card {
-    min-width: 200px;
-    flex-shrink: 0;
+    width: 100%;
+    flex: 1;
     padding: 12px;
 }
 
@@ -804,6 +804,70 @@ body {
 }
 
 /* =====================================================
+   HORARIO SEMANAL - NUEVA ESTRUCTURA
+   ===================================================== */
+
+.horario-semana {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dia-bloque {
+    display: flex;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(212,175,55,0.15);
+    overflow: hidden;
+}
+
+.dia-header {
+    min-width: 50px;
+    max-width: 50px;
+    background: rgba(212,175,55,0.1);
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    text-align: center;
+    border-right: 1px solid rgba(212,175,55,0.15);
+}
+
+.dia-actividades {
+    flex: 1;
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.actividad-item {
+    display: flex;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text);
+}
+
+.actividad-hora {
+    color: var(--gold);
+    font-weight: 500;
+    min-width: 45px;
+}
+
+.actividad-nombre {
+    flex: 1;
+}
+
+.sin-actividad {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+/* =====================================================
    HORARIOS - TIMELINE
    ===================================================== */
 
@@ -1016,33 +1080,6 @@ body {
 .contacto-mapa-btn:hover {
     background: var(--gold);
     color: #000;
-}
-
-.install-btn {
-    display: block;
-    width: 100%;
-    padding: 14px 24px;
-    background: var(--gold);
-    border: none;
-    border-radius: var(--radius-sm);
-    color: #000;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: all 0.3s;
-}
-
-.install-btn:hover {
-    background: var(--gold-light);
-}
-
-.install-help {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-align: center;
-    margin-top: 8px;
-    line-height: 1.4;
 }
 
 .contacto-titulo-sección {

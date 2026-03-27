@@ -398,15 +398,32 @@ async function loadHorarios() {
         });
     }
     
-    // Generar HTML
+    // Generar HTML - mostrar cada día con sus horarios directamente
     let html = '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
-    html += '<div class="dias-selector">';
+    html += '<div class="horario-semana">';
+    
     diasSemana.forEach((dia, idx) => {
-        const tieneActividades = todasActividadesGlobal.some(a => a.Dia === dia);
-        html += `<button class="dia-btn" data-dia="${dia}"><span class="dia-nombre">${diasCorto[idx]}</span><span class="dia-punto ${tieneActividades ? 'active' : ''}"></span></button>`;
+        const actividadesDia = todasActividadesGlobal.filter(a => a.Dia === dia);
+        const nombreDia = dia.charAt(0).toUpperCase() + dia.slice(1);
+        
+        html += `<div class="dia-bloque">
+            <div class="dia-header">${diasCorto[idx]}</div>
+            <div class="dia-actividades">`;
+        
+        if (actividadesDia.length === 0) {
+            html += `<span class="sin-actividad">-</span>`;
+        } else {
+            actividadesDia.forEach(a => {
+                html += `<div class="actividad-item">
+                    <span class="actividad-hora">${a.Hora}</span>
+                    <span class="actividad-nombre">${a.Nombre}</span>
+                </div>`;
+            });
+        }
+        
+        html += `</div></div>`;
     });
     html += '</div>';
-    html += '<div id="timeline-container" class="timeline-list"></div>';
     
     // Eventos y Talleres
     if (eventos.length) {
@@ -446,19 +463,6 @@ async function loadHorarios() {
                 cupo: card.dataset.cupo
             }, cachedWhatsApp);
         });
-    });
-    
-    container.querySelectorAll('.dia-btn').forEach(btn => {
-        btn.addEventListener('click', () => cambiarDia(btn.dataset.dia));
-    });
-    
-    requestAnimationFrame(() => {
-        setTimeout(() => {
-            const timelineContainer = document.getElementById('timeline-container');
-            if (timelineContainer) {
-                cambiarDia('lunes');
-            }
-        }, 200);
     });
 }
 
@@ -504,49 +508,6 @@ function showModal(datos, waNumero) {
 function registerSW() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('images/sw.js').catch(console.error);
-    }
-}
-
-let deferredPrompt;
-function setupInstallButton() {
-    const installBtn = document.getElementById('install-btn');
-    const installHelp = document.getElementById('install-help');
-    
-    if (!installBtn) return;
-    
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    
-    if (isIOS) {
-        installBtn.style.display = 'block';
-        installHelp.style.display = 'block';
-        return;
-    }
-    
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installBtn.style.display = 'block';
-    });
-}
-
-function installApp() {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    
-    if (isIOS) {
-        alert('Para instalar en iOS:\n1. Abre Safari\n2. Toca el botón Compartir (cuadrado con flecha)\n3. Toca "Añadir a pantalla de inicio"');
-        return;
-    }
-    
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((result) => {
-            if (result.outcome === 'accepted') {
-                console.log('App instalada');
-            }
-            deferredPrompt = null;
-        });
-    } else {
-        alert('Para instalar:\n1. Abre el menú del navegador\n2. Toca "Instalar app" o "Añadir a pantalla de inicio"');
     }
 }
 
@@ -666,20 +627,8 @@ async function loadContacto() {
             
             ${redes ? `<p class="contacto-titulo-sección">Síguenos</p>
             <div class="redes-sociales">${redes}</div>` : ''}
-            
-            <button id="install-btn" class="install-btn" style="display:none;" onclick="installApp()">
-                📲 Instalar App
-            </button>
-            <p id="install-help" class="install-help" style="display:none;">
-                En iOS: Safari → Compartir → Añadir a pantalla de inicio
-            </p>
         </div>
     `;
-    
-    container.addEventListener('click', () => {
-        setupInstallButton();
-    });
-    setTimeout(() => setupInstallButton(), 100);
 }
 
 async function loadSlogan() {
