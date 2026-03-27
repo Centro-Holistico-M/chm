@@ -236,6 +236,114 @@ function getIconoCategoria(cat) {
     return '🌀';
 }
 
+// ============================================
+// CALENDARIO LUNAR Y ESTACIONES
+// ============================================
+const LUNAR_EVENTS = {};
+const SOLAR_EVENTS = {};
+
+function initCalendario() {
+    const year = new Date().getFullYear();
+    calculateLunarEvents(year);
+    calculateSolarEvents(year);
+}
+
+function calculateLunarEvents(year) {
+    const phases = [
+        { name: 'Luna nueva', icon: '🌑' },
+        { name: 'Cuarto creciente', icon: '🌓' },
+        { name: 'Luna llena', icon: '🌕' },
+        { name: 'Cuarto menguante', icon: '🌗' }
+    ];
+    
+    for (let month = 0; month < 12; month++) {
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+        LUNAR_EVENTS[key] = {};
+        
+        let phaseIndex = 0;
+        let currentPhase = 0;
+        const baseDate = new Date(year, month, 1);
+        const knownNewMoon = getKnownNewMoon(year, month);
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const daysSinceNew = Math.floor((date - knownNewMoon) / (1000 * 60 * 60 * 24));
+            const lunation = daysSinceNew % 29.53;
+            
+            if (lunation < 1 || lunation > 28.5) {
+                LUNAR_EVENTS[key][day] = phases[0];
+            } else if (lunation >= 7.38 && lunation < 8.38) {
+                LUNAR_EVENTS[key][day] = phases[1];
+            } else if (lunation >= 14.77 && lunation < 15.77) {
+                LUNAR_EVENTS[key][day] = phases[2];
+            } else if (lunation >= 22.15 && lunation < 23.15) {
+                LUNAR_EVENTS[key][day] = phases[3];
+            }
+        }
+    }
+}
+
+function getKnownNewMoon(year, month) {
+    const knownNewMoons = {
+        2026: [new Date(2026, 0, 13), new Date(2026, 1, 11), new Date(2026, 2, 13), new Date(2026, 3, 12), new Date(2026, 4, 11), new Date(2026, 5, 10), new Date(2026, 6, 9), new Date(2026, 7, 8), new Date(2026, 8, 7), new Date(2026, 9, 6), new Date(2026, 10, 5), new Date(2026, 11, 5)]
+    };
+    return knownNewMoons[year]?.[month] || new Date(year, month, 1);
+}
+
+function calculateSolarEvents(year) {
+    SOLAR_EVENTS[year] = {
+        '03-20': { name: 'Equinoccio Primavera', icon: '🌅' },
+        '06-21': { name: 'Solsticio Verano', icon: '☀️' },
+        '09-22': { name: 'Equinoccio Otoño', icon: '🌅' },
+        '12-21': { name: 'Solsticio Invierno', icon: '❄️' }
+    };
+}
+
+function renderCalendario(year, month) {
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+    
+    let html = `
+        <div class="calendario-widget">
+            <div class="calendario-header">
+                <button class="cal-nav-btn" onclick="renderCalendario(${year}, ${month - 1})">◀</button>
+                <span class="cal-mes">${meses[month]} ${year}</span>
+                <button class="cal-nav-btn" onclick="renderCalendario(${year}, ${month + 1})">▶</button>
+            </div>
+            <div class="cal-dias-header">`;
+    
+    diasSemana.forEach(d => { html += `<span>${d}</span>`; });
+    html += '</div><div class="cal-dias">';
+    
+    for (let i = 0; i < firstDay; i++) {
+        html += '<span class="cal-vacio"></span>';
+    }
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        let eventIcon = '';
+        
+        if (LUNAR_EVENTS[key]?.[day]) {
+            eventIcon = `<span class="cal-icon">${LUNAR_EVENTS[key][day].icon}</span>`;
+        }
+        
+        const solarKey = `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        if (SOLAR_EVENTS[year]?.[solarKey]) {
+            eventIcon = `<span class="cal-icon">${SOLAR_EVENTS[year][solarKey].icon}</span>`;
+        }
+        
+        html += `<span class="cal-dia">${day}${eventIcon}</span>`;
+    }
+    
+    html += '</div></div>';
+    return html;
+}
+
+initCalendario();
+
 async function loadHorarios() {
     const container = document.getElementById('horarios-container');
     const horarios = await fetchAPI(API.HORARIOS, 'ch_horarios');
@@ -291,7 +399,9 @@ async function loadHorarios() {
     }
     
     // Generar HTML
-    let html = '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
+    const now = new Date();
+    let html = renderCalendario(now.getFullYear(), now.getMonth());
+    html += '<h3 class="section-subtitle">📅 Horario Semanal</h3>';
     html += '<div class="dias-selector">';
     diasSemana.forEach((dia, idx) => {
         const tieneActividades = todasActividadesGlobal.some(a => a.Dia === dia);

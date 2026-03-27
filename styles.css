@@ -67,6 +67,7 @@
     animation: splashLogo 2s ease-out both;
     position: relative;
     z-index: 1;
+    padding: 6px;
 }
 
 @keyframes splashLogo {
@@ -154,11 +155,13 @@ body {
 }
 
 .logo { 
-    width: 44px; height: 44px;
+    width: 48px; height: 48px;
     background: #000;
     border: 1.5px solid var(--gold);
     box-shadow: 0 0 12px rgba(212,175,55,0.3);
     animation: logoEntry 0.6s ease-out 0.2s both;
+    padding: 4px;
+    border-radius: 6px;
 }
 
 @keyframes logoEntry {
@@ -273,6 +276,88 @@ body {
     letter-spacing: 1px;
 }
 .section-subtitle:first-child { margin-top: 0; }
+
+/* CALENDARIO LUNAR */
+.calendario-widget {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(212,175,55,0.2);
+}
+
+.calendario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.cal-mes {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.cal-nav-btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cal-nav-btn:active {
+    background: var(--gold);
+    color: var(--bg);
+}
+
+.cal-dias-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.cal-dias-header span {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cal-dias {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.cal-vacio {
+    height: 32px;
+}
+
+.cal-dia {
+    height: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: var(--text);
+    position: relative;
+}
+
+.cal-icon {
+    font-size: 0.6rem;
+    line-height: 1;
+    margin-top: -2px;
+}
 
 /* CARDS */
 .cards-grid {
@@ -526,6 +611,92 @@ body {
         margin-top: 130px;
         padding: 12px;
     }
+    
+    .header {
+        padding: calc(6px + var(--safe-area-inset-top)) 12px 8px;
+    }
+    
+    .logo {
+        width: 42px;
+        height: 42px;
+        padding: 3px;
+    }
+    
+    .slogan {
+        font-size: 0.75rem;
+    }
+    
+    .nav {
+        gap: 6px;
+        padding: 10px 12px;
+    }
+    
+    .nav-btn {
+        padding: 12px 8px;
+        font-size: 0.7rem;
+        min-height: 44px;
+    }
+    
+    .card {
+        padding: 18px;
+    }
+    
+    .card h3 {
+        font-size: 1rem;
+    }
+
+    .calendario-widget {
+        padding: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .cal-mes {
+        font-size: 1rem;
+    }
+    
+    .cal-nav-btn {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .cal-dia {
+        height: 36px;
+        font-size: 0.8rem;
+    }
+    
+    .cal-icon {
+        font-size: 0.65rem;
+    }
+
+    .dia-btn {
+        padding: 12px 8px;
+        min-height: 44px;
+    }
+
+    .timeline-card {
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .modal-content {
+        padding: 20px;
+        margin: 16px;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    .modal-close {
+        width: 40px;
+        height: 40px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .whatsapp-btn {
+        padding: 14px 20px;
+        min-height: 50px;
+    }
+}
     
     .header {
         padding: calc(6px + var(--safe-area-inset-top)) 12px 8px;
