@@ -61,9 +61,7 @@
     width: 80px;
     height: 80px;
     background: #000;
-    border: 2px solid var(--gold);
     border-radius: 8px;
-    box-shadow: 0 0 30px rgba(212,175,55,0.4);
     animation: splashLogo 2s ease-out both;
     position: relative;
     z-index: 1;
@@ -157,8 +155,6 @@ body {
 .logo { 
     width: 48px; height: 48px;
     background: #000;
-    border: 1.5px solid var(--gold);
-    box-shadow: 0 0 12px rgba(212,175,55,0.3);
     animation: logoEntry 0.6s ease-out 0.2s both;
     padding: 4px;
     border-radius: 6px;
@@ -361,19 +357,26 @@ body {
 
 /* CARDS */
 .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.cards-horizontal {
     display: flex;
-    gap: 14px;
+    gap: 12px;
     overflow-x: auto;
     padding-bottom: 12px;
     -webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 600px) {
-    .cards-grid { gap: 16px; }
+    .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .cards-horizontal { gap: 14px; }
 }
 
 @media (min-width: 900px) {
-    .cards-grid { flex-wrap: wrap; justify-content: center; }
+    .cards-grid { max-width: 800px; margin: 0 auto; }
 }
 
 .card {
@@ -383,8 +386,17 @@ body {
     padding: 16px;
     cursor: pointer;
     transition: all 0.3s;
-    min-width: 240px;
+}
+
+.cards-horizontal .card {
+    min-width: 200px;
     flex-shrink: 0;
+    padding: 12px;
+}
+
+.cards-horizontal .card h3 {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
 }
 
 .card:hover { 
@@ -579,6 +591,14 @@ body {
     font-size: 0.7rem;
     border-top: 1px solid rgba(212,175,55,0.08);
     margin-top: auto;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .footer {
+        font-size: 0.65rem;
+        padding: 12px 8px;
+    }
 }
 
 /* LOADING */

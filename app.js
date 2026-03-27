@@ -411,7 +411,7 @@ async function loadHorarios() {
     // Eventos y Talleres
     if (eventos.length) {
         html += '<h3 class="section-subtitle">📚 Talleres y Eventos</h3>';
-        html += '<div class="cards-grid">';
+        html += '<div class="cards-grid cards-horizontal">';
         eventos.forEach(t => {
             const descLarga = t.DescripcionLarga || t.DescripcionCorta || '';
             const estadoClass = (t.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
@@ -676,7 +676,10 @@ async function loadContacto() {
         </div>
     `;
     
-    setupInstallButton();
+    container.addEventListener('click', () => {
+        setupInstallButton();
+    });
+    setTimeout(() => setupInstallButton(), 100);
 }
 
 async function loadSlogan() {
