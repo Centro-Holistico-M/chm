@@ -239,65 +239,85 @@ function getIconoCategoria(cat) {
 // ============================================
 // CALENDARIO LUNAR Y ESTACIONES
 // ============================================
-const LUNAR_EVENTS = {};
-const SOLAR_EVENTS = {};
+
+// Dataset estructurado con fechas específicas para fases lunares y eventos solares
+const LUNAR_EVENTS_2026 = [
+    { date: "2026-01-03", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-01-10", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-01-18", name: "Luna llena", icon: "🌕" },
+    { date: "2026-01-25", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-02-01", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-02-09", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-02-17", name: "Luna llena", icon: "🌕" },
+    { date: "2026-02-24", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-03-02", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-03-09", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-03-18", name: "Luna llena", icon: "🌕" },
+    { date: "2026-03-25", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-04-01", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-04-08", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-04-16", name: "Luna llena", icon: "🌕" },
+    { date: "2026-04-23", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-05-01", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-05-07", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-05-15", name: "Luna llena", icon: "🌕" },
+    { date: "2026-05-22", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-05-30", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-06-06", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-06-14", name: "Luna llena", icon: "🌕" },
+    { date: "2026-06-21", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-06-29", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-07-06", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-07-13", name: "Luna llena", icon: "🌕" },
+    { date: "2026-07-20", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-07-28", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-08-04", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-08-12", name: "Luna llena", icon: "🌕" },
+    { date: "2026-08-19", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-08-27", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-09-02", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-09-10", name: "Luna llena", icon: "🌕" },
+    { date: "2026-09-18", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-09-25", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-10-02", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-10-10", name: "Luna llena", icon: "🌕" },
+    { date: "2026-10-17", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-10-24", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-11-01", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-11-08", name: "Luna llena", icon: "🌕" },
+    { date: "2026-11-15", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-11-23", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-12-01", name: "Cuarto creciente", icon: "🌓" },
+    { date: "2026-12-07", name: "Luna llena", icon: "🌕" },
+    { date: "2026-12-14", name: "Cuarto menguante", icon: "🌗" },
+    { date: "2026-12-22", name: "Luna nueva", icon: "🌑" },
+    { date: "2026-12-30", name: "Cuarto creciente", icon: "🌓" }
+];
+
+const SOLAR_EVENTS = {
+    "2026-03-20": { name: "Equinoccio Primavera", icon: "🌅" },
+    "2026-06-21": { name: "Solsticio Verano", icon: "☀️" },
+    "2026-09-22": { name: "Equinoccio Otoño", icon: "🌅" },
+    "2026-12-21": { name: "Solsticio Invierno", icon: "❄️" }
+};
+
+const EVENT_MAP = {};
+
+// Función helper para buscar evento por fecha
+function getEventForDate(dateStr) {
+    return EVENT_MAP[dateStr] || null;
+}
 
 function initCalendario() {
-    const currentYear = new Date().getFullYear();
-    for (let y = currentYear - 1; y <= currentYear + 2; y++) {
-        calculateLunarEvents(y);
-        calculateSolarEvents(y);
-    }
-}
-
-function calculateLunarEvents(year) {
-    const phases = [
-        { name: 'Luna nueva', icon: '🌑' },
-        { name: 'Cuarto creciente', icon: '🌓' },
-        { name: 'Luna llena', icon: '🌕' },
-        { name: 'Cuarto menguante', icon: '🌗' }
-    ];
+    // Build event map for 2026
+    LUNAR_EVENTS_2026.forEach(event => {
+        EVENT_MAP[event.date] = event;
+    });
     
-    for (let month = 0; month < 12; month++) {
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const key = `${year}-${String(month + 1).padStart(2, '0')}`;
-        LUNAR_EVENTS[key] = {};
-        
-        const knownNewMoon = getKnownNewMoon(year, month);
-        
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, month, day);
-            const daysSinceNew = Math.floor((date - knownNewMoon) / (1000 * 60 * 60 * 24));
-            const lunation = daysSinceNew % 29.53;
-            
-            // Only mark specific days for each phase (±1 day)
-            if (lunation >= 0 && lunation <= 1) {
-                LUNAR_EVENTS[key][day] = phases[0]; // Luna nueva
-            } else if (lunation >= 6.38 && lunation <= 8.38) {
-                LUNAR_EVENTS[key][day] = phases[1]; // Cuarto creciente
-            } else if (lunation >= 13.77 && lunation <= 15.77) {
-                LUNAR_EVENTS[key][day] = phases[2]; // Luna llena
-            } else if (lunation >= 21.15 && lunation <= 23.15) {
-                LUNAR_EVENTS[key][day] = phases[3]; // Cuarto menguante
-            }
-        }
-    }
-}
-
-function getKnownNewMoon(year, month) {
-    const knownNewMoons = {
-        2026: [new Date(2026, 0, 13), new Date(2026, 1, 11), new Date(2026, 2, 13), new Date(2026, 3, 12), new Date(2026, 4, 11), new Date(2026, 5, 10), new Date(2026, 6, 9), new Date(2026, 7, 8), new Date(2026, 8, 7), new Date(2026, 9, 6), new Date(2026, 10, 5), new Date(2026, 11, 5)]
-    };
-    return knownNewMoons[year]?.[month] || new Date(year, month, 1);
-}
-
-function calculateSolarEvents(year) {
-    SOLAR_EVENTS[year] = {
-        '03-20': { name: 'Equinoccio Primavera', icon: '🌅' },
-        '06-21': { name: 'Solsticio Verano', icon: '☀️' },
-        '09-22': { name: 'Equinoccio Otoño', icon: '🌅' },
-        '12-21': { name: 'Solsticio Invierno', icon: '❄️' }
-    };
+    // Add solar events
+    Object.keys(SOLAR_EVENTS).forEach(date => {
+        EVENT_MAP[date] = SOLAR_EVENTS[date];
+    });
 }
 
 function renderCalendario(year, month) {
@@ -305,7 +325,6 @@ function renderCalendario(year, month) {
     const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const key = `${year}-${String(month + 1).padStart(2, '0')}`;
     
     let html = `
         <div class="calendario-widget">
@@ -324,15 +343,12 @@ function renderCalendario(year, month) {
     }
     
     for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const event = getEventForDate(dateStr);
+        
         let eventIcon = '';
-        
-        if (LUNAR_EVENTS[key]?.[day]) {
-            eventIcon = `<span class="cal-icon" title="${LUNAR_EVENTS[key][day].name}">${LUNAR_EVENTS[key][day].icon}</span>`;
-        }
-        
-        const solarKey = `${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        if (SOLAR_EVENTS[year]?.[solarKey]) {
-            eventIcon = `<span class="cal-icon" title="${SOLAR_EVENTS[year][solarKey].name}">${SOLAR_EVENTS[year][solarKey].icon}</span>`;
+        if (event) {
+            eventIcon = `<span class="cal-icon" title="${event.name}">${event.icon}</span>`;
         }
         
         html += `<span class="cal-dia">${day}${eventIcon}</span>`;
