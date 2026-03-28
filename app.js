@@ -113,7 +113,7 @@ async function loadTab(tab) {
     try {
         if (tab === 'horarios') await loadHorarios();
         else if (tab === 'servicios') await loadServicios();
-        else if (tab === 'conocete') await loadConocete();
+        else if (tab === 'descodificacion') await loadDescodificacion();
         else if (tab === 'contacto') await loadContacto();
     } catch (e) { console.error(e); }
     showLoading(false);
@@ -1041,8 +1041,9 @@ function parseInterpretacion(texto) {
     return resultado;
 }
 
-async function loadContacto() {
-    const container = document.getElementById('contacto-container');
+async function loadDescodificacion() {
+    const container = document.getElementById('descodificacion-container');
+    
     await loadDescodData();
     
     const zonasSet = new Set();
@@ -1098,6 +1099,97 @@ async function loadContacto() {
     
     document.getElementById('desc-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') buscarDescEnPagina();
+    });
+}
+
+async function loadContacto() {
+    const container = document.getElementById('descodificacion-container');
+    
+    await loadDescodData();
+    
+    const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
+    if (!data.length) {
+        container.innerHTML = '<p class="error">No hay información de contacto</p>';
+        return;
+    }
+
+    const c = data[0];
+    cachedWhatsApp = (c.WhatsApp||'').replace(/\D/g,'');
+    const wa = cachedWhatsApp;
+    
+    let redes = '';
+    if (c.Instagram) redes += `<a href="${c.Instagram}" target="_blank" title="Instagram" class="social-link"><svg class="social-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg><span class="nombre-red">Instagram</span></a>`;
+    if (c.Facebook) redes += `<a href="${c.Facebook}" target="_blank" title="Facebook" class="social-link"><svg class="social-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg><span class="nombre-red">Facebook</span></a>`;
+    if (c.YouTube || c.Youtube) redes += `<a href="${c.YouTube || c.Youtube}" target="_blank" title="YouTube" class="social-link"><svg class="social-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg><span class="nombre-red">YouTube</span></a>`;
+    if (wa) redes += `<a href="https://wa.me/${wa}" target="_blank" title="WhatsApp" class="social-link"><svg class="social-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span class="nombre-red">WhatsApp</span></a>`;
+
+    container.innerHTML = `
+        <div class="contacto-card">
+            <div class="contacto-icono-grande">🧘</div>
+            <h2>Centro Holístico M</h2>
+            
+            <div class="contacto-grid">
+                ${(c.Direccion||c.Dirección) ? `<div class="contacto-item">
+                    <div class="icono">📍</div>
+                    <div class="detalle">
+                        <strong>Dirección</strong>
+                        <span>${c.Direccion||c.Dirección}</span>
+                    </div>
+                </div>` : ''}
+                
+                ${(c.Ciudad || c.Estado) ? `<div class="contacto-item">
+                    <div class="icono">🏙️</div>
+                    <div class="detalle">
+                        <strong>Ubicación</strong>
+                        <span>${[c.Ciudad, c.Estado].filter(Boolean).join(', ')}</span>
+                    </div>
+                </div>` : ''}
+                
+                ${c.Telefono||c.Teléfono ? `<div class="contacto-item">
+                    <div class="icono">📞</div>
+                    <div class="detalle">
+                        <strong>Teléfono</strong>
+                        <a href="tel:${c.Telefono||c.Teléfono}">${c.Telefono||c.Teléfono}</a>
+                    </div>
+                </div>` : ''}
+                
+                ${c.Email ? `<div class="contacto-item">
+                    <div class="icono">✉️</div>
+                    <div class="detalle">
+                        <strong>Email</strong>
+                        <a href="mailto:${c.Email}">${c.Email}</a>
+                    </div>
+                </div>` : ''}
+                
+                ${c.Horario ? `<div class="contacto-item">
+                    <div class="icono">🕰️</div>
+                    <div class="detalle">
+                        <strong>Horario</strong>
+                        <span>${c.Horario}</span>
+                    </div>
+                </div>` : ''}
+            </div>
+            
+            ${c.GoogleMaps ? `<a href="${c.GoogleMaps}" target="_blank" class="contacto-mapa-btn">
+                🗺️ Ver ubicación en mapa
+            </a>` : ''}
+            
+            ${redes ? `<p class="contacto-titulo-sección">Síguenos</p>
+            <div class="redes-sociales">${redes}</div>` : ''}
+            
+            <div class="descodificacion-consulta">
+                <h3 class="section-subtitle">🔍 Descodificación</h3>
+                <p class="descodificacion-desc">Ingresa un síntoma para explorar su significado emocional</p>
+                <input type="text" id="sintoma-input" class="sintoma-input" placeholder="Ej: dolor de cabeza, ansiedad, fatiga..." />
+                <button class="sintoma-buscar-btn" id="btn-buscar-sintoma">Interpretar</button>
+                <div id="sintoma-resultado" class="sintoma-resultado"></div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('btn-buscar-sintoma').addEventListener('click', buscarSintoma);
+    document.getElementById('sintoma-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') buscarSintoma();
     });
 }
 
@@ -1171,7 +1263,7 @@ async function buscarDescEnPagina() {
 }
 
 function mostrarSubzonas(zona) {
-    const container = document.getElementById('contacto-container');
+    const container = document.getElementById('descodificacion-container');
     const subzonasSet = new Set();
     sintomasIndex.filter(s => s.zona === zona).forEach(s => {
         if (s.subzona) subzonasSet.add(s.subzona);
@@ -1213,7 +1305,7 @@ function mostrarSubzonas(zona) {
 }
 
 function mostrarSintomas(zona, subzona) {
-    const container = document.getElementById('contacto-container');
+    const container = document.getElementById('descodificacion-container');
     const sintomas = sintomasIndex.filter(s => s.zona === zona && s.subzona === subzona);
     
     let html = `
@@ -1238,7 +1330,7 @@ function mostrarSintomas(zona, subzona) {
 
 async function mostrarDetalleSintoma(sintomaJson) {
     const s = JSON.parse(decodeURIComponent(sintomaJson));
-    const container = document.getElementById('contacto-container');
+    const container = document.getElementById('descodificacion-container');
     
     showLoading(true);
     const interpretacion = await interpretarConIA(s);

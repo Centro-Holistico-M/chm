@@ -1,5 +1,5 @@
-const CACHE_NAME = 'chm-v41';
-const API_CACHE_NAME = 'chm-api-v41';
+const CACHE_NAME = 'chm-v42';
+const API_CACHE_NAME = 'chm-api-v42';
 
 const ASSETS = [
     '/',
