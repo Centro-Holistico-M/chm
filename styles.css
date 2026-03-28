@@ -367,6 +367,29 @@ body {
     position: relative;
 }
 
+.cal-dia-hoy {
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.cal-estacion-primavera {
+    background: rgba(76, 175, 80, 0.25);
+}
+
+.cal-estacion-verano {
+    background: rgba(255, 193, 7, 0.3);
+}
+
+.cal-estacion-otono {
+    background: rgba(255, 152, 0, 0.25);
+}
+
+.cal-estacion-invierno {
+    background: rgba(33, 150, 243, 0.25);
+}
+
 .cal-icon {
     font-size: 0.65rem;
     line-height: 1;

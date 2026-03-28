@@ -307,6 +307,49 @@ const EVENTS_DATA = [
     { date: "2026-12-21", type: "solstice", title: "Solsticio de Invierno", icon: "❄️", short: "Renovación desde la oscuridad", description: "Noche más larga. La luz renace.", message: "En la oscuridad nace la nueva luz." }
 ];
 
+// Iconos por categoría
+const CATEGORY_ICONS = {
+    'Yoga': '🧘',
+    'Movimiento': '💃',
+    'Artes Marciales': '🥋',
+    'Cultura y Conocimiento': '📚',
+    'Terapia Holística': '🌿',
+    'Arte terapia': '🎨',
+    'Arte': '🖼️',
+    'Estacional': '🌸',
+    'Taller': '🔧',
+    'Ritual': '🕯️',
+    'Terapia': '💚',
+    'Bienestar': '✨',
+    'Infantil Recreativo': '🧒'
+};
+
+function getIconByCategory(categoria) {
+    const cat = categoria?.trim() || '';
+    return CATEGORY_ICONS[cat] || '📌';
+}
+
+// Obtener estación del año
+function getEstacion(dateStr) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    
+    // Invierno: 21 dic - 20 mar
+    if ((month === 12 && day >= 21) || (month === 1) || (month === 2) || (month === 3 && day <= 20)) {
+        return 'invierno';
+    }
+    // Primavera: 21 mar - 20 jun
+    if ((month === 3 && day >= 21) || (month === 4) || (month === 5) || (month === 6 && day <= 20)) {
+        return 'primavera';
+    }
+    // Verano: 21 jun - 21 sep
+    if ((month === 6 && day >= 21) || (month === 7) || (month === 8) || (month === 9 && day <= 21)) {
+        return 'verano';
+    }
+    // Otoño: 22 sep - 20 dic
+    return 'otono';
+}
+
 const EVENT_MAP = {};
 
 function getEventsForDate(dateStr) {
@@ -435,6 +478,14 @@ function renderCalendario(year, month) {
     for (let day = 1; day <= daysInMonth; day++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
         const events = getEventsForDate(dateStr);
+        const estacion = getEstacion(dateStr);
+        
+        // Verificar si es el día de hoy
+        const isHoy = year === currentDate.getFullYear() && month === currentDate.getMonth() && day === currentDate.getDate();
+        
+        let diaClase = 'cal-dia';
+        if (isHoy) diaClase += ' cal-dia-hoy';
+        if (estacion) diaClase += ` cal-estacion-${estacion}`;
         
         let eventIcon = '';
         if (events.length > 0) {
@@ -445,7 +496,7 @@ function renderCalendario(year, month) {
             });
         }
         
-        html += `<span class="cal-dia">${day}${eventIcon}</span>`;
+        html += `<span class="${diaClase}">${day}${eventIcon}</span>`;
     }
     
     html += '</div></div>';
@@ -659,7 +710,8 @@ async function loadServicios() {
                     }
                     
                     const tipo = row.Tipo || 'Evento';
-                    const icono = tipo === 'Taller' ? '🧘' : '🎭';
+                    const categoria = row.Categoria || '';
+                    const icono = getIconByCategory(categoria);
                     const eventGoogleSheet = {
                         isGoogleSheetEvent: true,
                         date: fechaISO,
