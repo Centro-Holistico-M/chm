@@ -480,6 +480,20 @@ body {
     margin: 0;
 }
 
+.event-modal-badges {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.event-modal-cupo {
+    color: var(--gold);
+    font-size: 0.85rem;
+    margin: 8px 0 0;
+}
+
 /* CARDS */
 .cards-grid {
     display: grid;

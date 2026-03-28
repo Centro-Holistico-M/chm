@@ -324,19 +324,40 @@ function formatDate(dateStr) {
     return `${parseInt(day)} de ${meses[parseInt(month) - 1]} de ${year}`;
 }
 
-function showEventModal(dateStr) {
-    const event = getEventForDate(dateStr);
+function showEventModal(dateStr, eventData) {
+    let event;
+    if (eventData) {
+        try {
+            event = typeof eventData === 'string' ? JSON.parse(decodeURIComponent(eventData)) : eventData;
+        } catch(e) {
+            event = getEventForDate(dateStr);
+        }
+    } else {
+        event = getEventForDate(dateStr);
+    }
     if (!event) return;
+    
+    const isGoogleSheetEvent = event.isGoogleSheetEvent;
     
     const existing = document.getElementById('event-modal');
     if (existing) existing.remove();
     
-    const modal = document.createElement('div');
-    modal.id = 'event-modal';
-    modal.className = 'event-modal-overlay';
-    modal.innerHTML = `
-        <div class="event-modal-content">
-            <button class="event-modal-close" onclick="closeEventModal()">✕</button>
+    let modalContent = '';
+    if (isGoogleSheetEvent) {
+        const estadoClass = (event.Estado||'').toLowerCase().includes('no') ? 'nodisponible' : 'disponible';
+        modalContent = `
+            <div class="event-modal-icon">${event.icon}</div>
+            <h3 class="event-modal-title">${event.title}</h3>
+            <p class="event-modal-date">${event.date} ${event.Hora||''}</p>
+            <p class="event-modal-desc">${event.description}</p>
+            <div class="event-modal-badges">
+                <span class="badge evento">${event.tipo}</span>
+                <span class="badge ${estadoClass}">${event.Estado||'Disponible'}</span>
+            </div>
+            ${event.Cupo ? `<p class="event-modal-cupo">Cupo: ${event.Cupo}</p>` : ''}
+        `;
+    } else {
+        modalContent = `
             <div class="event-modal-icon">${event.icon}</div>
             <h3 class="event-modal-title">${event.title}</h3>
             <p class="event-modal-date">${formatDate(event.date)}</p>
@@ -345,6 +366,16 @@ function showEventModal(dateStr) {
                 <span class="event-modal-message-label">✨ Mensaje energetico</span>
                 <p>${event.message}</p>
             </div>
+        `;
+    }
+    
+    const modal = document.createElement('div');
+    modal.id = 'event-modal';
+    modal.className = 'event-modal-overlay';
+    modal.innerHTML = `
+        <div class="event-modal-content">
+            <button class="event-modal-close" onclick="closeEventModal()">✕</button>
+            ${modalContent}
         </div>
     `;
     
@@ -408,7 +439,9 @@ function renderCalendario(year, month) {
         let eventIcon = '';
         if (events.length > 0) {
             events.forEach(event => {
-                eventIcon += `<span class="cal-icon" title="${event.short}" onclick="showEventModal('${event.date}')" style="cursor:pointer;">${event.icon}</span>`;
+                const title = event.short || event.title || event.Nombre || '';
+                const eventData = encodeURIComponent(JSON.stringify(event));
+                eventIcon += `<span class="cal-icon" title="${title}" onclick="showEventModal('${event.date}', decodeURIComponent('${eventData}'))" style="cursor:pointer;">${event.icon}</span>`;
             });
         }
         
@@ -606,6 +639,48 @@ function registerSW() {
 async function loadServicios() {
     const container = document.getElementById('servicios-container');
     const horarios = await fetchAPI(API.HORARIOS, 'ch_horarios');
+    
+    // Cargar eventos de Google Sheets al calendario
+    if (horarios && horarios.length > 0) {
+        horarios.forEach(row => {
+            if (!row.Nombre) return;
+            
+            const tieneFecha = row.Fecha && row.Fecha.trim();
+            const esEventoOTaller = row.Tipo === 'Evento' || row.Tipo === 'Taller';
+            
+            if (tieneFecha || esEventoOTaller) {
+                const fecha = row.Fecha || '';
+                if (fecha) {
+                    // Convertir fecha DD/MM/YYYY a YYYY-MM-DD
+                    const fechaParts = fecha.split('/');
+                    let fechaISO = fecha;
+                    if (fechaParts.length === 3) {
+                        fechaISO = `${fechaParts[2]}-${fechaParts[1].padStart(2,'0')}-${fechaParts[0].padStart(2,'0')}`;
+                    }
+                    
+                    const tipo = row.Tipo || 'Evento';
+                    const icono = tipo === 'Taller' ? '🧘' : '🎭';
+                    const eventGoogleSheet = {
+                        isGoogleSheetEvent: true,
+                        date: fechaISO,
+                        icon: icono,
+                        title: row.Nombre,
+                        description: row.DescripcionCorta || row.DescripcionLarga || '',
+                        tipo: tipo,
+                        Hora: row.Hora || '',
+                        Categoria: row.Categoria || '',
+                        Estado: row.Estado || 'Disponible',
+                        Cupo: row.Cupo || ''
+                    };
+                    
+                    if (!EVENT_MAP[fechaISO]) {
+                        EVENT_MAP[fechaISO] = [];
+                    }
+                    EVENT_MAP[fechaISO].push(eventGoogleSheet);
+                }
+            }
+        });
+    }
     
     const now = new Date();
     let html = '<div id="calendario-container">' + renderCalendario(now.getFullYear(), now.getMonth()) + '</div>';
