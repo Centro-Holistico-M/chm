@@ -105,8 +105,8 @@ async function loadTab(tab) {
     try {
         if (tab === 'horarios') await loadHorarios();
         else if (tab === 'servicios') await loadServicios();
+        else if (tab === 'conocete') await loadConocete();
         else if (tab === 'contacto') await loadContacto();
-        else if (tab === 'descodificacion') await loadDescodificacion();
     } catch (e) { console.error(e); }
     showLoading(false);
 }
@@ -826,35 +826,10 @@ function normalizarTexto(texto) {
 // ======================
 // CONTACTO
 // ======================
-async function loadContacto() {
-    const container = document.getElementById('contacto-container');
+async function loadConocete() {
+    const container = document.getElementById('conocete-container');
     
-    // Load symptoms data for search
-    if (sintomasData.length === 0) {
-        const symptomsData = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
-        if (symptomsData && symptomsData.length > 0) {
-            sintomasData = symptomsData;
-            sintomasData.forEach(item => {
-                if (item.sintoma && item.id) {
-                    const sintomasArray = item.sintoma.split(',').map(s => normalizarTexto(s));
-                    const [area, subarea, parte] = item.id.split('-');
-                    sintomasArray.forEach(sintoma => {
-                        if (sintoma) {
-                            sintomasIndex.push({
-                                sintoma: sintoma,
-                                area: normalizarTexto(area),
-                                subarea: normalizarTexto(subarea),
-                                parte: normalizarTexto(parte),
-                                nombre: normalizarTexto(parte),
-                                conflicto: item.conflicto || '',
-                                bloqueo: item.bloqueo || ''
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    }
+    await loadDescodData();
     
     const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
     if (!data.length) {
@@ -935,44 +910,6 @@ async function loadContacto() {
             </div>
         </div>
     `;
-}
-
-function buscarSintoma() {
-    const input = document.getElementById('sintoma-input');
-    const resultado = document.getElementById('sintoma-resultado');
-    const termino = normalizarTexto(input.value);
-    
-    if (!termino) {
-        resultado.innerHTML = '<p class="error-buscar">Por favor ingresa un síntoma</p>';
-        return;
-    }
-    
-    // Buscar en el índice
-    const resultados = sintomasIndex.filter(item => item.sintoma.includes(termino));
-    
-    if (resultados.length > 0) {
-        const r = resultados[0];
-        const lectura = r.conflicto + '. Esto se sostiene por ' + r.bloqueo.toLowerCase() + '.';
-        
-        resultado.innerHTML = `
-            <div class="sintoma-card">
-                <h4>${r.nombre}</h4>
-                <p class="significado">${r.conflicto}</p>
-                <p class="sintomas-relacionados">Síntomas: ${resultados.map(x => x.sintoma).join(', ')}</p>
-                <p class="bloqueo">Bloqueo: ${r.bloqueo}</p>
-                <div class="mensaje-energetico">
-                    <span>✨</span> ${lectura}
-                </div>
-            </div>
-        `;
-    } else {
-        resultado.innerHTML = `
-            <div class="no-encontrado">
-                <p>No encontramos una lectura exacta, pero tu cuerpo sigue hablando.</p>
-                <p class="sugerencia">Prueba con otras palabras como: dolor, cabeza, estómago, ansiedad...</p>
-            </div>
-        `;
-    }
 }
 
 window.buscarSintoma = buscarSintoma;
@@ -1109,8 +1046,8 @@ function parseInterpretacion(texto) {
     return resultado;
 }
 
-async function loadDescodificacion() {
-    const container = document.getElementById('descodificacion-container');
+async function loadContacto() {
+    const container = document.getElementById('contacto-container');
     await loadDescodData();
     
     const zonasSet = new Set();
@@ -1239,7 +1176,7 @@ async function buscarDescEnPagina() {
 }
 
 function mostrarSubzonas(zona) {
-    const container = document.getElementById('descodificacion-container');
+    const container = document.getElementById('contacto-container');
     const subzonasSet = new Set();
     sintomasIndex.filter(s => s.zona === zona).forEach(s => {
         if (s.subzona) subzonasSet.add(s.subzona);
@@ -1281,7 +1218,7 @@ function mostrarSubzonas(zona) {
 }
 
 function mostrarSintomas(zona, subzona) {
-    const container = document.getElementById('descodificacion-container');
+    const container = document.getElementById('contacto-container');
     const sintomas = sintomasIndex.filter(s => s.zona === zona && s.subzona === subzona);
     
     let html = `
@@ -1306,7 +1243,7 @@ function mostrarSintomas(zona, subzona) {
 
 async function mostrarDetalleSintoma(sintomaJson) {
     const s = JSON.parse(decodeURIComponent(sintomaJson));
-    const container = document.getElementById('descodificacion-container');
+    const container = document.getElementById('contacto-container');
     
     showLoading(true);
     const interpretacion = await interpretarConIA(s);
