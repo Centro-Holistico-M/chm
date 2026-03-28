@@ -1193,63 +1193,66 @@ body {
 
 .contacto-card {
     background: var(--bg-card);
-    border: 1px solid rgba(212,175,55,0.2);
+    border: 1px solid rgba(212,175,55,0.15);
     border-radius: var(--radius);
-    padding: 28px;
+    padding: 20px;
     text-align: center;
 }
 
 .contacto-icono-grande {
-    font-size: 3rem;
-    margin-bottom: 12px;
+    font-size: 2.5rem;
+    margin-bottom: 8px;
 }
 
 .contacto-card h2 {
     font-family: 'Cinzel', serif;
     color: var(--gold);
-    font-size: 1.3rem;
-    margin-bottom: 24px;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
 }
 
 .contacto-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
     text-align: left;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .contacto-item {
     display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
     background: rgba(0,0,0,0.2);
     border-radius: var(--radius-sm);
+    border: 1px solid rgba(212,175,55,0.1);
 }
 
 .contacto-item .icono {
-    font-size: 1.3rem;
-    min-width: 28px;
+    font-size: 1.2rem;
+    min-width: 24px;
+    text-align: center;
 }
 
 .contacto-item .detalle {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
+    flex: 1;
 }
 
 .contacto-item strong {
     color: var(--gold);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .contacto-item span,
 .contacto-item a {
     color: var(--text);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .contacto-item a {
