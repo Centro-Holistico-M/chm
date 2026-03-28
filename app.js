@@ -314,7 +314,8 @@ function getEventsForDate(dateStr) {
 }
 
 function getEventForDate(dateStr) {
-    return EVENT_MAP[dateStr] || null;
+    const events = EVENT_MAP[dateStr];
+    return events ? events[0] : null;
 }
 
 function formatDate(dateStr) {
@@ -368,7 +369,10 @@ window.closeEventModal = closeEventModal;
 
 function initCalendario() {
     EVENTS_DATA.forEach(event => {
-        EVENT_MAP[event.date] = event;
+        if (!EVENT_MAP[event.date]) {
+            EVENT_MAP[event.date] = [];
+        }
+        EVENT_MAP[event.date].push(event);
     });
 }
 
