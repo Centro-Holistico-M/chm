@@ -878,9 +878,81 @@ async function loadContacto() {
             
             ${redes ? `<p class="contacto-titulo-sección">Síguenos</p>
             <div class="redes-sociales">${redes}</div>` : ''}
+            
+            <div class="descodificacion-consulta">
+                <h3 class="section-subtitle">🔍 Descodificación</h3>
+                <p class="descodificacion-desc">Ingresa un síntoma para explorar su significado emocional</p>
+                <input type="text" id="sintoma-input" class="sintoma-input" placeholder="Ej: dolor de cabeza, ansiedad, fatiga..." />
+                <button class="sintoma-buscar-btn" onclick="buscarSintoma()">Buscar</button>
+                <div id="sintoma-resultado" class="sintoma-resultado"></div>
+            </div>
         </div>
     `;
 }
+
+function buscarSintoma() {
+    const input = document.getElementById('sintoma-input');
+    const resultado = document.getElementById('sintoma-resultado');
+    const sintoma = input.value.trim().toLowerCase();
+    
+    if (!sintoma) {
+        resultado.innerHTML = '<p class="error-buscar">Por favor ingresa un síntoma</p>';
+        return;
+    }
+    
+    // Diccionario de síntomas y significados emocionales
+    const diccionario = {
+        'cabeza': { zona: 'Cabeza', significado: 'Representa tus pensamientos, tu capacidad de análisis y la carga mental. Dolores de cabeza pueden indicar estrés, preocupaciones excesivas o necesidad de mudar pensamientos.', mensaje: 'Permítete descansar y soltar pensamientos que ya no te sirven.' },
+        'migraña': { zona: 'Cabeza', significado: 'Migrañas pueden relacionarse con conflicto interno, miedo a辜负 o necesidad de controlar todo. También pueden indicar agotamiento mental.', mensaje: 'Reconoce que no puedes controlar todo. Delegate y descansa.' },
+        'cuello': { zona: 'Cuello', significado: 'El cuello conecta la cabeza con el cuerpo. Tensiones aquí indican dificultad para expresar emociones o puntos de vista. Rigidez = terquedad emocional.', mensaje: 'Exprésate con libertad. Aprende a decir no.' },
+        'hombros': { zona: 'Hombros', significado: 'Los hombros cargan responsabilidades y preocupaciones. Tensiones indican que sientes demasiado peso de obligaciones propias o ajenas.', mensaje: 'No cargues solo. Pide ayuda y suelta lo que no es tuyo.' },
+        'espalda': { zona: 'Espalda', significado: 'La espalda representa tu sistema de apoyo. Problemas superiores = falta de apoyo emocional. Problemas lumbares = miedos relacionados con finanzas o estabilidad.', mensaje: 'Busca apoyo. El miedo阻断tu crecimiento.' },
+        'pecho': { zona: 'Pecho/Corazón', significado: 'El corazón almacena emociones. Tensiones pueden indicar amor propio bajo, tristeza no procesada o miedo a abrir el corazón.', mensaje: 'Ámate primero. Tus emociones son válidas.' },
+        'corazon': { zona: 'Pecho/Corazón', significado: 'El corazón almacena emociones. Tensiones pueden indicar amor propio bajo, tristeza no procesada o miedo a abrir el corazón.', mensaje: 'Ámate primero. Tus emociones son válidas.' },
+        'pulmones': { zona: 'Pulmones', significado: 'Relacionados con la capacidad de recibir y dar. Problemas pueden indicar miedo a vivir, tristeza profunda o dificultad para recibir.', mensaje: 'Vive plenamente. Permite recibir amor y apoyo.' },
+        'estomago': { zona: 'Estómago', significado: 'El estómago procesa lo que "no podemos digerir" emocionalmente. Problemas indican ansiedad, miedo o dificultad para aceptar situaciones.', mensaje: 'Suelta la necesidad de controlar. Confía en el proceso.' },
+        'estomago': { zona: 'Estómago', significado: 'El estómago procesa lo que "no podemos digerir" emocionalmente. Problemas indican ansiedad, miedo o dificultad para aceptar situaciones.', mensaje: 'Suelta la necesidad de controlar. Confía en el proceso.' },
+        'abdomen': { zona: 'Abdomen', significado: 'El abdomen es el centro de emociones y creatividad. Problemas pueden indicar emociones reprimidas, miedo o falta de creatividad.', mensaje: 'Exprésate creativamente. Tus emociones merecen ser sentidas.' },
+        'hígado': { zona: 'Hígado', significado: 'El hígado almacena rabia y frustración. Problemas pueden indicar ira contenida, resentimiento o dificultad para perdonar.', mensaje: 'Expresa tu ira de manera saludable. El perdón libera.' },
+        'intestinos': { zona: 'Intestinos', significado: 'Relacionados con la eliminación de lo que no sirve. Problemas pueden indicar dificultad para soltar, apego excesivo o miedo a perder.', mensaje: 'Suelta el pasado. Lo que ya no sirve blockingtu crecimiento.' },
+        'rodillas': { zona: 'Rodillas', significado: 'Las rodillas representan flexibilidad y humildad. Problemas indican orgullo, terquedad o dificultad para aceptar ayuda.', mensaje: 'Sé flexible. Pedir ayuda es fortaleza, no debilidad.' },
+        'piernas': { zona: 'Piernas', significado: 'Las piernas dan movilidad y dirección en la vida. Problemas pueden indicar miedo al futuro, dificultad para avanzar o falta de motivación.', mensaje: 'Avanza con valentía. El futuro te espera.' },
+        'pies': { zona: 'Pies', significado: 'Los pies representan tu conexión con la tierra y tu base. Problemas pueden indicar feeling inestable, falta de dirección o miedo a avanzar.', mensaje: 'Mantén los pies en la tierra. Confía en tu camino.' },
+        'ansiedad': { zona: 'Sistema General', significado: 'La ansiedad indica miedo al futuro, preocupación excesiva o sensación de no tener control sobre la vida.', mensaje: 'El presente es lo único que existe. Confía en ti.' },
+        'depresion': { zona: 'Sistema General', significado: 'La depresión puede indicar tristeza profunda, sensación de hopelessness, pérdidade propósito o amor propio.', mensaje: 'Tu vida tiene sentido. Busca ayuda y recuerda que mereces alegría.' },
+        'insomnio': { zona: 'Sistema General', significado: 'El insomnio puede indicar mente hiperactiva, miedo a soltar control, culpa o preocupaciones que impiden descansar.', mensaje: 'Tu mente puede descansar. El mañana cuidará de sí mismo.' },
+        'fatiga': { zona: 'Sistema General', significado: 'La fatiga puede indicar agotamiento emocional, falta de motivación, miedo o anemia emocional (dar sin recibir).', mensaje: 'Descansa. No puedes dar desde el vacío.' },
+        'alergia': { zona: 'Piel', significado: 'Las alergias indican sensibilidad excesiva, irritación ante estímulos o situaciones, y dificultad para过滤器 lo que te afecta.', mensaje: 'Protege tus límites. No todo merece tu reacción.' },
+        'eczema': { zona: 'Piel', significado: 'El eczema puede indicar frustración, ira reprimida o conflicto con la identidad personal.', mensaje: 'Expresa tus emociones. Tu piel refleja tu mundo interno.' },
+        'psoriasis': { zona: 'Piel', significado: 'La psoriasis puede relacionarse con rechazo a uno mismo, sensación de "sucio" o culpa profunda.', mensaje: 'Eres digno de amor. Suelta la culpa y ámate.' },
+        'dolor': { zona: 'General', significado: 'El dolor físico señala внимание emocional. Es un llamado a cambiar algo en tu vida.', mensaje: 'Escucha tu cuerpo. Te está hablando.' },
+        'articulaciones': { zona: 'Articulaciones', significado: 'Las articulaciones representan flexibilidad y capacidad de adaptación. Rigidez indica rigidez mental o emocional.', mensaje: 'Sé flexible. El cambio es parte de la vida.' }
+    };
+    
+    let encontrado = null;
+    for (const [key, value] of Object.entries(diccionario)) {
+        if (sintoma.includes(key)) {
+            encontrado = value;
+            break;
+        }
+    }
+    
+    if (encontrado) {
+        resultado.innerHTML = `
+            <div class="sintoma-card">
+                <h4>${encontrado.zona}</h4>
+                <p class="significado">${encontrado.significado}</p>
+                <div class="mensaje-energetico">
+                    <span>✨</span> ${encontrado.mensaje}
+                </div>
+            </div>
+        `;
+    } else {
+        resultado.innerHTML = '<p class="no-encontrado">No tenemos información para este síntoma. Te recomendamos agendar una sesión de descodificación.</p>';
+    }
+}
+
+window.buscarSintoma = buscarSintoma;
 
 async function loadSlogan() {
     const el = document.getElementById('slogan');

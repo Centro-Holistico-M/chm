@@ -153,16 +153,29 @@ body {
 }
 
 .logo { 
-    width: 48px; height: 48px;
+    width: 56px; height: 56px;
     background: #000;
-    animation: logoEntry 0.6s ease-out 0.2s both;
+    animation: logoEntry 0.6s ease-out 0.2s both, logoPulse 2s ease-in-out infinite 1s;
     padding: 4px;
-    border-radius: 6px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(212,175,55,0.5), 0 0 40px rgba(212,175,55,0.2);
+    border: 2px solid var(--gold);
 }
 
 @keyframes logoEntry {
     from { opacity: 0; transform: scale(0.6); }
     to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes logoPulse {
+    0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(212,175,55,0.5), 0 0 40px rgba(212,175,55,0.2);
+    }
+    50% { 
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(212,175,55,0.7), 0 0 60px rgba(212,175,55,0.3);
+    }
 }
 
 @keyframes headerFadeIn {
@@ -1274,6 +1287,110 @@ body {
     justify-content: center;
     gap: 16px;
     flex-wrap: wrap;
+}
+
+/* =====================================================
+   DESCODIFICACIÓN - BUSCAR SÍNTOMA
+   ===================================================== */
+
+.descodificacion-consulta {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(212,175,55,0.2);
+}
+
+.descodificacion-consulta .section-subtitle {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.descodificacion-desc {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+}
+
+.sintoma-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.sintoma-input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.sintoma-input::placeholder {
+    color: var(--text-muted);
+}
+
+.sintoma-buscar-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: var(--gold);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-bottom: 16px;
+}
+
+.sintoma-buscar-btn:hover {
+    background: var(--gold-light);
+}
+
+.sintoma-resultado {
+    margin-top: 12px;
+}
+
+.sintoma-card {
+    background: rgba(212,175,55,0.1);
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: left;
+}
+
+.sintoma-card h4 {
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.sintoma-card .significado {
+    color: var(--text);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.mensaje-energetico {
+    background: rgba(0,0,0,0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.error-buscar, .no-encontrado {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 12px;
 }
 
 .social-link {
