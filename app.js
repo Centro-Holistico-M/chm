@@ -1103,7 +1103,7 @@ async function loadDescodificacion() {
 }
 
 async function loadContacto() {
-    const container = document.getElementById('descodificacion-container');
+    const container = document.getElementById('contacto-container');
     
     await loadDescodData();
     
