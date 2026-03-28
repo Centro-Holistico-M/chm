@@ -104,7 +104,6 @@ async function loadTab(tab) {
         if (tab === 'horarios') await loadHorarios();
         else if (tab === 'servicios') await loadServicios();
         else if (tab === 'contacto') await loadContacto();
-        else if (tab === 'descodificacion') await loadDescodificacion();
     } catch (e) { console.error(e); }
     showLoading(false);
 }
@@ -821,22 +820,21 @@ function normalizarTexto(texto) {
         .trim();
 }
 
-async function loadDescodificacion() {
-    const container = document.getElementById('descodificacion-container');
+// ======================
+// CONTACTO
+// ======================
+async function loadContacto() {
+    const container = document.getElementById('contacto-container');
     
-    // Cargar datos si no existen
+    // Load symptoms data for search
     if (sintomasData.length === 0) {
-        const data = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
-        
-        if (data && data.length > 0) {
-            sintomasData = data;
-            
-            // Crear índice de búsqueda
+        const symptomsData = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
+        if (symptomsData && symptomsData.length > 0) {
+            sintomasData = symptomsData;
             sintomasData.forEach(item => {
                 if (item.sintoma && item.id) {
                     const sintomasArray = item.sintoma.split(',').map(s => normalizarTexto(s));
                     const [area, subarea, parte] = item.id.split('-');
-                    
                     sintomasArray.forEach(sintoma => {
                         if (sintoma) {
                             sintomasIndex.push({
@@ -855,83 +853,6 @@ async function loadDescodificacion() {
         }
     }
     
-    container.innerHTML = `
-        <div class="descodificacion-page">
-            <h1 class="descodificacion-titulo">Descodificación</h1>
-            <p class="descodificacion-subtitulo">Tu cuerpo no se equivoca. Solo espera ser comprendido.</p>
-            
-            <div class="descodificacion-busqueda">
-                <input type="text" id="desc-input" class="desc-input" placeholder="Escribe lo que sientes..." />
-                <button class="desc-boton" onclick="buscarDescodificacion()">Interpretar</button>
-            </div>
-            
-            <div id="desc-resultado" class="desc-resultado"></div>
-            
-            <p class="desc-nota-legal">Esto no es un diagnóstico médico. Es una lectura simbólica del cuerpo.</p>
-        </div>
-    `;
-    
-    // Agregar event listener para Enter
-    document.getElementById('desc-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') buscarDescodificacion();
-    });
-}
-
-function buscarDescodificacion() {
-    const input = document.getElementById('desc-input');
-    const resultado = document.getElementById('desc-resultado');
-    const termino = normalizarTexto(input.value);
-    
-    if (!termino) {
-        resultado.innerHTML = '<p class="desc-error">Por favor ingresa un síntoma</p>';
-        return;
-    }
-    
-    // Buscar en el índice
-    const resultados = sintomasIndex.filter(item => item.sintoma.includes(termino));
-    
-    if (resultados.length > 0) {
-        const r = resultados[0];
-        const lectura = r.conflicto + '. Esto se sostiene por ' + r.bloqueo.toLowerCase() + '.';
-        
-        resultado.innerHTML = `
-            <div class="desc-card">
-                <h2 class="desc-nombre">${r.nombre}</h2>
-                <p class="desc-jerarquia">${r.area} → ${r.subarea} → ${r.parte}</p>
-                
-                <div class="desc-seccion">
-                    <h3>Conflicto</h3>
-                    <p>${r.conflicto}</p>
-                </div>
-                
-                <div class="desc-seccion">
-                    <h3>Síntomas relacionados</h3>
-                    <p class="desc-sintomas">${resultados.map(x => x.sintoma).join(', ')}</p>
-                </div>
-                
-                <div class="desc-seccion">
-                    <h3>Bloqueo</h3>
-                    <p>${r.bloqueo}</p>
-                </div>
-                
-                <div class="desc-lectura">
-                    <h3>Lectura</h3>
-                    <p>${lectura}</p>
-                </div>
-            </div>
-        `;
-    } else {
-        resultado.innerHTML = '<p class="desc-no-encontrado">No encontramos una lectura exacta, pero tu cuerpo sigue hablando.</p>';
-    }
-}
-
-window.buscarDescodificacion = buscarDescodificacion;
-
-// ======================
-// CONTACTO
-// ======================
-async function loadContacto() {
-    const container = document.getElementById('contacto-container');
     const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
     if (!data.length) {
         container.innerHTML = '<p class="error">No hay información de contacto</p>';
@@ -1016,62 +937,38 @@ async function loadContacto() {
 function buscarSintoma() {
     const input = document.getElementById('sintoma-input');
     const resultado = document.getElementById('sintoma-resultado');
-    const sintoma = input.value.trim().toLowerCase();
+    const termino = normalizarTexto(input.value);
     
-    if (!sintoma) {
+    if (!termino) {
         resultado.innerHTML = '<p class="error-buscar">Por favor ingresa un síntoma</p>';
         return;
     }
     
-    // Diccionario de síntomas y significados emocionales
-    const diccionario = {
-        'cabeza': { zona: 'Cabeza', significado: 'Representa tus pensamientos, tu capacidad de análisis y la carga mental. Dolores de cabeza pueden indicar estrés, preocupaciones excesivas o necesidad de mudar pensamientos.', mensaje: 'Permítete descansar y soltar pensamientos que ya no te sirven.' },
-        'migraña': { zona: 'Cabeza', significado: 'Migrañas pueden relacionarse con conflicto interno, miedo a辜负 o necesidad de controlar todo. También pueden indicar agotamiento mental.', mensaje: 'Reconoce que no puedes controlar todo. Delegate y descansa.' },
-        'cuello': { zona: 'Cuello', significado: 'El cuello conecta la cabeza con el cuerpo. Tensiones aquí indican dificultad para expresar emociones o puntos de vista. Rigidez = terquedad emocional.', mensaje: 'Exprésate con libertad. Aprende a decir no.' },
-        'hombros': { zona: 'Hombros', significado: 'Los hombros cargan responsabilidades y preocupaciones. Tensiones indican que sientes demasiado peso de obligaciones propias o ajenas.', mensaje: 'No cargues solo. Pide ayuda y suelta lo que no es tuyo.' },
-        'espalda': { zona: 'Espalda', significado: 'La espalda representa tu sistema de apoyo. Problemas superiores = falta de apoyo emocional. Problemas lumbares = miedos relacionados con finanzas o estabilidad.', mensaje: 'Busca apoyo. El miedo阻断tu crecimiento.' },
-        'pecho': { zona: 'Pecho/Corazón', significado: 'El corazón almacena emociones. Tensiones pueden indicar amor propio bajo, tristeza no procesada o miedo a abrir el corazón.', mensaje: 'Ámate primero. Tus emociones son válidas.' },
-        'corazon': { zona: 'Pecho/Corazón', significado: 'El corazón almacena emociones. Tensiones pueden indicar amor propio bajo, tristeza no procesada o miedo a abrir el corazón.', mensaje: 'Ámate primero. Tus emociones son válidas.' },
-        'pulmones': { zona: 'Pulmones', significado: 'Relacionados con la capacidad de recibir y dar. Problemas pueden indicar miedo a vivir, tristeza profunda o dificultad para recibir.', mensaje: 'Vive plenamente. Permite recibir amor y apoyo.' },
-        'estomago': { zona: 'Estómago', significado: 'El estómago procesa lo que "no podemos digerir" emocionalmente. Problemas indican ansiedad, miedo o dificultad para aceptar situaciones.', mensaje: 'Suelta la necesidad de controlar. Confía en el proceso.' },
-        'estomago': { zona: 'Estómago', significado: 'El estómago procesa lo que "no podemos digerir" emocionalmente. Problemas indican ansiedad, miedo o dificultad para aceptar situaciones.', mensaje: 'Suelta la necesidad de controlar. Confía en el proceso.' },
-        'abdomen': { zona: 'Abdomen', significado: 'El abdomen es el centro de emociones y creatividad. Problemas pueden indicar emociones reprimidas, miedo o falta de creatividad.', mensaje: 'Exprésate creativamente. Tus emociones merecen ser sentidas.' },
-        'hígado': { zona: 'Hígado', significado: 'El hígado almacena rabia y frustración. Problemas pueden indicar ira contenida, resentimiento o dificultad para perdonar.', mensaje: 'Expresa tu ira de manera saludable. El perdón libera.' },
-        'intestinos': { zona: 'Intestinos', significado: 'Relacionados con la eliminación de lo que no sirve. Problemas pueden indicar dificultad para soltar, apego excesivo o miedo a perder.', mensaje: 'Suelta el pasado. Lo que ya no sirve blockingtu crecimiento.' },
-        'rodillas': { zona: 'Rodillas', significado: 'Las rodillas representan flexibilidad y humildad. Problemas indican orgullo, terquedad o dificultad para aceptar ayuda.', mensaje: 'Sé flexible. Pedir ayuda es fortaleza, no debilidad.' },
-        'piernas': { zona: 'Piernas', significado: 'Las piernas dan movilidad y dirección en la vida. Problemas pueden indicar miedo al futuro, dificultad para avanzar o falta de motivación.', mensaje: 'Avanza con valentía. El futuro te espera.' },
-        'pies': { zona: 'Pies', significado: 'Los pies representan tu conexión con la tierra y tu base. Problemas pueden indicar feeling inestable, falta de dirección o miedo a avanzar.', mensaje: 'Mantén los pies en la tierra. Confía en tu camino.' },
-        'ansiedad': { zona: 'Sistema General', significado: 'La ansiedad indica miedo al futuro, preocupación excesiva o sensación de no tener control sobre la vida.', mensaje: 'El presente es lo único que existe. Confía en ti.' },
-        'depresion': { zona: 'Sistema General', significado: 'La depresión puede indicar tristeza profunda, sensación de hopelessness, pérdidade propósito o amor propio.', mensaje: 'Tu vida tiene sentido. Busca ayuda y recuerda que mereces alegría.' },
-        'insomnio': { zona: 'Sistema General', significado: 'El insomnio puede indicar mente hiperactiva, miedo a soltar control, culpa o preocupaciones que impiden descansar.', mensaje: 'Tu mente puede descansar. El mañana cuidará de sí mismo.' },
-        'fatiga': { zona: 'Sistema General', significado: 'La fatiga puede indicar agotamiento emocional, falta de motivación, miedo o anemia emocional (dar sin recibir).', mensaje: 'Descansa. No puedes dar desde el vacío.' },
-        'alergia': { zona: 'Piel', significado: 'Las alergias indican sensibilidad excesiva, irritación ante estímulos o situaciones, y dificultad para过滤器 lo que te afecta.', mensaje: 'Protege tus límites. No todo merece tu reacción.' },
-        'eczema': { zona: 'Piel', significado: 'El eczema puede indicar frustración, ira reprimida o conflicto con la identidad personal.', mensaje: 'Expresa tus emociones. Tu piel refleja tu mundo interno.' },
-        'psoriasis': { zona: 'Piel', significado: 'La psoriasis puede relacionarse con rechazo a uno mismo, sensación de "sucio" o culpa profunda.', mensaje: 'Eres digno de amor. Suelta la culpa y ámate.' },
-        'dolor': { zona: 'General', significado: 'El dolor físico señala внимание emocional. Es un llamado a cambiar algo en tu vida.', mensaje: 'Escucha tu cuerpo. Te está hablando.' },
-        'articulaciones': { zona: 'Articulaciones', significado: 'Las articulaciones representan flexibilidad y capacidad de adaptación. Rigidez indica rigidez mental o emocional.', mensaje: 'Sé flexible. El cambio es parte de la vida.' }
-    };
+    // Buscar en el índice
+    const resultados = sintomasIndex.filter(item => item.sintoma.includes(termino));
     
-    let encontrado = null;
-    for (const [key, value] of Object.entries(diccionario)) {
-        if (sintoma.includes(key)) {
-            encontrado = value;
-            break;
-        }
-    }
-    
-    if (encontrado) {
+    if (resultados.length > 0) {
+        const r = resultados[0];
+        const lectura = r.conflicto + '. Esto se sostiene por ' + r.bloqueo.toLowerCase() + '.';
+        
         resultado.innerHTML = `
             <div class="sintoma-card">
-                <h4>${encontrado.zona}</h4>
-                <p class="significado">${encontrado.significado}</p>
+                <h4>${r.nombre}</h4>
+                <p class="significado">${r.conflicto}</p>
+                <p class="sintomas-relacionados">Síntomas: ${resultados.map(x => x.sintoma).join(', ')}</p>
+                <p class="bloqueo">Bloqueo: ${r.bloqueo}</p>
                 <div class="mensaje-energetico">
-                    <span>✨</span> ${encontrado.mensaje}
+                    <span>✨</span> ${lectura}
                 </div>
             </div>
         `;
     } else {
-        resultado.innerHTML = '<p class="no-encontrado">No tenemos información para este síntoma. Te recomendamos agendar una sesión de descodificación.</p>';
+        resultado.innerHTML = `
+            <div class="no-encontrado">
+                <p>No encontramos una lectura exacta, pero tu cuerpo sigue hablando.</p>
+                <p class="sugerencia">Prueba con otras palabras como: dolor, cabeza, estómago, ansiedad...</p>
+            </div>
+        `;
     }
 }
 
@@ -1095,289 +992,4 @@ async function loadSlogan() {
     } catch(e) {}
 }
 
-// ================================
-// DESCODIFICACIÓN
-// ================================
-let cachedDescodificacion = [];
 
-function capitalize(str) {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function parseDescId(id) {
-    const str = String(id || '').trim().toLowerCase();
-    const parts = str.split('-').filter(p => p && p.length > 0);
-    
-    return {
-        nivel1: capitalize(parts[0] || ''),
-        nivel2: capitalize(parts[1] || ''),
-        nivel3: capitalize(parts[2] || parts[1] || '')
-    };
-}
-
-async function loadDescodificacion() {
-    const container = document.getElementById('descodificacion-container');
-    
-    try {
-        if (cachedDescodificacion.length === 0) {
-            cachedDescodificacion = await fetchAPI(API.DESCODIFICACION, 'ch_horarios_descodif');
-        }
-        
-        if (!cachedDescodificacion || cachedDescodificacion.length === 0) {
-            container.innerHTML = `
-                <div class="desc-empty">
-                    <div class="empty-icon">📋</div>
-                    <p>No hay datos disponibles</p>
-                    <p style="font-size:0.8rem;margin-top:8px;">Verifica que la hoja 'Descodificacion' tenga datos</p>
-                </div>
-            `;
-            return;
-        }
-        
-        renderNivel1(container);
-    } catch (e) {
-        console.error('Error cargando descodificación:', e);
-        container.innerHTML = `
-            <div class="desc-empty">
-                <div class="empty-icon">❌</div>
-                <p>Error al cargar datos</p>
-                <p style="font-size:0.8rem;margin-top:8px;">Verifica el nombre de la hoja: 'Descodificacion'</p>
-            </div>
-        `;
-    }
-}
-
-function renderNivel1(container) {
-    const data = cachedDescodificacion;
-    
-    const zonasSet = new Set();
-    data.forEach(item => {
-        if (item && item.id) {
-            const niveles = parseDescId(item.id);
-            if (niveles.nivel1) {
-                zonasSet.add(niveles.nivel1);
-            }
-        }
-    });
-    
-    const zonasNivel1 = Array.from(zonasSet);
-    
-    const iconosNivel1 = {
-        'Cabeza': '🧠',
-        'Tronco': '❤️',
-        'Extremidades': '💪'
-    };
-    
-    let html = `
-        <div class="desc-intro">
-            <h2>🧠 Descodificación</h2>
-            <p>Tu cuerpo es un mapa de emociones</p>
-        </div>
-        
-        <div class="desc-instrucciones">
-            <p>Selecciona una zona del cuerpo para explorar su significado emocional</p>
-        </div>
-        
-        <div class="desc-zonas-nivel1">
-    `;
-    
-    if (zonasNivel1.length === 0) {
-        html += `
-            <div class="desc-empty">
-                <div class="empty-icon">❓</div>
-                <p>No se encontraron zonas</p>
-            </div>
-        `;
-    } else {
-        zonasNivel1.forEach(nivel1 => {
-            const count = data.filter(item => {
-                if (!item || !item.id) return false;
-                const niveles = parseDescId(item.id);
-                return niveles.nivel1 === nivel1;
-            }).length;
-            
-            html += `
-                <div class="desc-zona" onclick="renderNivel2('${nivel1}')">
-                    <span class="zona-icono">${iconosNivel1[nivel1] || '🔘'}</span>
-                    <div class="zona-nombre">${nivel1}</div>
-                    <div class="zona-count">${count} partes</div>
-                </div>
-            `;
-        });
-    }
-    
-    html += '</div>';
-    container.innerHTML = html;
-}
-
-function renderNivel2(nivel1) {
-    const container = document.getElementById('descodificacion-container');
-    const filteredData = cachedDescodificacion.filter(item => {
-        if (!item || !item.id) return false;
-        const niveles = parseDescId(item.id);
-        return niveles.nivel1 === nivel1;
-    });
-    
-    const zonasNivel2Set = new Set();
-    filteredData.forEach(item => {
-        const niveles = parseDescId(item.id);
-        if (niveles.nivel2) {
-            zonasNivel2Set.add(niveles.nivel2);
-        }
-    });
-    
-    const zonasNivel2 = Array.from(zonasNivel2Set);
-    
-    const iconosNivel2 = {
-        'Cara': '😊', 'Craneo': '💭', 'Cuello': '🔗', 'Sentidos': '👁️',
-        'Pecho': '💗', 'Abdomen': '🫃', 'Espalda': '🔙', 'Caderas': '🦴',
-        'Brazos': '💪', 'Manos': '🤲', 'Piernas': '🦵', 'Pies': '🦶'
-    };
-    
-    let html = `
-        <div class="desc-nav-back" onclick="renderNivel1(document.getElementById('descodificacion-container'))">
-            <span>←</span> Volver
-        </div>
-        
-        <h3 class="desc-level-title">🗺️ ${nivel1}</h3>
-        
-        <div class="desc-zonas-nivel2">
-    `;
-    
-    zonasNivel2.forEach(nivel2 => {
-        const count = filteredData.filter(item => {
-            const niveles = parseDescId(item.id);
-            return niveles.nivel2 === nivel2;
-        }).length;
-        
-        html += `
-            <div class="desc-zona" onclick="renderNivel3('${nivel1}', '${nivel2}')">
-                <span class="zona-icono">${iconosNivel2[nivel2] || '🔘'}</span>
-                <div class="zona-nombre">${nivel2}</div>
-                <div class="zona-count">${count} partes</div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    container.innerHTML = html;
-}
-
-function renderNivel3(nivel1, nivel2) {
-    const container = document.getElementById('descodificacion-container');
-    const filteredData = cachedDescodificacion.filter(item => {
-        if (!item || !item.id) return false;
-        const niveles = parseDescId(item.id);
-        return niveles.nivel1 === nivel1 && niveles.nivel2 === nivel2;
-    });
-    
-    let html = `
-        <div class="desc-nav-back" onclick="renderNivel2('${nivel1}')">
-            <span>←</span> ${nivel1}
-        </div>
-        
-        <h3 class="desc-level-title">📍 ${nivel2}</h3>
-        
-        <div class="desc-zonas-nivel2">
-    `;
-    
-    filteredData.forEach(item => {
-        const niveles = parseDescId(item.id);
-        const nombre = item.nombre || niveles.nivel3;
-        
-        html += `
-            <div class="desc-zona" onclick="showDescDetail('${item.id}')">
-                <span class="zona-icono">🔍</span>
-                <div class="zona-nombre">${nombre}</div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    container.innerHTML = html;
-}
-
-function showDescDetail(id) {
-    const item = cachedDescodificacion.find(i => i.id === id);
-    if (!item) return;
-    
-    const niveles = parseDescId(item.id);
-    const nombre = item.nombre || niveles.nivel3;
-    
-    const m = document.createElement('div');
-    m.className = 'modal-overlay active';
-    
-    const conflictoList = item.conflicto ? item.conflicto.split(/[|,]/).map(c => c.trim()).filter(Boolean) : [];
-    const sintomaList = item.sintoma ? item.sintoma.split(/[|,]/).map(s => s.trim()).filter(Boolean) : [];
-    const bloqueoList = item.bloqueo ? item.bloqueo.split(/[|,]/).map(b => b.trim()).filter(Boolean) : [];
-    
-    let cardsHtml = '';
-    
-    if (conflictoList.length) {
-        cardsHtml += `
-            <div class="desc-info-card">
-                <div class="info-header">
-                    <span class="info-icon">⚡</span>
-                    <span class="info-title">Conflicto Emocional</span>
-                </div>
-                <ul class="info-list">
-                    ${conflictoList.map(c => `<li>${c}</li>`).join('')}
-                </ul>
-            </div>
-        `;
-    }
-    
-    if (sintomaList.length) {
-        cardsHtml += `
-            <div class="desc-info-card">
-                <div class="info-header">
-                    <span class="info-icon">🔍</span>
-                    <span class="info-title">Síntomas Asociados</span>
-                </div>
-                <ul class="info-list">
-                    ${sintomaList.map(s => `<li>${s}</li>`).join('')}
-                </ul>
-            </div>
-        `;
-    }
-    
-    if (bloqueoList.length) {
-        cardsHtml += `
-            <div class="desc-info-card">
-                <div class="info-header">
-                    <span class="info-icon">🔒</span>
-                    <span class="info-title">Bloqueo Energético</span>
-                </div>
-                <ul class="info-list">
-                    ${bloqueoList.map(b => `<li>${b}</li>`).join('')}
-                </ul>
-            </div>
-        `;
-    }
-    
-    m.innerHTML = `
-        <div class="modal-content">
-            <button class="modal-close">&times;</button>
-            <div class="desc-detalle">
-                <div class="desc-detalle-header">
-                    <h3>${nombre}</h3>
-                    <span class="subtitulo">${niveles.nivel1} › ${niveles.nivel2}</span>
-                </div>
-                ${cardsHtml || '<p style="color:var(--text-muted);text-align:center;">Sin información disponible</p>'}
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(m);
-    
-    m.querySelector('.modal-close').addEventListener('click', () => m.remove());
-    m.addEventListener('click', (e) => { if (e.target === m) m.remove(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') m.remove(); });
-}
-
-// Funciones globales para onclick
-window.renderNivel1 = renderNivel1;
-window.renderNivel2 = renderNivel2;
-window.renderNivel3 = renderNivel3;
-window.showDescDetail = showDescDetail;
