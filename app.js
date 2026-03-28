@@ -809,6 +809,125 @@ async function loadServicios() {
 }
 
 // ======================
+// DESCODIFICACIÓN
+// ======================
+let sintomasIndex = [];
+let sintomasData = [];
+
+function normalizarTexto(texto) {
+    if (!texto) return '';
+    return texto.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .trim();
+}
+
+async function loadDescodificacion() {
+    const container = document.getElementById('descodificacion-container');
+    
+    // Cargar datos si no existen
+    if (sintomasData.length === 0) {
+        const data = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
+        
+        if (data && data.length > 0) {
+            sintomasData = data;
+            
+            // Crear índice de búsqueda
+            sintomasData.forEach(item => {
+                if (item.sintoma && item.id) {
+                    const sintomasArray = item.sintoma.split(',').map(s => normalizarTexto(s));
+                    const [area, subarea, parte] = item.id.split('-');
+                    
+                    sintomasArray.forEach(sintoma => {
+                        if (sintoma) {
+                            sintomasIndex.push({
+                                sintoma: sintoma,
+                                area: normalizarTexto(area),
+                                subarea: normalizarTexto(subarea),
+                                parte: normalizarTexto(parte),
+                                nombre: normalizarTexto(parte),
+                                conflicto: item.conflicto || '',
+                                bloqueo: item.bloqueo || ''
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    }
+    
+    container.innerHTML = `
+        <div class="descodificacion-page">
+            <h1 class="descodificacion-titulo">Descodificación</h1>
+            <p class="descodificacion-subtitulo">Tu cuerpo no se equivoca. Solo espera ser comprendido.</p>
+            
+            <div class="descodificacion-busqueda">
+                <input type="text" id="desc-input" class="desc-input" placeholder="Escribe lo que sientes..." />
+                <button class="desc-boton" onclick="buscarDescodificacion()">Interpretar</button>
+            </div>
+            
+            <div id="desc-resultado" class="desc-resultado"></div>
+            
+            <p class="desc-nota-legal">Esto no es un diagnóstico médico. Es una lectura simbólica del cuerpo.</p>
+        </div>
+    `;
+    
+    // Agregar event listener para Enter
+    document.getElementById('desc-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') buscarDescodificacion();
+    });
+}
+
+function buscarDescodificacion() {
+    const input = document.getElementById('desc-input');
+    const resultado = document.getElementById('desc-resultado');
+    const termino = normalizarTexto(input.value);
+    
+    if (!termino) {
+        resultado.innerHTML = '<p class="desc-error">Por favor ingresa un síntoma</p>';
+        return;
+    }
+    
+    // Buscar en el índice
+    const resultados = sintomasIndex.filter(item => item.sintoma.includes(termino));
+    
+    if (resultados.length > 0) {
+        const r = resultados[0];
+        const lectura = r.conflicto + '. Esto se sostiene por ' + r.bloqueo.toLowerCase() + '.';
+        
+        resultado.innerHTML = `
+            <div class="desc-card">
+                <h2 class="desc-nombre">${r.nombre}</h2>
+                <p class="desc-jerarquia">${r.area} → ${r.subarea} → ${r.parte}</p>
+                
+                <div class="desc-seccion">
+                    <h3>Conflicto</h3>
+                    <p>${r.conflicto}</p>
+                </div>
+                
+                <div class="desc-seccion">
+                    <h3>Síntomas relacionados</h3>
+                    <p class="desc-sintomas">${resultados.map(x => x.sintoma).join(', ')}</p>
+                </div>
+                
+                <div class="desc-seccion">
+                    <h3>Bloqueo</h3>
+                    <p>${r.bloqueo}</p>
+                </div>
+                
+                <div class="desc-lectura">
+                    <h3>Lectura</h3>
+                    <p>${lectura}</p>
+                </div>
+            </div>
+        `;
+    } else {
+        resultado.innerHTML = '<p class="desc-no-encontrado">No encontramos una lectura exacta, pero tu cuerpo sigue hablando.</p>';
+    }
+}
+
+window.buscarDescodificacion = buscarDescodificacion;
+
+// ======================
 // CONTACTO
 // ======================
 async function loadContacto() {

@@ -1599,3 +1599,170 @@ body {
     color: var(--text-muted);
     font-size: 0.85rem;
 }
+
+/* =====================================================
+   DESCODIFICACIÓN - NUEVA PÁGINA
+   ===================================================== */
+
+.descodificacion-page {
+    text-align: center;
+    padding: 20px 16px;
+}
+
+.descodificacion-titulo {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+
+.descodificacion-subtitulo {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+    font-style: italic;
+}
+
+.descodificacion-busqueda {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+    margin: 0 auto 24px;
+}
+
+.desc-input {
+    width: 100%;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 1rem;
+    text-align: center;
+}
+
+.desc-input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.desc-input::placeholder {
+    color: var(--text-muted);
+}
+
+.desc-boton {
+    padding: 14px 32px;
+    background: var(--gold);
+    border: none;
+    border-radius: var(--radius);
+    color: #000;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.desc-boton:hover {
+    background: var(--gold-light);
+}
+
+.desc-resultado {
+    margin-top: 24px;
+}
+
+.desc-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: left;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.desc-nombre {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.desc-jerarquia {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: capitalize;
+}
+
+.desc-seccion {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(212,175,55,0.1);
+}
+
+.desc-seccion:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.desc-seccion h3 {
+    color: var(--gold);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+.desc-seccion p {
+    color: var(--text);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.desc-sintomas {
+    color: var(--gold-light) !important;
+}
+
+.desc-lectura {
+    background: rgba(212,175,55,0.1);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.desc-lectura h3 {
+    color: var(--gold);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.desc-lectura p {
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.desc-error, .desc-no-encontrado {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px;
+}
+
+.desc-nota-legal {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-align: center;
+    margin-top: 32px;
+    font-style: italic;
+}
