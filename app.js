@@ -580,7 +580,11 @@ async function loadHorarios() {
             <div class="dia-actividades">`;
         
         if (actividadesDia.length === 0) {
-            html += `<span class="sin-actividad">-</span>`;
+            if (dia === 'domingo') {
+                html += `<span class="sin-actividad mensaje-domingo">Hoy es domingo… lo demás puede esperar.</span>`;
+            } else {
+                html += `<span class="sin-actividad">-</span>`;
+            }
         } else {
             actividadesDia.forEach((a, i) => {
                 html += `<div class="actividad-item">
