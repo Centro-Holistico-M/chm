@@ -210,7 +210,7 @@ body {
 
 /* NAV */
 .nav {
-    position: fixed; top: 84px; left: 0; right: 0;
+    position: fixed; top: 100px; left: 0; right: 0;
     display: flex; justify-content: center; gap: 6px;
     padding: 8px 12px;
     padding-bottom: calc(8px + var(--safe-area-inset-bottom));
@@ -258,7 +258,7 @@ body {
 
 /* CONTENT */
 .content { 
-    margin-top: 125px; 
+    margin-top: 145px; 
     padding: 16px; 
 }
 
