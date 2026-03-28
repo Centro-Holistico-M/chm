@@ -313,6 +313,24 @@ body {
     color: var(--bg);
 }
 
+.cal-hoy-btn {
+    display: block;
+    margin: 0 auto 10px;
+    padding: 6px 16px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cal-hoy-btn:hover {
+    background: var(--gold);
+    color: var(--bg);
+}
+
 .cal-dias-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);

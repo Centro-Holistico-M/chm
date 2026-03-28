@@ -381,6 +381,8 @@ function renderCalendario(year, month) {
     const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const currentDate = new Date();
+    const isCurrentMonth = year === currentDate.getFullYear() && month === currentDate.getMonth();
     
     let html = `
         <div class="calendario-widget">
@@ -389,6 +391,7 @@ function renderCalendario(year, month) {
                 <span class="cal-mes">${meses[month]} ${year}</span>
                 <button class="cal-nav-btn" onclick="navegarMes(${year}, ${month + 1})">▶</button>
             </div>
+            ${!isCurrentMonth ? '<button class="cal-hoy-btn" onclick="irAHoy()">Hoy</button>' : ''}
             <div class="cal-dias-header">`;
     
     diasSemana.forEach(d => { html += `<span>${d}</span>`; });
@@ -430,8 +433,14 @@ function navegarMes(year, month) {
     }
 }
 
+function irAHoy() {
+    const now = new Date();
+    navegarMes(now.getFullYear(), now.getMonth());
+}
+
 window.renderCalendario = renderCalendario;
 window.navegarMes = navegarMes;
+window.irAHoy = irAHoy;
 
 initCalendario();
 
