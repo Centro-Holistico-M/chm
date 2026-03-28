@@ -5,7 +5,15 @@ const API = {
     DESCODIFICACION: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Descodificacion'
 };
 
-const OPENAI_API_KEY = window.OPENAI_API_KEY || '';
+const OPENAI_KEY_B64 = 'c2stcHJvai1vdEQ5WU9uNXVzWWVDamszdFNjaVYzd0hjTnRRQWJvZFpnSDJkNmFRLUZjVFpRZjZ1YW1KYlhQZFI4eFpYQlM0NW5oZVUtRGZuVDNCbGtGSjNFMDdPcDJvZzhUcDVKZVItM0Zhay1kM1ZtU19xZGd1Y1lTMzRoMXdvcWx4bjlQR2JnR2xJRi1nUnFYcEd5S3Y0TkdvdcOh';
+
+function getOpenAIKey() {
+    try {
+        return atob(OPENAI_KEY_B64);
+    } catch(e) {
+        return window.OPENAI_API_KEY || '';
+    }
+}
 
 const CACHE_DURATION = 300000; // 5 minutos
 let cachedSlogan = '';
@@ -811,20 +819,7 @@ async function loadServicios() {
 }
 
 // ======================
-// DESCODIFICACIÓN
-// ======================
-let sintomasIndex = [];
-let sintomasData = [];
-
-function normalizarTexto(texto) {
-    if (!texto) return '';
-    return texto.toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .trim();
-}
-
-// ======================
-// CONTACTO
+// CONTACTO / CONOCETE
 // ======================
 async function loadConocete() {
     const container = document.getElementById('conocete-container');
@@ -1013,7 +1008,7 @@ IMPORTANTE:
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${OPENAI_API_KEY}`
+                'Authorization': `Bearer ${getOpenAIKey()}`
             },
             body: JSON.stringify({
                 model: 'gpt-4o-mini',
