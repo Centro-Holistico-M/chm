@@ -5,6 +5,8 @@ const API = {
     DESCODIFICACION: 'https://opensheet.elk.sh/1Tdxx6a3nKK8JmQvL8BwVzJhbFalWcHEAgd07cmt9uG0/Descodificacion'
 };
 
+const OPENAI_API_KEY = window.OPENAI_API_KEY || '';
+
 const CACHE_DURATION = 300000; // 5 minutos
 let cachedSlogan = '';
 let cachedWhatsApp = '';
@@ -104,6 +106,7 @@ async function loadTab(tab) {
         if (tab === 'horarios') await loadHorarios();
         else if (tab === 'servicios') await loadServicios();
         else if (tab === 'contacto') await loadContacto();
+        else if (tab === 'descodificacion') await loadDescodificacion();
     } catch (e) { console.error(e); }
     showLoading(false);
 }
@@ -991,5 +994,440 @@ async function loadSlogan() {
         }
     } catch(e) {}
 }
+
+// ============================================
+// DESCODIFICACIÓN - Sistema Híbrido
+// ============================================
+let sintomasIndex = [];
+let sintomasData = [];
+let cachedInterpretacion = {};
+
+function normalizarTexto(texto) {
+    if (!texto) return '';
+    return texto.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .trim();
+}
+
+async function loadDescodData() {
+    if (sintomasData.length > 0) return;
+    
+    const data = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
+    if (data && data.length > 0) {
+        sintomasData = data;
+        sintomasData.forEach(item => {
+            if (item.sintoma && item.zona) {
+                const sintomasArray = item.sintoma.split(',').map(s => normalizarTexto(s.trim()));
+                sintomasArray.forEach(sintoma => {
+                    if (sintoma) {
+                        sintomasIndex.push({
+                            sintoma: sintoma,
+                            zona: item.zona || '',
+                            subzona: item.subzona || '',
+                            conflicto: item.conflicto || '',
+                            emocion: item.emocion || '',
+                            palabras_clave: item.palabras_clave || '',
+                            recomendacion: item.recomendacion || '',
+                            intensidad: item.intensidad || ''
+                        });
+                    }
+                });
+            }
+        });
+    }
+}
+
+async function interpretarConIA(datosSintoma) {
+    const cacheKey = `${datosSintoma.sintoma}-${datosSintoma.zona}`;
+    if (cachedInterpretacion[cacheKey]) {
+        return cachedInterpretacion[cacheKey];
+    }
+
+    const prompt = `Eres un especialista en descodificación emocional y biológica del cuerpo humano. El cuerpo no miente nunca - cada síntoma es un mensaje.
+
+Datos del síntoma:
+- Síntoma: ${datosSintoma.sintoma}
+- Zona: ${datosSintoma.zona}
+- Subzona: ${datosSintoma.subzona}
+- Conflicto: ${datosSintoma.conflicto}
+- Emoción: ${datosSintoma.emocion}
+- Palabras clave: ${datosSintoma.palabras_clave}
+- Intensidad: ${datosSintoma.intensidad}
+
+Tu misión es transformar estos datos en un mensaje profundo, personal y transformador. El cuerpo le está hablando DIRECTAMENTE al usuario.
+
+Responde en este formato exacto (cada línea en una línea nueva):
+
+MENSAJE CLAVE: [Una frase poderosa que hit directo al alma]
+EXPLICACIÓN: [2-3 oraciones explicando la conexión cuerpo-emoción]
+MENSAJE DEL CUERPO: [Qué está intentando decir el cuerpo y por qué existe este síntoma]
+ACCIÓN CONSCIENTE: [Qué debe hacer el usuario a partir de hoy]
+RECOMENDACIÓN: [${datosSintoma.recomendacion || ' productos naturales como aceites esenciales, infusiones, suplementación'}]
+
+IMPORTANTE:
+- No menciones que eres una IA
+- Hazlo sentir como si el cuerpo le hablara directamente
+- No seas clínico ni repetitivo con los datos
+- Profundo, revelador, directo
+- Máximo 150 palabras en total`;
+
+    try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: prompt }],
+                max_tokens: 500,
+                temperature: 0.7
+            })
+        });
+
+        const result = await response.json();
+        const interpretacion = result.choices?.[0]?.message?.content || '';
+        cachedInterpretacion[cacheKey] = interpretacion;
+        return interpretacion;
+    } catch (e) {
+        console.error('Error IA:', e);
+        return null;
+    }
+}
+
+function parseInterpretacion(texto) {
+    if (!texto) return {};
+    const lineas = texto.split('\n');
+    const resultado = {};
+    lineas.forEach(linea => {
+        if (linea.includes(':')) {
+            const [key, ...value] = linea.split(':');
+            resultado[key.trim().toLowerCase()] = value.join(':').trim();
+        }
+    });
+    return resultado;
+}
+
+async function loadDescodificacion() {
+    const container = document.getElementById('descodificacion-container');
+    await loadDescodData();
+    
+    const zonasSet = new Set();
+    sintomasIndex.forEach(item => {
+        if (item.zona) zonasSet.add(item.zona);
+    });
+    const zonas = Array.from(zonasSet).sort();
+    
+    const iconosZonas = {
+        'cabeza': '🧠', 'cara': '😊', 'ojos': '👁️', 'oidos': '👂', 'boca': '👄',
+        'cuello': '🔗', 'hombros': '💪', 'pecho': '❤️', 'corazón': '💗',
+        'pulmones': '🫁', 'estómago': '🫃', 'hígado': '🫘', 'intestinos': '🌀',
+        'útero': '🌸', 'próstata': '🔵', 'vejiga': '💧', 'riñones': '🫘',
+        'piel': '🩹', 'articulaciones': '🦴', 'músculos': '💪', 'extremidades': '🦶'
+    };
+    
+    let html = `
+        <div class="desc-page">
+            <h2 class="desc-title">🔮 Descodificación</h2>
+            <p class="desc-subtitle">Tu cuerpo es un mapa de emociones</p>
+            
+            <div class="desc-buscar">
+                <input type="text" id="desc-input" class="desc-input" placeholder="¿Qué sientes?" />
+                <button class="desc-btn" onclick="buscarDescEnPagina()">Interpretar</button>
+            </div>
+            
+            <div id="desc-resultado-pagina"></div>
+            
+            <p class="desc-instruccion">O explora por zona del cuerpo:</p>
+            
+            <div class="desc-zonas-grid">
+    `;
+    
+    zonas.forEach(zona => {
+        const count = sintomasIndex.filter(s => s.zona === zona).length;
+        const icono = iconosZonas[zona.toLowerCase()] || '🔘';
+        html += `
+            <div class="desc-zona-card" onclick="mostrarSubzonas('${zona}')">
+                <span class="desc-zona-icono">${icono}</span>
+                <span class="desc-zona-nombre">${zona}</span>
+                <span class="desc-zona-count">${count} síntomas</span>
+            </div>
+        `;
+    });
+    
+    html += `
+            </div>
+            <p class="desc-nota">Esto no es un diagnóstico médico. Es una lectura emocional.</p>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+    
+    document.getElementById('desc-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') buscarDescEnPagina();
+    });
+}
+
+async function buscarDescEnPagina() {
+    const input = document.getElementById('desc-input');
+    const resultado = document.getElementById('desc-resultado-pagina');
+    const termino = normalizarTexto(input.value);
+    
+    if (!termino) {
+        resultado.innerHTML = '<p class="desc-error">¿Qué estás sintiendo?</p>';
+        return;
+    }
+    
+    showLoading(true);
+    await loadDescodData();
+    
+    const resultados = sintomasIndex.filter(item => item.sintoma.includes(termino));
+    
+    if (resultados.length > 0) {
+        const r = resultados[0];
+        const interpretacion = await interpretarConIA(r);
+        
+        if (interpretacion) {
+            const parsed = parseInterpretacion(interpretacion);
+            resultado.innerHTML = `
+                <div class="desc-card">
+                    <h3>${r.sintoma}</h3>
+                    <p class="desc-zona-info">📍 ${r.zona} ${r.subzona ? '› ' + r.subzona : ''}</p>
+                    
+                    ${parsed['mensaje clave'] ? `<p class="desc-mensaje-clave">"${parsed['mensaje clave']}"</p>` : ''}
+                    
+                    ${parsed['explicación'] ? `<p class="desc-explicacion">${parsed['explicación']}</p>` : ''}
+                    
+                    ${parsed['mensaje del cuerpo'] ? `<div class="desc-seccion">
+                        <span class="desc-seccion-icono">🧬</span>
+                        <p>${parsed['mensaje del cuerpo']}</p>
+                    </div>` : ''}
+                    
+                    ${parsed['acción consciente'] ? `<div class="desc-seccion">
+                        <span class="desc-seccion-icono">✨</span>
+                        <p>${parsed['acción consciente']}</p>
+                    </div>` : ''}
+                    
+                    ${parsed['recomendación'] ? `<div class="desc-recomendacion">
+                        <span class="desc-seccion-icono">🌿</span>
+                        <p>${parsed['recomendación']}</p>
+                    </div>` : ''}
+                </div>
+            `;
+        } else {
+            resultado.innerHTML = `
+                <div class="desc-card">
+                    <h3>${r.sintoma}</h3>
+                    <p class="desc-zona-info">📍 ${r.zona}</p>
+                    <p><strong>Conflicto:</strong> ${r.conflicto}</p>
+                    <p><strong>Emoción:</strong> ${r.emocion}</p>
+                    <p><strong>Recomendación:</strong> ${r.recomendacion}</p>
+                </div>
+            `;
+        }
+    } else {
+        resultado.innerHTML = `
+            <div class="desc-no-encontrado">
+                <p>No encontramos "${input.value}" en nuestro mapa corporal.</p>
+                <p class="desc-sugerencia">Prueba con otras palabras: dolor, tensión, fatiga, ansiedad...</p>
+            </div>
+        `;
+    }
+    
+    showLoading(false);
+}
+
+function mostrarSubzonas(zona) {
+    const container = document.getElementById('descodificacion-container');
+    const subzonasSet = new Set();
+    sintomasIndex.filter(s => s.zona === zona).forEach(s => {
+        if (s.subzona) subzonasSet.add(s.subzona);
+    });
+    const subzonas = Array.from(subzonasSet);
+    
+    let html = `
+        <div class="desc-nav-back" onclick="loadDescodificacion()">
+            <span>←</span> Volver
+        </div>
+        <h3 class="desc-level-title">📍 ${zona}</h3>
+        <div class="desc-zonas-grid">
+    `;
+    
+    subzonas.forEach(subzona => {
+        const count = sintomasIndex.filter(s => s.zona === zona && s.subzona === subzona).length;
+        html += `
+            <div class="desc-zona-card" onclick="mostrarSintomas('${zona}', '${subzona}')">
+                <span class="desc-zona-nombre">${subzona}</span>
+                <span class="desc-zona-count">${count} síntomas</span>
+            </div>
+        `;
+    });
+    
+    // Si no hay subzonas, mostrar todos los síntomas de la zona
+    if (subzonas.length === 0) {
+        const sintomas = sintomasIndex.filter(s => s.zona === zona);
+        sintomas.forEach(s => {
+            html += `
+                <div class="desc-zona-card" onclick="mostrarDetalleSintoma('${encodeURIComponent(JSON.stringify(s))}')">
+                    <span class="desc-zona-nombre">${s.sintoma}</span>
+                </div>
+            `;
+        });
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function mostrarSintomas(zona, subzona) {
+    const container = document.getElementById('descodificacion-container');
+    const sintomas = sintomasIndex.filter(s => s.zona === zona && s.subzona === subzona);
+    
+    let html = `
+        <div class="desc-nav-back" onclick="mostrarSubzonas('${zona}')">
+            <span>←</span> ${zona}
+        </div>
+        <h3 class="desc-level-title">📍 ${zona} › ${subzona}</h3>
+        <div class="desc-zonas-grid">
+    `;
+    
+    sintomas.forEach(s => {
+        html += `
+            <div class="desc-zona-card" onclick="mostrarDetalleSintoma('${encodeURIComponent(JSON.stringify(s))}')">
+                <span class="desc-zona-nombre">${s.sintoma}</span>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+async function mostrarDetalleSintoma(sintomaJson) {
+    const s = JSON.parse(decodeURIComponent(sintomaJson));
+    const container = document.getElementById('descodificacion-container');
+    
+    showLoading(true);
+    const interpretacion = await interpretarConIA(s);
+    showLoading(false);
+    
+    if (interpretacion) {
+        const parsed = parseInterpretacion(interpretacion);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay active';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+                <div class="desc-card desc-card-full">
+                    <h3>${s.sintoma}</h3>
+                    <p class="desc-zona-info">📍 ${s.zona} ${s.subzona ? '› ' + s.subzona : ''}</p>
+                    
+                    ${parsed['mensaje clave'] ? `<p class="desc-mensaje-clave">"${parsed['mensaje clave']}"</p>` : ''}
+                    ${parsed['explicación'] ? `<p class="desc-explicacion">${parsed['explicación']}</p>` : ''}
+                    ${parsed['mensaje del cuerpo'] ? `<div class="desc-seccion"><span class="desc-seccion-icono">🧬</span><p>${parsed['mensaje del cuerpo']}</p></div>` : ''}
+                    ${parsed['acción consciente'] ? `<div class="desc-seccion"><span class="desc-seccion-icono">✨</span><p>${parsed['acción consciente']}</p></div>` : ''}
+                    ${parsed['recomendación'] ? `<div class="desc-recomendacion"><span class="desc-seccion-icono">🌿</span><p>${parsed['recomendación']}</p></div>` : ''}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    }
+}
+
+window.buscarDescEnPagina = buscarDescEnPagina;
+window.mostrarSubzonas = mostrarSubzonas;
+window.mostrarSintomas = mostrarSintomas;
+window.mostrarDetalleSintoma = mostrarDetalleSintoma;
+
+// Actualizar búsqueda en Contacto para usar IA
+async function buscarSintoma() {
+    const input = document.getElementById('sintoma-input');
+    const resultado = document.getElementById('sintoma-resultado');
+    const termino = normalizarTexto(input.value);
+    
+    if (!termino) {
+        resultado.innerHTML = '<p class="error-buscar">¿Qué estás sintiendo?</p>';
+        return;
+    }
+    
+    showLoading(true);
+    await loadDescodData();
+    
+    const resultados = sintomasIndex.filter(item => item.sintoma.includes(termino));
+    
+    if (resultados.length > 0) {
+        const r = resultados[0];
+        const interpretacion = await interpretarConIA(r);
+        
+        if (interpretacion) {
+            const parsed = parseInterpretacion(interpretacion);
+            resultado.innerHTML = `
+                <div class="sintoma-card">
+                    <h4>${r.sintoma}</h4>
+                    <p class="desc-zona-info">📍 ${r.zona}</p>
+                    ${parsed['mensaje clave'] ? `<p class="desc-mensaje-clave">"${parsed['mensaje clave']}"</p>` : ''}
+                    ${parsed['explicación'] ? `<p class="desc-explicacion-corto">${parsed['explicación']}</p>` : ''}
+                    <div class="desc-botones">
+                        <button class="desc-btn-small" onclick="abrirModalInterpretacion('${encodeURIComponent(JSON.stringify(r))}')">Ver más</button>
+                        <button class="desc-btn-small desc-btn-outline" onclick="irADescodificacion()">Explorar</button>
+                    </div>
+                </div>
+            `;
+        }
+    } else {
+        resultado.innerHTML = `
+            <div class="no-encontrado">
+                <p>No encontramos "${input.value}" en nuestro mapa corporal.</p>
+                <p class="sugerencia">Prueba: dolor, cabeza, estómago, ansiedad...</p>
+            </div>
+        `;
+    }
+    
+    showLoading(false);
+}
+
+async function abrirModalInterpretacion(sintomaJson) {
+    const s = JSON.parse(decodeURIComponent(sintomaJson));
+    const interpretacion = await interpretarConIA(s);
+    
+    if (!interpretacion) return;
+    
+    const parsed = parseInterpretacion(interpretacion);
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay active';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">&times;</button>
+            <div class="desc-card">
+                <h3>${s.sintoma}</h3>
+                <p class="desc-zona-info">📍 ${s.zona} ${s.subzona ? '› ' + s.subzona : ''}</p>
+                
+                ${parsed['mensaje clave'] ? `<p class="desc-mensaje-clave">"${parsed['mensaje clave']}"</p>` : ''}
+                ${parsed['explicación'] ? `<p class="desc-explicacion">${parsed['explicación']}</p>` : ''}
+                ${parsed['mensaje del cuerpo'] ? `<div class="desc-seccion"><span class="desc-seccion-icono">🧬</span><p>${parsed['mensaje del cuerpo']}</p></div>` : ''}
+                ${parsed['acción consciente'] ? `<div class="desc-seccion"><span class="desc-seccion-icono">✨</span><p>${parsed['acción consciente']}</p></div>` : ''}
+                ${parsed['recomendación'] ? `<div class="desc-recomendacion"><span class="desc-seccion-icono">🌿</span><p>${parsed['recomendación']}</p></div>` : ''}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+}
+
+function irADescodificacion() {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector('[data-tab="descodificacion"]').classList.add('active');
+    document.getElementById('descodificacion').classList.add('active');
+    loadDescodificacion();
+}
+
+window.buscarSintoma = buscarSintoma;
+window.abrirModalInterpretacion = abrirModalInterpretacion;
+window.irADescodificacion = irADescodificacion;
 
 
