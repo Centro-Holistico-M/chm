@@ -27,19 +27,18 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWhatsApp();
     registerSW();
     
-    // Ocultar splash después de la animación (3.5s para permitir fusión)
+    // Fusionar logo después de la animación (3s)
     setTimeout(() => {
         const splash = document.getElementById('splash');
         if (splash) {
             splash.style.display = 'none';
         }
-        // Mostrar logo del header con animación de fusión
-        const headerLogo = document.querySelector('.header .logo');
-        if (headerLogo) {
-            headerLogo.style.opacity = '1';
-            headerLogo.style.animation = 'logoEntry 0.6s ease-out 0.2s both, logoPulse 2s ease-in-out infinite 1s';
+        // El logo ya está en posición, agregar clase para efecto pulso continuo
+        const fusionLogo = document.getElementById('fusion-logo');
+        if (fusionLogo) {
+            fusionLogo.classList.add('fused');
         }
-    }, 3500);
+    }, 3000);
     
     // Crear partículas del splash
     initSplashParticles();
