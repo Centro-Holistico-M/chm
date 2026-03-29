@@ -29,7 +29,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: splashFadeOut 0.5s ease-out 2.5s forwards;
+    animation: splashFadeOut 0.5s ease-out 3.3s forwards;
 }
 
 @keyframes splashFadeOut {
@@ -57,22 +57,30 @@
     50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
 }
 
-.splash-logo {
-    width: 80px;
-    height: 80px;
-    background: #000;
-    border-radius: 8px;
-    animation: splashLogo 2s ease-out both;
+.splash-logo-container {
     position: relative;
     z-index: 1;
-    padding: 6px;
 }
 
-@keyframes splashLogo {
-    0% { opacity: 0; transform: scale(0.5); }
-    20% { opacity: 1; transform: scale(1.05); }
-    40% { transform: scale(1); }
-    100% { opacity: 1; transform: scale(1); }
+.splash-logo {
+    width: 50px;
+    height: 50px;
+    background: #000;
+    border-radius: 8px;
+    animation: splashLogoFusion 3s ease-in-out both;
+    position: relative;
+    padding: 4px;
+    box-shadow: 0 0 25px rgba(212,175,55,0.6), 0 0 50px rgba(212,175,55,0.3);
+}
+
+@keyframes splashLogoFusion {
+    0% { opacity: 0; transform: scale(0.3) translateY(0); }
+    15% { opacity: 1; transform: scale(1.08) translateY(-30px); }
+    30% { transform: scale(1) translateY(-60px); }
+    50% { transform: scale(1.02) translateY(-100px); }
+    70% { transform: scale(1) translateY(-130px); opacity: 1; }
+    85% { opacity: 0.8; transform: scale(1) translateY(-150px); }
+    100% { opacity: 0; transform: scale(1) translateY(-160px); }
 }
 
 .splash-title {
@@ -86,6 +94,31 @@
 
 @keyframes splashTitle {
     to { opacity: 1; }
+}
+
+/* SPLASH PARTICLES */
+.splash-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.splash-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    opacity: 0;
+    animation: splashParticleFloat 3s ease-in-out infinite;
+}
+
+@keyframes splashParticleFloat {
+    0% { opacity: 0; transform: translateY(0) scale(0); }
+    20% { opacity: 0.8; transform: translateY(-20px) scale(1); }
+    80% { opacity: 0.4; transform: translateY(-80px) scale(0.5); }
+    100% { opacity: 0; transform: translateY(-100px) scale(0); }
 }
 
 html, body {

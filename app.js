@@ -27,14 +27,39 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWhatsApp();
     registerSW();
     
-    // Ocultar splash después de la animación
+    // Ocultar splash después de la animación (3.5s para permitir fusión)
     setTimeout(() => {
         const splash = document.getElementById('splash');
         if (splash) {
             splash.style.display = 'none';
         }
-    }, 2600);
+        // Mostrar logo del header con animación de fusión
+        const headerLogo = document.querySelector('.header .logo');
+        if (headerLogo) {
+            headerLogo.style.opacity = '1';
+            headerLogo.style.animation = 'logoEntry 0.6s ease-out 0.2s both, logoPulse 2s ease-in-out infinite 1s';
+        }
+    }, 3500);
+    
+    // Crear partículas del splash
+    initSplashParticles();
 });
+
+function initSplashParticles() {
+    const container = document.getElementById('splash-particles');
+    if (!container) return;
+    
+    for (let i = 0; i < 12; i++) {
+        const p = document.createElement('div');
+        p.className = 'splash-particle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = 60 + Math.random() * 30 + '%';
+        p.style.animationDelay = Math.random() * 2 + 's';
+        p.style.width = (Math.random() * 4 + 2) + 'px';
+        p.style.height = p.style.width;
+        container.appendChild(p);
+    }
+}
 
 async function loadWhatsApp() {
     try {
