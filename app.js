@@ -919,14 +919,6 @@ async function loadConocete() {
             
             ${redes ? `<p class="contacto-titulo-sección">Síguenos</p>
             <div class="redes-sociales">${redes}</div>` : ''}
-            
-            <div class="descodificacion-consulta">
-                <h3 class="section-subtitle">🔍 Descodificación</h3>
-                <p class="descodificacion-desc">Ingresa un síntoma para explorar su significado emocional</p>
-                <input type="text" id="sintoma-input" class="sintoma-input" placeholder="Ej: dolor de cabeza, ansiedad, fatiga..." />
-                <button class="sintoma-buscar-btn" onclick="buscarSintoma()">Buscar</button>
-                <div id="sintoma-resultado" class="sintoma-resultado"></div>
-            </div>
         </div>
     `;
 }
