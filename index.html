@@ -13,7 +13,7 @@
     <link rel="icon" type="image/png" href="images/logo.png">
     <link rel="apple-touch-icon" href="images/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=67">
+    <link rel="stylesheet" href="styles.css?v=69">
 </head>
 <body>
     <!-- Splash solo para fondo y partículas -->
@@ -22,44 +22,50 @@
         <div class="splash-particles" id="splash-particles"></div>
     </div>
 
-    <!-- Contenedor Principal Flexbox -->
-    <div class="app-container">
-        <!-- Header: Logo + Slogan -->
-        <header class="app-header">
-            <div id="fusion-logo" class="fusion-logo" onclick="irADescodificacion()">
-                <img src="images/logo.png" alt="Centro Holístico M">
-            </div>
-            <p class="slogan" id="slogan"></p>
-        </header>
-
-        <!-- Botones de Navegación -->
-        <nav class="nav">
-            <button class="nav-btn active" data-tab="horarios">Horarios</button>
+<!-- Contenedor Principal -->
+<div class="app-container">
+    <!-- Header FIJO -->
+    <header class="app-header-fixed">
+        <div id="fusion-logo" class="fusion-logo" onclick="irASeccionM()">
+            <img src="images/logo.png" alt="Centro Holístico M">
+        </div>
+        <p class="slogan" id="slogan"></p>
+        <nav class="nav-fixed">
+            <button class="nav-btn" data-tab="horarios">Horarios</button>
             <button class="nav-btn" data-tab="servicios">Eventos</button>
             <button class="nav-btn" data-tab="contacto">Contacto</button>
         </nav>
+    </header>
 
-        <!-- Contenido de Secciones -->
-        <main class="content">
-            <section id="horarios" class="tab-content active">
-                <div id="horarios-container"></div>
-            </section>
-            <section id="servicios" class="tab-content">
-                <div id="servicios-container"></div>
-            </section>
-            <section id="descodificacion" class="tab-content">
-                <div id="descodificacion-container"></div>
-            </section>
-            <section id="contacto" class="tab-content">
-                <div id="contacto-container"></div>
-            </section>
-        </main>
+    <!-- Contenido principal (entre header y footer fijos) -->
+    <main class="app-content">
+        <!-- SECTION M (oculta por defecto, solo visible vía logo) -->
+        <section id="seccion-m" class="tab-content hidden">
+            <div id="seccion-m-contenedor"></div>
+        </section>
+        
+        <!-- MINIAPPS (accesibles solo desde Section M) -->
+        <section id="descodificacion" class="tab-content hidden"></section>
+        <section id="yoga" class="tab-content hidden"></section>
+        <section id="living-light" class="tab-content hidden"></section>
+        
+        <!-- SECCIONES PRINCIPALES (accesibles vía nav buttons) -->
+        <section id="horarios" class="tab-content active">
+            <div id="horarios-container"></div>
+        </section>
+        <section id="servicios" class="tab-content hidden">
+            <div id="servicios-container"></div>
+        </section>
+        <section id="contacto" class="tab-content hidden">
+            <div id="contacto-container"></div>
+        </section>
+    </main>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <p>© 2026 Centro Holístico M. Todos los derechos reservados 🄼</p>
-        </footer>
-    </div>
+    <!-- Footer FIJO -->
+    <footer class="app-footer-fixed">
+        <p>© 2026 Centro Holístico M. Todos los derechos reservados 🄼</p>
+    </footer>
+</div>
 
     <div class="bg-aura"></div>
     <div class="particles" id="particles"></div>
@@ -68,7 +74,7 @@
         <div class="spinner"></div>
     </div>
 
-    <script src="app.js?v=67"></script>
+    <script src="app.js?v=68"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

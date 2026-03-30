@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadWhatsApp();
     registerSW();
     
+    // Establecer botón Horarios como activo al inicio
+    document.querySelector('.nav-btn[data-tab="horarios"]').classList.add('active');
+    
     // Fusionar logo después de la animación (3s)
     setTimeout(() => {
         const splash = document.getElementById('splash');
@@ -125,8 +128,14 @@ function initNavigation() {
             const tab = btn.dataset.tab;
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            // Ocultar Section M y todos los tab-content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active', 'hidden'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(tab).classList.remove('hidden');
             document.getElementById(tab).classList.add('active');
+            // Ocultar Section M si está visible
+            const seccionM = document.getElementById('seccion-m');
+            if (seccionM) seccionM.classList.add('hidden');
             loadTab(tab);
         });
     });
@@ -137,7 +146,6 @@ async function loadTab(tab) {
     try {
         if (tab === 'horarios') await loadHorarios();
         else if (tab === 'servicios') await loadServicios();
-        else if (tab === 'descodificacion') await loadDescodificacion();
         else if (tab === 'contacto') await loadContacto();
     } catch (e) { console.error(e); }
     showLoading(false);
@@ -1859,21 +1867,1013 @@ async function abrirModalInterpretacion(sintomaJson) {
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 }
 
-function irADescodificacion() {
-    console.debug('[CHM] irADescodificacion invoked');
+function irASeccionM() {
+    console.debug('[CHM] Accediendo a Section M vía logo');
+    // Resetear nav
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    const btn = document.querySelector('[data-tab="descodificacion"]');
-    if (btn) btn.classList.add('active');
-    const section = document.getElementById('descodificacion');
-    if (section) section.classList.add('active');
-    try {
-        loadDescodificacion();
-    } catch (e) {
-        console.error('Error al cargar Descodificación:', e);
+    // Ocultar todos los tab-content
+    document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.remove('active');
+        c.classList.add('hidden');
+    });
+    // Mostrar Section M
+    const seccionM = document.getElementById('seccion-m');
+    if (seccionM) {
+        seccionM.classList.remove('hidden');
+        seccionM.classList.add('active');
     }
+    // Cargar contenido de Section M
+    cargarSeccionM();
+}
+
+async function cargarSeccionM() {
+    const contenedor = document.getElementById('seccion-m-contenedor');
+    if (!contenedor) return;
+    
+    // Evitar recargar si ya tiene contenido
+    if (contenedor.querySelector('.miniapps-grid')) return;
+    
+    contenedor.innerHTML = `
+        <div class="seccion-m-header">
+            <h2>Sección M</h2>
+            <p>Explora nuestras herramientas de bienestar</p>
+        </div>
+        
+        <div class="miniapps-grid">
+            <!-- Miniapp Descodificación -->
+            <div class="miniapp-card" onclick="abrirMiniapp('descodificacion')">
+                <div class="miniapp-icon">🧠</div>
+                <div class="miniapp-titulo">Decodificación</div>
+                <div class="miniapp-descripcion">
+                    Entiende el mensaje detrás de tus síntomas
+                </div>
+            </div>
+            
+            <!-- Miniapp Yoga -->
+            <div class="miniapp-card" onclick="abrirMiniapp('yoga')">
+                <div class="miniapp-icon">🧘</div>
+                <div class="miniapp-titulo">Yoga Terapéutico</div>
+                <div class="miniapp-descripcion">
+                    Clases diarias basado en fase lunar
+                </div>
+            </div>
+            
+            <!-- Miniapp Living Light -->
+            <div class="miniapp-card" onclick="abrirMiniapp('living-light')">
+                <div class="miniapp-icon">💎</div>
+                <div class="miniapp-titulo">Living Light</div>
+                <div class="miniapp-descripcion">
+                    Análisis lingüístico y energético
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function abrirMiniapp(tipo) {
+    console.debug('[CHM] Abriendo miniapp:', tipo);
+    // Ocultar Section M
+    const seccionM = document.getElementById('seccion-m');
+    if (seccionM) {
+        seccionM.classList.remove('active');
+        seccionM.classList.add('hidden');
+    }
+    // Mostrar el miniapp seleccionado
+    const miniappSeccion = document.getElementById(tipo);
+    if (miniappSeccion) {
+        miniappSeccion.classList.remove('hidden');
+        miniappSeccion.classList.add('active');
+    }
+    // Cargar contenido específico del miniapp
+    switch(tipo) {
+        case 'descodificacion':
+            loadDescodificacion();
+            break;
+        case 'yoga':
+            loadYoga();
+            break;
+        case 'living-light':
+            // loadLivingLight(); // Pendiente implementación
+            break;
+    }
+}
+
+function volverASeccionM() {
+    console.debug('[CHM] Regresando a Section M');
+    // Ocultar todos los tab-content
+    document.querySelectorAll('.tab-content').forEach(c => {
+        c.classList.remove('active');
+        c.classList.add('hidden');
+    });
+    // Mostrar Section M
+    const seccionM = document.getElementById('seccion-m');
+    if (seccionM) {
+        seccionM.classList.remove('hidden');
+        seccionM.classList.add('active');
+    }
+}
+
+// ============================================
+// YOGA MINIAPP - Sistema de generación de clases
+// ============================================
+
+// Base de datos de posturas de yoga (placeholder - usuario proporcionará datos completos)
+let posturaDB = [
+    {
+        nombre: "Postura del Niño",
+        sanskrit: "Balasana",
+        tipo: ["flexibilidad", "relajación"],
+        fase_lunar_adecuada: ["luna_nueva", "luna_llena", "luna_menguante"],
+        intencion_alineada: ["soltar", "equilibrar"],
+        duracion_estimada_seg: 60,
+        instrucciones_clave: [
+            "Rodillas separadas ancho de caderas",
+            "Glúteos hacia talones",
+            "Frontal hacia el suelo",
+            "Brazos extendidos o a los lados",
+            "Respiración profunda en espalda"
+        ],
+        contraindicaciones: ["lesión de rodilla grave"],
+        beneficios: ["alivia ansiedad", "estira espalda baja", "calma mente"],
+        transicion_desde: {
+            "Perro Abajo": "Lleva las rodillas al suelo y siéntate sobre los talones"
+        },
+        transicion_hacia: {
+            "Gato-Vaca": "Desde Postura del Niño, inhala y lleva las manos al frente, arriba de la cabeza"
+        },
+        puntos_clave_instructor: [
+            "Mantener respiración profunda y lenta",
+            "Ajustar separación de rodillas según comodidad",
+            "Permitir que la espalda se redondee naturalmente"
+        ]
+    },
+    {
+        nombre: "Gato-Vaca",
+        sanskrit: "Marjaryasana-Bitilasana",
+        tipo: ["flexibilidad", "movilidad"],
+        fase_lunar_adecuada: ["luna_nueva", "media_luna_creciente", "luna_menguante"],
+        intencion_alineada: ["activar", "soltar", "equilibrar"],
+        duracion_estimada_seg: 45,
+        instrucciones_clave: [
+            "Manos bajo hombros, rodillas bajo caderas",
+            "Inhala: arquea espalda, pecho al frente",
+            "Exhala: redondea espalda, mentón al pecho",
+            "Movimiento fluido con respiración"
+        ],
+        contraindicaciones: ["lesión de muñeca"],
+        beneficios: ["moviliza columna", "masajea órganos abdominales", "sincroniza respiración"],
+        transicion_desde: {
+            "Postura del Niño": "Levanta el torso y lleva las manos al frente"
+        },
+        transicion_hacia: {
+            "Perro Abajo": "Desde Gato-Vaca, levanta caderas hacia arriba y atrás"
+        },
+        puntos_clave_instructor: [
+            "Iniciar movimiento desde coxis hasta cabeza",
+            "Movimiento fluido, no brusco",
+            "Mantener muñecas alineadas"
+        ]
+    },
+    {
+        nombre: "Perro Abajo",
+        sanskrit: "Adho Mukha Svanasana",
+        tipo: ["fuerza", "flexibilidad", "equilibrio"],
+        fase_lunar_adecuada: ["cuarto_creciente", "luna_llena", "cuarto_menguante"],
+        intencion_alineada: ["activar", "enfocar", "abrir"],
+        duracion_estimada_seg: 60,
+        instrucciones_clave: [
+            "Manos a ancho de hombros, pies a ancho de caderas",
+            "Levanta caderas hacia arriba y atrás",
+            "Presiona suelo con manos, alarga columna",
+            "Talones intentando llegar al suelo"
+        ],
+        contraindicaciones: ["hipertensión", "glaucoma", "lesión de hombro"],
+        beneficios: ["fortalece brazos y piernas", "estira espalda y piernas", "energiza"],
+        transicion_desde: {
+            "Gato-Vaca": "Levanta caderas hacia arriba y atrás",
+            "Postura del Niño": "Levanta caderas, llevando el peso hacia adelante"
+        },
+        transicion_hacia: {
+            "Guerrero I": "Lleva un pie al frente entre las manos"
+        },
+        puntos_clave_instructor: [
+            "Presionar fuerte contra el suelo con las manos",
+            "Mantener espalda recta, no redondear",
+            "Relajar cuello, mirar hacia ombligo"
+        ]
+    },
+    {
+        nombre: "Guerrero I",
+        sanskrit: "Virabhadrasana I",
+        tipo: ["fuerza", "equilibrio"],
+        fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["activar", "enfocar"],
+        duracion_estimada_seg: 60,
+        instrucciones_clave: [
+            "Pie delantero flexionado 90°, pie trasero a 45°",
+            "Cadera abierta hacia el lado",
+            "Brazos extendidos hacia el techo",
+            "Mirada hacia arriba o al frente"
+        ],
+        contraindicaciones: ["lesión de rodilla o cadera"],
+        beneficios: ["fortalece piernas", "mejora equilibrio", "abre caderas"],
+        transicion_desde: {
+            "Perro Abajo": "Lleva el pie derecho entre las manos, levanta el torso"
+        },
+        transicion_hacia: {
+            "Guerrero II": "Abre brazos y cadera hacia el lado"
+        },
+        puntos_clave_instructor: [
+            "Mantener rodilla delantera alineada con tobillo",
+            "Hundir talón trasero para estabilidad",
+            "Levantar pecho, alargar columna"
+        ]
+    },
+    {
+        nombre: "Guerrero II",
+        sanskrit: "Virabhadrasana II",
+        tipo: ["fuerza", "equilibrio"],
+        fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["activar", "enfocar", "equilibrar"],
+        duracion_estimada_seg: 60,
+        instrucciones_clave: [
+            "Pie delantero flexionado 90°, pie trasero a 45°",
+            "Cadera abierta hacia el lado",
+            "Brazos extendidos paralelos al suelo",
+            "Mirada sobre la mano delantera"
+        ],
+        contraindicaciones: ["lesión de rodilla o cadera"],
+        beneficios: ["fortalece piernas", "mejora equilibrio", "abre caderas"],
+        transicion_desde: {
+            "Guerrero I": "Abre brazos y cadera hacia el lado"
+        },
+        transicion_hacia: {
+            "Postura del Triángulo": "Endereza pierna delantera y desliza mano hacia pantorrilla"
+        },
+        puntos_clave_instructor: [
+            "Mantener rodilla delantera alineada con tobillo",
+            "Espalda recta, no inclinarse",
+            "Hundir ambos talones para estabilidad"
+        ]
+    },
+    {
+        nombre: "Postura del Triángulo",
+        sanskrit: "Trikonasana",
+        tipo: ["flexibilidad", "equilibrio"],
+        fase_lunar_adecuada: ["media_luna_creciente", "cuarto_creciente"],
+        intencion_alineada: ["abrir", "enfocar"],
+        duracion_estimada_seg: 60,
+        instrucciones_clave: [
+            "Piernas separadas ampliamente",
+            "Pie delantero 90°, pie trasero 45°",
+            "Extiende brazos y baja mano a pantorrilla",
+            "Extiende brazo superior al techo"
+        ],
+        contraindicaciones: ["lesión de cuello o espalda baja"],
+        beneficios: ["estira lados del torso", "abre caderas", "fortalece piernas"],
+        transicion_desde: {
+            "Guerrero II": "Endereza pierna delantera y baja mano"
+        },
+        transicion_hacia: {
+            "Árbol": "Levanta pierna trasera y coloca pie en interior del muslo"
+        },
+        puntos_clave_instructor: [
+            "Mantener ambos lados del torso igual de largos",
+            "Girar desde caderas, no espalda baja",
+            "Mirada hacia mano superior o al frente"
+        ]
+    },
+    {
+        nombre: "Postura del Árbol",
+        sanskrit: "Vrksasana",
+        tipo: ["equilibrio"],
+        fase_lunar_adecuada: ["luna_nueva", "cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["enfocar", "equilibrar"],
+        duracion_estimada_seg: 45,
+        instrucciones_clave: [
+            "Peso en pierna derecha",
+            "Pie izquierdo en interior del muslo derecho",
+            "Manos en posición de oración o hacia arriba",
+            "Mirada fija en un punto"
+        ],
+        contraindicaciones: ["dolor de rodilla"],
+        beneficios: ["mejora equilibrio", "fortalece piernas", "mejora concentración"],
+        transicion_desde: {
+            "Postura del Triángulo": "Levanta pierna trasera y coloca pie en muslo"
+        },
+        transicion_hacia: {
+            "Savasana": "Baja pierna y acuéstate boca arriba"
+        },
+        puntos_clave_instructor: [
+            "Encontrar punto de equilibrio antes de levantar pie",
+            "Mantener caderas niveladas",
+            "Presionar pie contra muslo, no al revés"
+        ]
+    },
+    {
+        nombre: "Savasana",
+        sanskrit: "Savasana",
+        tipo: ["relajación"],
+        fase_lunar_adecuada: ["luna_nueva", "media_luna_creciente", "cuarto_creciente", "luna_gibosa_creciente", "luna_llena", "luna_gibosa_menguante", "cuarto_menguante", "luna_menguante"],
+        intencion_alineada: ["soltar", "equilibrar"],
+        duracion_estimada_seg: 180,
+        instrucciones_clave: [
+            "Acuéstate boca arriba",
+            "Piernas ligeramente separadas",
+            "Brazos a los lados, palmas hacia arriba",
+            "Cierra ojos y relaja todo el cuerpo"
+        ],
+        contraindicaciones: ["embarazo avanzado"],
+        beneficios: ["relajación profunda", "reduce estrés", "integra práctica"],
+        transicion_desde: {
+            "Postura del Árbol": "Baja pierna y acuéstate boca arriba",
+            "Postura del Niño": "Gírate y acuéstate boca arriba"
+        },
+        transicion_hacia: {},
+        puntos_clave_instructor: [
+            "Guiar relajación progresiva",
+            "Mantener voz suave y lenta",
+            "Dar tiempo suficiente para relajación"
+        ]
+    }
+];
+
+// Constantes del sistema Yoga
+const FASE_LUNAR_MAP = {
+    'luna_nueva': { 
+        tipo: 'Hatha', 
+        intensidad: 'suave', 
+        ritmo: 'lento', 
+        enfoque: 'introspección, siembra de intenciones' 
+    },
+    'media_luna_creciente': { 
+        tipo: 'Vinyasa', 
+        intensidad: 'suave-moderada', 
+        ritmo: 'fluido', 
+        enfoque: 'expansión, crecimiento' 
+    },
+    'cuarto_creciente': { 
+        tipo: 'Vinyasa', 
+        intensidad: 'moderada', 
+        ritmo: 'dinámico', 
+        enfoque: 'acción, superación de obstáculos' 
+    },
+    'luna_gibosa_creciente': { 
+        tipo: 'Vinyasa', 
+        intensidad: 'moderada-alta', 
+        ritmo: 'fluido-poderoso', 
+        enfoque: 'refinamiento, preparación' 
+    },
+    'luna_llena': { 
+        tipo: 'Hatha', 
+        intensidad: 'intensa', 
+        ritmo: 'sostenido', 
+        enfoque: 'manifestación, liberación, iluminación' 
+    },
+    'luna_gibosa_menguante': { 
+        tipo: 'Hatha/Vinyasa mixto', 
+        intensidad: 'moderada', 
+        ritmo: 'introspectivo', 
+        enfoque: 'gratitud, compartición' 
+    },
+    'cuarto_menguante': { 
+        tipo: 'Hatha', 
+        intensidad: 'suave-moderada', 
+        ritmo: 'lento', 
+        enfoque: 'liberación, cierre de ciclos' 
+    },
+    'luna_menguante': { 
+        tipo: 'Hatha', 
+        intensidad: 'suave', 
+        ritmo: 'muy lento', 
+        enfoque: 'descanso, regeneración' 
+    }
+};
+
+const INTENCIONES_DIARIAS = [
+    'activar',      // energía, despertar, motivación
+    'soltar',       // liberación, rendición, fluir
+    'enfocar',      // concentración, claridad, precisión
+    'abrir',        // expansión, receptividad, vulnerabilidad
+    'equilibrar'    // estabilidad, armonía, neutralidad
+];
+
+// Historial para control de repetición
+let yogaHistorial = {
+    fechas: [],
+    posturasRecientes: [],
+    secuenciasRecientes: []
+};
+
+// Cargar historial de localStorage al inicio
+function cargarHistorialYoga() {
+    try {
+        const data = localStorage.getItem('yoga_historial');
+        if (data) yogaHistorial = JSON.parse(data);
+    } catch(e) {
+        console.warn('Error cargando historial de yoga:', e);
+    }
+}
+
+// Guardar historial en localStorage
+function guardarHistorialYoga() {
+    try {
+        localStorage.setItem('yoga_historial', JSON.stringify(yogaHistorial));
+    } catch(e) {
+        console.warn('Error guardando historial de yoga:', e);
+    }
+}
+
+// Obtener fase lunar actual (simplificado - se puede mejorar)
+function obtenerFaseLunarHoy() {
+    const hoy = new Date();
+    // Usar eventos lunares predefinidos si están disponibles
+    if (typeof EVENTS_DATA !== 'undefined') {
+        const evento = EVENTS_DATA.find(ev => ev.date === hoy.toISOString().split('T')[0]);
+        if (evento) {
+            const map = {
+                'new_moon': 'luna_nueva',
+                'first_quarter': 'cuarto_creciente',
+                'full_moon': 'luna_llena',
+                'last_quarter': 'cuarto_menguante'
+            };
+            return map[evento.type] || 'luna_nueva';
+        }
+    }
+    // Fallback: ciclo lunar aproximado (29.5 días)
+    const diaDelMes = hoy.getDate();
+    if (diaDelMes <= 2) return 'luna_nueva';
+    if (diaDelMes <= 9) return 'media_luna_creciente';
+    if (diaDelMes <= 15) return 'cuarto_creciente';
+    if (diaDelMes <= 22) return 'luna_llena';
+    if (diaDelMes <= 25) return 'cuarto_menguante';
+    return 'luna_menguante';
+}
+
+// Obtener intención diaria aleatoria
+function obtenerIntencionDiaria() {
+    // Usar fecha como seed para consistencia diaria
+    const hoy = new Date().toDateString();
+    const hash = Array.from(hoy).reduce((hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0);
+    const index = Math.abs(hash) % INTENCIONES_DIARIAS.length;
+    return INTENCIONES_DIARIAS[index];
+}
+
+// Generar mensaje del día
+function generarMensajeDia(fase, intention) {
+    const mensajes = {
+        'luna_nueva': {
+            activar: "Empieza con movimientos suaves para despertar el cuerpo sin forzar",
+            soltar: "En cada exhalación, imagina liberar tensión de hombros y mandíbula",
+            enfocar: "Mantén una mirada suave fija en un punto para mejorar la concentración",
+            abrir: "Abre ligeramente el pecho en cada inhalación para mejorar la respiración",
+            equilibrar: "Distribuye tu peso igualmente entre ambos pies antes de moverte"
+        },
+        'luna_llena': {
+            activar: "Aprovecha esta energía para mantener posturas fuertes con respiración estable",
+            soltar: "En cada postura, busca el punto donde el esfuerzo se convierte en liberación",
+            enfocar: "Enfócate en la alineación precisa de cada articulación",
+            abrir: "Expande tu conciencia más allá del cuerpo físico en cada exhalación",
+            equilibrar: "Encuentra la sutileza entre esfuerzo y entrega en posturas de equilibrio"
+        },
+        'default': {
+            activar: "Mueve tu cuerpo con energía consciente",
+            soltar: "Permite que la tensión se disuelva en cada respiración",
+            enfocar: "Lleva tu atención al momento presente",
+            abrir: "Expande tu respiración y tu corazón",
+            equilibrar: "Encuentra tu centro de gravedad y de paz"
+        }
+    };
+    
+    return mensajes[fase]?.[intention] || mensajes.default[intention] || 
+           `Hoy la ${fase} te invita a ${intention} con consciencia`;
+}
+
+// Filtrar posturas adecuadas
+function filtrarPosturasAdecuadas(fase, intention) {
+    return posturaDB.filter(p => 
+        p.fase_lunar_adecuada.includes(fase) &&
+        p.intencion_alineada.includes(intention) &&
+        !yogaHistorial.posturasRecientes.includes(p.nombre)
+    );
+}
+
+// Seleccionar posturas variadas
+function seleccionarPosturasVariadas(posturas, cantidad) {
+    if (posturas.length <= cantidad) return posturas;
+    // Mezclar y tomar las primeras 'cantidad'
+    const mezcladas = [...posturas].sort(() => Math.random() - 0.5);
+    return mezcladas.slice(0, cantidad);
+}
+
+// Generar transición contextual
+function generarTransicion(actual, siguiente) {
+    if (actual && siguiente && actual.transicion_hacia?.[siguiente.nombre]) {
+        return actual.transicion_hacia[siguiente.nombre];
+    }
+    if (siguiente && actual && siguiente.transicion_desde?.[actual.nombre]) {
+        return siguiente.transicion_desde[actual.nombre];
+    }
+    // Transiciones genéricas por tipo de cambio
+    const tiposActual = actual?.tipo || [];
+    const tiposSiguiente = siguiente?.tipo || [];
+    
+    if (tiposActual.includes('relajación') && tiposSiguiente.includes('fuerza')) {
+        return "Levántate lentamente y prepárate para más movimiento";
+    }
+    if (tiposActual.includes('fuerza') && tiposSiguiente.includes('flexibilidad')) {
+        return "Desde la postura anterior, busca apertura y suavidad";
+    }
+    if (tiposActual.includes('equilibrio') && tiposSiguiente.includes('equilibrio')) {
+        return "Mantén la concentración mientras transicionas";
+    }
+    return `Transición suave a ${siguiente?.nombre || 'siguiente postura'}`;
+}
+
+// Calcular estructura por duración
+function calcularEstructuraPorDuracion(duracionMinutos) {
+    const estructura = {
+        10: { inicio: 1, calentamiento: 2, flujoPrincipal: 4, posturasClave: 2, cierre: 1 },
+        20: { inicio: 2, calentamiento: 3, flujoPrincipal: 8, posturasClave: 4, cierre: 3 },
+        30: { inicio: 3, calentamiento: 4, flujoPrincipal: 12, posturasClave: 6, cierre: 5 }
+    };
+    return estructura[duracionMinutos] || estructura[20];
+}
+
+// Generar clase yoga guiada
+function generarClaseYogaGuiada(duracionSeleccionada = 20) {
+    const fase = obtenerFaseLunarHoy();
+    const intention = obtenerIntencionDiaria();
+    const caracteristicas = FASE_LUNAR_MAP[fase] || FASE_LUNAR_MAP['luna_nueva'];
+    
+    // Filtrar posturas adecuadas
+    const posturasAdecuadas = filtrarPosturasAdecuadas(fase, intention);
+    
+    // Generar mensaje del día
+    const mensajeDia = generarMensajeDia(fase, intention);
+    
+    // Estructura de tiempo
+    const estructura = calcularEstructuraPorDuracion(duracionSeleccionada);
+    
+    // Construir flujo guiado
+    const flujo = [];
+    
+    // INICIO (respiración)
+    flujo.push({
+        tipo: "inicio",
+        instrucciones: [
+            "Siéntate cómodamente, columna erguida",
+            "Cierra ojos, lleva atención a la respiración",
+            "Inhala profundo por nariz, exhala completamente",
+            `Hoy: ${mensajeDia}`
+        ]
+    });
+    
+    // CALENTAMIENTO
+    if (posturasAdecuadas.length > 0) {
+        const calentamientoPosturas = seleccionarPosturasVariadas(
+            posturasAdecuadas.filter(p => p.tipo.includes('flexibilidad') || p.tipo.includes('movilidad')),
+            estructura.calentamiento
+        );
+        
+        if (calentamientoPosturas.length > 0) {
+            flujo.push({
+                tipo: "calentamiento",
+                pasos: calentamientoPosturas.map((p, i) => ({
+                    postura: p.nombre,
+                    duracion: `${Math.max(3, Math.round(p.duracion_estimada_seg / 20))} respiraciones`,
+                    guia: p.instrucciones_clave[0] || "Mantén respiración consciente"
+                }))
+            });
+        }
+    }
+    
+    // FLUJO PRINCIPAL
+    const flujoPosturas = seleccionarPosturasVariadas(
+        posturasAdecuadas.filter(p => p.tipo.includes('fuerza') || p.tipo.includes('equilibrio')),
+        estructura.flujoPrincipal
+    );
+    
+    if (flujoPosturas.length > 0) {
+        const flujoSteps = [];
+        flujoPosturas.forEach((postura, i) => {
+            // Añadir postura
+            flujoSteps.push({
+                postura: postura.nombre,
+                duracion: `${Math.max(3, Math.round(postura.duracion_estimada_seg / 15))} respiraciones`,
+                guia: postura.instrucciones_clave[0] || "Mantén postura con respiración estable"
+            });
+            
+            // Añadir transición si no es la última
+            if (i < flujoPosturas.length - 1) {
+                const siguiente = flujoPosturas[i + 1];
+                flujoSteps.push({
+                    transicion: generarTransicion(postura, siguiente)
+                });
+            }
+        });
+        
+        flujo.push({
+            tipo: "flujo",
+            pasos: flujoSteps
+        });
+    }
+    
+    // POSTURAS CLAVE
+    const posturasClave = seleccionarPosturasVariadas(
+        posturasAdecuadas.filter(p => p.tipo.includes('flexibilidad') || p.tipo.includes('relajación')),
+        estructura.posturasClave
+    );
+    
+    if (posturasClave.length > 0) {
+        flujo.push({
+            tipo: "posturas_clave",
+            pasos: posturasClave.map(p => ({
+                postura: p.nombre,
+                duracion: `${Math.max(3, Math.round(p.duracion_estimada_seg / 10))} respiraciones`,
+                guia: p.instrucciones_clave[0] || "Mantén postura, respira profundamente"
+            }))
+        });
+    }
+    
+    // CIERRE
+    flujo.push({
+        tipo: "cierre",
+        pasos: [
+            {
+                postura: "Savasana",
+                duracion: "2 minutos",
+                guia: "Relaja todo el cuerpo, cierra ojos, respira naturalmente"
+            },
+            {
+                transicion: "Levántate lentamente, llevando la calma contigo"
+            },
+            {
+                instrucciones: ["Clase finalizada. Namaste 🙏"]
+            }
+        ]
+    });
+    
+    // Modo instructor mejorado
+    const modoInstructor = {
+        ritmoGeneral: caracteristicas.ritmo,
+        respiracionPorPostura: "3 a 6 respiraciones (ajustar según postura)",
+        puntosClave: [
+            `Enfoque: ${caracteristicas.enfoque}`,
+            "Mantener conciencia de la respiración en todo momento",
+            "No forzar rango de movimiento; honrar los límites del cuerpo",
+            ...(intention === 'soltar' ? ["Enfatizar la exhalación para liberar tensión"] : []),
+            ...(intention === 'activar' ? ["Iniciar movimientos con inhalación energética"] : []),
+            "Observar la calidad de movimiento, no la cantidad"
+        ]
+    };
+    
+    // Verificar similitud con historial
+    if (esClaseAdecuadamenteUnica(flujo, yogaHistorial)) {
+        // Actualizar historial
+        yogaHistorial.fechas.push(new Date().toISOString().split('T')[0]);
+        if (yogaHistorial.fechas.length > 7) yogaHistorial.fechas.shift();
+        
+        // Actualizar posturas recientes
+        const posturasUsadas = flujo.flatMap(seccion => 
+            seccion.pasos?.filter(p => p.postura).map(p => p.postura) || []
+        );
+        yogaHistorial.posturasRecientes = [...new Set([...posturasUsadas, ...yogaHistorial.posturasRecientes])].slice(0, 20);
+        
+        // Actualizar secuencias recientes
+        const secuenciaHash = Array.from(JSON.stringify(flujo)).reduce(
+            (hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0
+        );
+        yogaHistorial.secuenciasRecientes = [secuenciaHash.toString(), ...yogaHistorial.secuenciasRecientes].slice(0, 5);
+        
+        guardarHistorialYoga();
+    }
+    
+    return {
+        fecha: new Date().toISOString().split('T')[0],
+        faseLunar: fase,
+        tipoYoga: caracteristicas.tipo,
+        duracion: duracionSeleccionada,
+        intention: intention,
+        mensajeDia: mensajeDia,
+        flujo: flujo,
+        modoInstructor: modoInstructor
+    };
+}
+
+function esClaseAdecuadamenteUnica(flujo, historial) {
+    if (!historial || historial.secuenciasRecientes.length === 0) return true;
+    
+    // Verificar similitud simple
+    const secuenciaHash = Array.from(JSON.stringify(flujo)).reduce(
+        (hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0
+    );
+    
+    return !historial.secuenciasRecientes.includes(secuenciaHash.toString());
+}
+
+// Cargar miniapp Yoga
+function loadYoga() {
+    console.debug('[CHM] Cargando miniapp Yoga');
+    const container = document.getElementById('yoga');
+    if (!container) return;
+    
+    // Inicializar historial
+    cargarHistorialYoga();
+    
+    // Obtener fase lunar
+    const faseActual = obtenerFaseLunarHoy();
+    const caracteristicas = FASE_LUNAR_MAP[faseActual] || FASE_LUNAR_MAP['luna_nueva'];
+    
+    container.innerHTML = `
+        <div class="yoga-miniapp">
+            <div class="yoga-header">
+                <div class="fase-lunar-indicador">
+                    <span class="fase-icon">🌙</span>
+                    <span class="fase-texto">${faseActual.replace(/_/g, ' ')}</span>
+                </div>
+                <div class="duracion-selector">
+                    <label>Duración:</label>
+                    <select id="duracion-select">
+                        <option value="10">10 min</option>
+                        <option value="20" selected>20 min</option>
+                        <option value="30">30 min</option>
+                    </select>
+                </div>
+                <button id="generar-btn" class="yoga-btn-primary">
+                    Generar Clase de Hoy
+                </button>
+            </div>
+            
+            <div id="clase-generada" class="clase-container">
+                <!-- Se mostrará la clase generada aquí -->
+            </div>
+            
+            <div class="modo-instructor-toggle">
+                <label>
+                    <input type="checkbox" id="modo-instructor">
+                    Mostrar Guía para Instructor
+                </label>
+            </div>
+            
+            <button class="btn-regresar-seccion-m" onclick="volverASeccionM()">
+                ← Volver a Sección M
+            </button>
+        </div>
+    `;
+    
+    // Event listeners
+    document.getElementById('generar-btn').addEventListener('click', () => {
+        const duracion = parseInt(document.getElementById('duracion-select').value);
+        const clase = generarClaseYogaGuiada(duracion);
+        mostrarClaseYogaGuiada(clase);
+    });
+    
+    // Auto-generar clase al cargar
+    setTimeout(() => {
+        const duracion = parseInt(document.getElementById('duracion-select').value) || 20;
+        const clase = generarClaseYogaGuiada(duracion);
+        mostrarClaseYogaGuiada(clase);
+    }, 300);
+}
+
+// Mostrar clase generada
+function mostrarClaseYogaGuiada(clase) {
+    const container = document.getElementById('clase-generada');
+    if (!container) return;
+    
+    const mostrarInstructor = document.getElementById('modo-instructor')?.checked || false;
+    
+    // Generar HTML del flujo
+    const flujoHTML = clase.flujo.map((seccion, seccionIndex) => {
+        if (seccion.instrucciones) {
+            return `
+                <div class="paso-instrucciones">
+                    <div class="seccion-header">
+                        <span class="seccion-numero">${seccionIndex + 1}</span>
+                        <span class="seccion-tipo">Inicio</span>
+                    </div>
+                    <div class="instrucciones-lista">
+                        ${seccion.instrucciones.map(i => `<p class="instruccion">${i}</p>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (seccion.pasos) {
+            const pasosHTML = seccion.pasos.map((paso, i) => {
+                if (paso.postura) {
+                    const postura = posturaDB.find(p => p.nombre === paso.postura);
+                    const puntosClaveHTML = mostrarInstructor && postura?.puntos_clave_instructor ? 
+                        `<div class="puntos-clave-instructor">
+                            <strong>Puntos clave:</strong>
+                            <ul>${postura.puntos_clave_instructor.map(p => `<li>${p}</li>`).join('')}</ul>
+                        </div>` : '';
+                    
+                    return `
+                        <div class="paso-postura">
+                            <div class="paso-numero">${seccionIndex + 1}.${i + 1}</div>
+                            <div class="postura-contenido">
+                                <h4>${paso.postura}</h4>
+                                <div class="postura-detalles">
+                                    <span class="duracion">⏱️ ${paso.duracion}</span>
+                                    <span class="guia">📢 ${paso.guia}</span>
+                                </div>
+                                ${puntosClaveHTML}
+                            </div>
+                        </div>
+                    `;
+                } else if (paso.transicion) {
+                    return `
+                        <div class="paso-transicion">
+                            <div class="transicion-contenido">
+                                <span class="transicion-icon">→</span>
+                                <span class="transicion-texto">${paso.transicion}</span>
+                            </div>
+                        </div>
+                    `;
+                } else if (paso.instrucciones) {
+                    return `
+                        <div class="paso-instrucciones-final">
+                            ${paso.instrucciones.map(i => `<p class="instruccion-final">${i}</p>`).join('')}
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('');
+            
+            return `
+                <div class="seccion-flujo">
+                    <div class="seccion-header">
+                        <span class="seccion-numero">${seccionIndex + 1}</span>
+                        <span class="seccion-tipo">${seccion.tipo}</span>
+                    </div>
+                    ${pasosHTML}
+                </div>
+            `;
+        }
+        return '';
+    }).join('');
+    
+    // Modo instructor
+    const modoInstructorHTML = mostrarInstructor ? `
+        <div class="modo-instructor-panel">
+            <h4>Modo Instructor</h4>
+            <div class="instructor-info">
+                <p><strong>Ritmo:</strong> ${clase.modoInstructor.ritmoGeneral}</p>
+                <p><strong>Respiración:</strong> ${clase.modoInstructor.respiracionPorPostura}</p>
+                <p><strong>Puntos clave:</strong></p>
+                <ul>
+                    ${clase.modoInstructor.puntosClave.map(p => `<li>${p}</li>`).join('')}
+                </ul>
+            </div>
+        </div>
+    ` : '';
+    
+    container.innerHTML = `
+        <div class="clase-generada-header">
+            <div class="clase-info">
+                <div class="clase-tipo">${clase.tipoYoga}</div>
+                <div class="clase-duracion">${clase.duracion} min</div>
+                <div class="clase-intencion">Intención: ${clase.intention}</div>
+            </div>
+            <div class="clase-mensaje">
+                <p>${clase.mensajeDia}</p>
+            </div>
+        </div>
+        
+        <div class="clase-flujo">
+            ${flujoHTML}
+        </div>
+        
+        ${modoInstructorHTML}
+        
+        <div class="clase-controles">
+            <button id="btn-anterior" class="clase-btn-control" disabled>← Anterior</button>
+            <span id="contador-pasos">1 / ${clase.flujo.length}</span>
+            <button id="btn-siguiente" class="clase-btn-control">Siguiente →</button>
+            
+            <div class="clase-modos">
+                <label class="clase-modo-item">
+                    <input type="checkbox" id="chk-pantalla-lima">
+                    <span>Pantalla limpia</span>
+                </label>
+                <label class="clase-modo-item">
+                    <input type="checkbox" id="chk-automatico">
+                    <span>Auto-avanzar</span>
+                    <span id="contador-tiempo">--:--</span>
+                </label>
+            </div>
+        </div>
+    `;
+    
+    // Inicializar navegación de clase
+    inicializarNavegacionClase(clase);
+    
+    // Event listener para modo instructor
+    const modoCheckbox = document.getElementById('modo-instructor');
+    if (modoCheckbox) {
+        modoCheckbox.addEventListener('change', () => {
+            mostrarClaseYogaGuiada(clase);
+        });
+    }
+}
+
+// Inicializar navegación de clase
+function inicializarNavegacionClase(clase) {
+    let pasoActual = 0;
+    let intervaloAutomatico = null;
+    const pasosTotales = clase.flujo.length;
+    
+    const btnAnterior = document.getElementById('btn-anterior');
+    const btnSiguiente = document.getElementById('btn-siguiente');
+    const contadorPasos = document.getElementById('contador-pasos');
+    const chkAutomatico = document.getElementById('chk-automatico');
+    const contadorTiempo = document.getElementById('contador-tiempo');
+    
+    function actualizarControles() {
+        if (!btnAnterior || !btnSiguiente || !contadorPasos) return;
+        
+        btnAnterior.disabled = pasoActual === 0;
+        btnSiguiente.disabled = pasoActual === pasosTotales - 1;
+        contadorPasos.textContent = `${pasoActual + 1} / ${pasosTotales}`;
+    }
+    
+    function avanzarPaso() {
+        if (pasoActual < pasosTotales - 1) {
+            pasoActual++;
+            actualizarControles();
+            scrollToPaso(pasoActual);
+        }
+    }
+    
+    function retrocederPaso() {
+        if (pasoActual > 0) {
+            pasoActual--;
+            actualizarControles();
+            scrollToPaso(pasoActual);
+        }
+    }
+    
+    function scrollToPaso(index) {
+        const pasos = document.querySelectorAll('.seccion-flujo, .paso-instrucciones');
+        if (pasos[index]) {
+            pasos[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    
+    function reiniciarTemporizadorAutomatico() {
+        clearInterval(intervaloAutomatico);
+        if (!contadorTiempo) return;
+        contadorTiempo.textContent = "--:--";
+        
+        if (chkAutomatico?.checked && pasoActual < pasosTotales - 1) {
+            const seccion = clase.flujo[pasoActual];
+            let segundos = 30; // Valor por defecto
+            
+            if (seccion.pasos) {
+                const primerPaso = seccion.pasos[0];
+                if (primerPaso.duracion) {
+                    const match = primerPaso.duracion.match(/(\d+)\s*respiraciones/);
+                    if (match) segundos = parseInt(match[1]) * 4;
+                }
+            }
+            
+            let tiempoRestante = segundos;
+            intervaloAutomatico = setInterval(() => {
+                tiempoRestante--;
+                const mins = Math.floor(tiempoRestante / 60);
+                const secs = tiempoRestante % 60;
+                contadorTiempo.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (tiempoRestante <= 0) {
+                    avanzarPaso();
+                }
+            }, 1000);
+        }
+    }
+    
+    // Event listeners
+    if (btnSiguiente) btnSiguiente.addEventListener('click', avanzarPaso);
+    if (btnAnterior) btnAnterior.addEventListener('click', retrocederPaso);
+    if (chkAutomatico) {
+        chkAutomatico.addEventListener('change', () => {
+            if (chkAutomatico.checked) {
+                reiniciarTemporizadorAutomatico();
+            } else {
+                clearInterval(intervaloAutomatico);
+                if (contadorTiempo) contadorTiempo.textContent = "--:--";
+            }
+        });
+    }
+    
+    // Inicializar
+    actualizarControles();
 }
 
 window.buscarSintoma = buscarSintoma;
 window.abrirModalInterpretacion = abrirModalInterpretacion;
-window.irADescodificacion = irADescodificacion;
+window.irASeccionM = irASeccionM;
+window.abrirMiniapp = abrirMiniapp;
+window.volverASeccionM = volverASeccionM;
+window.loadYoga = loadYoga;
