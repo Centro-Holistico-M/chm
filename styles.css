@@ -98,13 +98,9 @@
     animation: logoPulse 2s ease-in-out infinite;
 }
 
-.fusion-logo.fused + .slogan,
-body:has(.fusion-logo.fused) .slogan {
-    position: relative;
-    top: auto;
-    left: auto;
-    transform: none;
-    z-index: 100;
+.fusion-logo.fused .slogan {
+    opacity: 1;
+    animation: sloganPulse 3s ease-in-out 1s infinite;
 }
 
 @keyframes logoPulse {
@@ -288,14 +284,9 @@ body {
 .slogan {
     font-family: 'Montserrat', sans-serif; 
     color: var(--gold);
-    font-size: 0.85rem; 
+    font-size: 0.75rem; 
     font-weight: 600;
     letter-spacing: 0.5px;
-    position: fixed;
-    top: calc(8px + var(--safe-area-inset-top) + 50px + 6px);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
     opacity: 0;
     animation: sloganEntry 0.5s ease-out 0.5s both;
 }
