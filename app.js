@@ -957,8 +957,8 @@ function normalizarTexto(texto) {
         .trim();
 }
 
-async function loadDescodData() {
-    if (sintomasData.length > 0) return;
+async function loadDescodData(force=false) {
+    if (!force && sintomasData.length > 0) return;
     
     const data = await fetchAPI(API.DESCODIFICACION, 'ch_descodificacion');
     if (data && data.length > 0) {
@@ -1088,6 +1088,9 @@ function renderDescodPaso0(container) {
                 <div class="descod-botones">
                     <button class="descod-btn" onclick="renderDescodPaso1()">Explorar mi síntoma</button>
                     <button class="descod-btn-outline" onclick="renderModoExploracion()">Explorar manualmente</button>
+                </div>
+                <div class="descod-botones" style="margin-top:6px;">
+                    <button class="descod-btn-outline" onclick="actualizarDescodDatos()">Actualizar datos</button>
                 </div>
             </div>
         </div>
@@ -1291,6 +1294,26 @@ function renderGuardarProceso() {
             </div>
         </div>
     `;
+}
+
+function actualizarDescodDatos() {
+  // Reset in-memory caches to fetch fresh data
+  sintomasIndex = [];
+  sintomasData = [];
+  // Force reload
+  loadDescodData(true).then(() => {
+    const container = document.getElementById('descodificacion-container');
+    if (container) {
+      const note = document.createElement('div');
+      note.className = 'desc-nota';
+      note.style.color = 'var(--gold)';
+      note.textContent = 'Datos actualizados';
+      container.appendChild(note);
+      setTimeout(() => note.remove(), 1700);
+    }
+  }).catch((e) => {
+    console.error('Error actualizando datos', e);
+  });
 }
 
 function renderModoExploracion() {
@@ -1826,13 +1849,17 @@ async function abrirModalInterpretacion(sintomaJson) {
 function irADescodificacion() {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelector('[data-tab="descodificacion"]').classList.add('active');
-    document.getElementById('descodificacion').classList.add('active');
-    loadDescodificacion();
+    const btn = document.querySelector('[data-tab="descodificacion"]');
+    if (btn) btn.classList.add('active');
+    const section = document.getElementById('descodificacion');
+    if (section) section.classList.add('active');
+    try {
+        loadDescodificacion();
+    } catch (e) {
+        console.error('Error al cargar Descodificación:', e);
+    }
 }
 
 window.buscarSintoma = buscarSintoma;
 window.abrirModalInterpretacion = abrirModalInterpretacion;
 window.irADescodificacion = irADescodificacion;
-
-
