@@ -2834,19 +2834,38 @@ function generarClaseVinyasa(duracion, intention) {
             secuenciaBase = [...SECUENCIAS_VINYASA.sun_salutation_a_suave];
     }
     
-    // 3. Calcular número de repeticiones según duración
-    // Cada secuencia dura aproximadamente 3-5 minutos
-    const repeticiones = Math.max(1, Math.ceil(duracion / 4));
+    // 3. Calcular tiempo objetivo en segundos
+    const tiempoTotalSeg = duracion * 60;
+    const tiempoReservadoCierre = 60; // 1 minuto para cierre
+    const tiempoDisponible = tiempoTotalSeg - tiempoReservadoCierre;
     
-    // 4. Generar flujo con variaciones
+    // 4. Generar flujo limitado por tiempo
     const flujoCompleto = [];
+    let tiempoUsado = 0;
+    let intentos = 0;
+    const MAX_INTENTOS = 50;
     
-    for (let i = 0; i < repeticiones; i++) {
+    // Primero, añadir posturas de apertura (respiración)
+    const posturaApertura = obtenerPosturaPorNombre('Postura del Niño');
+    if (posturaApertura) {
+        const duracionApertura = Math.min(30, Math.floor(tiempoDisponible * 0.1));
+        flujoCompleto.push({
+            nombre: 'Postura del Niño',
+            tipo: 'apertura',
+            duracionSeg: duracionApertura
+        });
+        tiempoUsado += duracionApertura;
+    }
+    
+    // Añadir secuencias mientras haya tiempo
+    while (tiempoUsado < tiempoDisponible && intentos < MAX_INTENTOS) {
+        intentos++;
+        
         // Copiar secuencia base
         let secuencia = [...secuenciaBase];
         
-        // Insertar posturas adicionales aleatoriamente (no en la primera repetición)
-        if (i > 0 && Math.random() > 0.6) {
+        // Insertar posturas adicionales aleatoriamente (no en la primera iteración)
+        if (intentos > 1 && Math.random() > 0.7) {
             const posturasExtra = filtrarPosturasPorTipoClase('vinyasa')
                 .filter(p => !secuencia.includes(p.nombre));
             
@@ -2857,45 +2876,86 @@ function generarClaseVinyasa(duracion, intention) {
             }
         }
         
-        // Añadir postura de pico en la penúltima repetición
-        if (i === repeticiones - 2 && intensidad !== 'suave') {
-            const posturasPico = ['Guerrero III', 'Ardha Chandrasana', 'Chaturanga Dandasana'];
-            const posturaPico = posturasPico[Math.floor(Math.random() * posturasPico.length)];
-            secuencia.splice(Math.floor(secuencia.length / 2), 0, posturaPico);
+        // Procesar cada postura de la secuencia
+        for (const nombrePostura of secuencia) {
+            const postura = obtenerPosturaPorNombre(nombrePostura);
+            if (!postura) continue;
+            
+            // Calcular duración de la postura
+            let duracionSeg = postura.duracion_vinyasa || 
+                calcularDuracionAutomatica(postura, 'vinyasa');
+            
+            // Ajustar según intensidad
+            if (intensidad === 'suave') duracionSeg *= 1.2;
+            if (intensidad === 'intensa') duracionSeg *= 0.8;
+            
+            // Verificar si hay tiempo suficiente
+            if (tiempoUsado + duracionSeg > tiempoDisponible) {
+                // Si es la última postura necesaria, reducir duración
+                if (tiempoDisponible - tiempoUsado > 5) {
+                    duracionSeg = tiempoDisponible - tiempoUsado;
+                } else {
+                    break;
+                }
+            }
+            
+            // Añadir postura al flujo
+            flujoCompleto.push({
+                nombre: nombrePostura,
+                tipo: 'vinyasa',
+                duracionSeg: duracionSeg
+            });
+            
+            tiempoUsado += duracionSeg;
+            
+            // Verificar si se alcanzó el tiempo
+            if (tiempoUsado >= tiempoDisponible) break;
         }
         
-        // Añadir secuencia al flujo completo
-        flujoCompleto.push(...secuencia);
+        // Verificar si se alcanzó el tiempo
+        if (tiempoUsado >= tiempoDisponible) break;
     }
     
-    // 5. Asignar tiempos y transiciones
-    const flujoFinal = flujoCompleto.map((nombrePostura, indice) => {
-        const postura = obtenerPosturaPorNombre(nombrePostura);
-        if (!postura) return null;
-        
-        // Calcular duración
-        let duracionSeg = postura.duracion_vinyasa || 
-            calcularDuracionAutomatica(postura, 'vinyasa');
-        
-        // Ajustar según intensidad
-        if (intensidad === 'suave') duracionSeg *= 1.2;
-        if (intensidad === 'intensa') duracionSeg *= 0.8;
+    // 5. Añadir postura de cierre
+    const posturaCierre = obtenerPosturaPorNombre('Savasana');
+    if (posturaCierre) {
+        flujoCompleto.push({
+            nombre: 'Savasana',
+            tipo: 'cierre',
+            duracionSeg: tiempoReservadoCierre
+        });
+    }
+    
+    // 6. Convertir a formato final con transiciones
+    const flujoFinal = [];
+    for (let i = 0; i < flujoCompleto.length; i++) {
+        const item = flujoCompleto[i];
+        const postura = obtenerPosturaPorNombre(item.nombre);
+        if (!postura) continue;
         
         // Generar transición
         let transicion = '';
-        if (indice < flujoCompleto.length - 1) {
-            const siguiente = flujoCompleto[indice + 1];
-            transicion = generarTransicionVinyasa(nombrePostura, siguiente);
+        if (i < flujoCompleto.length - 1) {
+            const siguiente = flujoCompleto[i + 1];
+            transicion = generarTransicionVinyasa(item.nombre, siguiente.nombre);
         }
         
-        return {
+        // Formatear duración
+        const minutos = Math.floor(item.duracionSeg / 60);
+        const segundos = Math.round(item.duracionSeg % 60);
+        const duracionFormateada = minutos > 0 
+            ? `${minutos}:${segundos.toString().padStart(2, '0')} min`
+            : `${segundos} seg`;
+        
+        flujoFinal.push({
             postura: postura.nombre,
-            duracion: `${Math.round(duracionSeg / 4)} respiraciones`,
+            duracion: duracionFormateada,
+            duracionSeg: item.duracionSeg,
             guia: postura.instrucciones_clave[0] || "Mantén flujo continuo",
             transicion: transicion,
             tipo: 'vinyasa'
-        };
-    }).filter(Boolean);
+        });
+    }
     
     return {
         tipo: 'vinyasa',
@@ -2903,7 +2963,8 @@ function generarClaseVinyasa(duracion, intention) {
         flujo: flujoFinal,
         ritmo: intensidad === 'suave' ? 'fluido-suave' : (intensidad === 'intensa' ? 'fluido-dinámico' : 'fluido'),
         respiracion: "inhala-eleva, exhala-flexiona",
-        intensidad: intensidad
+        intensidad: intensidad,
+        tiempoTotalSeg: tiempoUsado + tiempoReservadoCierre
     };
 }
 
@@ -2948,52 +3009,111 @@ function generarTransicionVinyasa(actual, siguiente) {
 function generarClaseHatha(duracion, intention) {
     console.debug('[Yoga] Generando clase Hatha:', { duracion, intention });
     
-    // 1. Distribuir tiempo por categorías según intención
-    const distribucion = calcularDistribucionHatha(duracion, intention);
+    // 1. Calcular tiempo objetivo en segundos
+    const tiempoTotalSeg = duracion * 60;
+    const tiempoReservadoCierre = 120; // 2 minutos para cierre
+    const tiempoDisponible = tiempoTotalSeg - tiempoReservadoCierre;
     
-    // 2. Seleccionar posturas por categoría
-    const flujo = [];
+    // 2. Distribuir tiempo por categorías según intención
+    const distribucion = calcularDistribucionHatha(tiempoDisponible / 60, intention);
+    
+    // 3. Seleccionar posturas por categoría con límite de tiempo
+    const flujoCompleto = [];
+    let tiempoUsado = 0;
     
     // Apertura (respiración y posturas suaves)
-    flujo.push(...seleccionarPosturasPorCategoriaHatha('respiración', distribucion.apertura));
+    const posturasApertura = seleccionarPosturasPorCategoriaHatha('respiración', distribucion.apertura);
+    for (const postura of posturasApertura) {
+        const duracionSeg = postura.duracion_hatha || 
+            calcularDuracionAutomatica(postura, 'hatha');
+        
+        if (tiempoUsado + duracionSeg <= tiempoDisponible) {
+            flujoCompleto.push({
+                nombre: postura.nombre,
+                tipo: 'apertura',
+                duracionSeg: duracionSeg
+            });
+            tiempoUsado += duracionSeg;
+        }
+    }
     
     // Cuerpo principal (categorías según intención)
     Object.entries(distribucion.cuerpo).forEach(([categoria, minutos]) => {
-        flujo.push(...seleccionarPosturasPorCategoriaHatha(categoria, minutos));
+        const posturasCategoria = seleccionarPosturasPorCategoriaHatha(categoria, minutos);
+        
+        for (const postura of posturasCategoria) {
+            const duracionSeg = postura.duracion_hatha || 
+                calcularDuracionAutomatica(postura, 'hatha');
+            
+            // Ajustar según intención
+            let duracionAjustada = duracionSeg;
+            if (intention === 'soltar') duracionAjustada *= 1.2;
+            if (intention === 'activar') duracionAjustada *= 0.9;
+            
+            if (tiempoUsado + duracionAjustada <= tiempoDisponible) {
+                flujoCompleto.push({
+                    nombre: postura.nombre,
+                    tipo: categoria,
+                    duracionSeg: duracionAjustada
+                });
+                tiempoUsado += duracionAjustada;
+            }
+        }
     });
     
-    // Cierre (relajación)
-    flujo.push(...seleccionarPosturasPorCategoriaHatha('relajación', distribucion.cierre));
+    // 4. Ordenar lógicamente (suelo → pie → suelo)
+    const posturasParaOrdenar = flujoCompleto.map(item => {
+        return {
+            nombre: item.nombre,
+            tipo: item.tipo,
+            duracionSeg: item.duracionSeg,
+            postura: obtenerPosturaPorNombre(item.nombre)
+        };
+    }).filter(item => item.postura);
     
-    // 3. Ordenar lógicamente (suelo → pie → suelo)
-    const flujoOrdenado = ordenarPosturasHatha(flujo);
+    const flujoOrdenado = ordenarPosturasHatha(posturasParaOrdenar.map(item => item.postura));
     
-    // 4. Asignar tiempos y transiciones
-    const flujoFinal = flujoOrdenado.map((postura, indice) => {
-        // Calcular duración
-        let duracionSeg = postura.duracion_hatha || 
-            calcularDuracionAutomatica(postura, 'hatha');
-        
-        // Ajustar según intención
-        if (intention === 'soltar') duracionSeg *= 1.2;
-        if (intention === 'activar') duracionSeg *= 0.9;
+    // 5. Añadir postura de cierre
+    const posturaCierre = obtenerPosturaPorNombre('Savasana');
+    if (posturaCierre) {
+        flujoCompleto.push({
+            nombre: 'Savasana',
+            tipo: 'cierre',
+            duracionSeg: tiempoReservadoCierre
+        });
+    }
+    
+    // 6. Convertir a formato final con transiciones
+    const flujoFinal = [];
+    for (let i = 0; i < flujoCompleto.length; i++) {
+        const item = flujoCompleto[i];
+        const postura = obtenerPosturaPorNombre(item.nombre);
+        if (!postura) continue;
         
         // Generar transición
         let transicion = '';
-        if (indice < flujoOrdenado.length - 1) {
-            const siguiente = flujoOrdenado[indice + 1];
-            transicion = generarTransicionHatha(postura.nombre, siguiente.nombre);
+        if (i < flujoCompleto.length - 1) {
+            const siguiente = flujoCompleto[i + 1];
+            transicion = generarTransicionHatha(item.nombre, siguiente.nombre);
         }
         
-        return {
+        // Formatear duración
+        const minutos = Math.floor(item.duracionSeg / 60);
+        const segundos = Math.round(item.duracionSeg % 60);
+        const duracionFormateada = minutos > 0 
+            ? `${minutos}:${segundos.toString().padStart(2, '0')} min`
+            : `${segundos} seg`;
+        
+        flujoFinal.push({
             postura: postura.nombre,
-            duracion: `${Math.round(duracionSeg / 6)} respiraciones profundas`,
+            duracion: duracionFormateada,
+            duracionSeg: item.duracionSeg,
             guia: postura.instrucciones_clave[1] || postura.instrucciones_clave[0] || "Mantén postura con respiración consciente",
             transicion: transicion,
             puntos_clave: postura.puntos_clave_instructor || [],
             tipo: 'hatha'
-        };
-    });
+        });
+    }
     
     return {
         tipo: 'hatha',
@@ -3001,7 +3121,8 @@ function generarClaseHatha(duracion, intention) {
         flujo: flujoFinal,
         ritmo: 'lento-meditativo',
         respiracion: "5-8 respiraciones profundas por postura",
-        intention: intention
+        intention: intention,
+        tiempoTotalSeg: tiempoUsado + tiempoReservadoCierre
     };
 }
 
@@ -3850,7 +3971,7 @@ function inicializarNavegacionClase(clase) {
     }
     
     function scrollToPaso(index) {
-        const pasos = document.querySelectorAll('.seccion-flujo, .paso-instrucciones');
+        const pasos = document.querySelectorAll('.paso-postura, .paso-transicion');
         if (pasos[index]) {
             pasos[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -3862,14 +3983,21 @@ function inicializarNavegacionClase(clase) {
         contadorTiempo.textContent = "--:--";
         
         if (chkAutomatico?.checked && pasoActual < pasosTotales - 1) {
-            const seccion = clase.flujo[pasoActual];
+            const paso = clase.flujo[pasoActual];
             let segundos = 30; // Valor por defecto
             
-            if (seccion.pasos) {
-                const primerPaso = seccion.pasos[0];
-                if (primerPaso.duracion) {
-                    const match = primerPaso.duracion.match(/(\d+)\s*respiraciones/);
-                    if (match) segundos = parseInt(match[1]) * 4;
+            // Usar duracionSeg si está disponible
+            if (paso.duracionSeg) {
+                segundos = Math.round(paso.duracionSeg);
+            } else if (paso.duracion) {
+                // Intentar parsear la duración formateada (ej: "1:30 min" o "45 seg")
+                const matchMin = paso.duracion.match(/(\d+):(\d+)\s*min/);
+                const matchSeg = paso.duracion.match(/(\d+)\s*seg/);
+                
+                if (matchMin) {
+                    segundos = parseInt(matchMin[1]) * 60 + parseInt(matchMin[2]);
+                } else if (matchSeg) {
+                    segundos = parseInt(matchSeg[1]);
                 }
             }
             
