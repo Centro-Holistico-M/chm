@@ -928,19 +928,32 @@ window.buscarSintoma = buscarSintoma;
 async function loadSlogan() {
     const el = document.getElementById('slogan');
     if (!el) return;
+    
+    // If we have cached slogan, use it immediately
     if (cachedSlogan) {
         el.textContent = cachedSlogan;
         el.classList.add('visible');
         return;
     }
+    
     try {
         const data = await fetchAPI(API.CONTACTO, 'ch_contacto');
-        if (data[0]?.Slogan) {
-            cachedSlogan = data[0].Slogan;
-            el.textContent = cachedSlogan;
-            el.classList.add('visible');
+        if (data && data.length > 0 && data[0].Slogan) {
+            cachedSlogan = data[0].Slogan.trim();
+            // Only set if we actually have content
+            if (cachedSlogan) {
+                el.textContent = cachedSlogan;
+                el.classList.add('visible');
+                return;
+            }
         }
-    } catch(e) {}
+    } catch(e) {
+        console.warn('Could not load slogan from API:', e);
+    }
+    
+    // Fallback: set a default slogan to ensure visibility
+    el.textContent = "Centro Holístico M";
+    el.classList.add('visible');
 }
 
 // ============================================
@@ -1847,6 +1860,7 @@ async function abrirModalInterpretacion(sintomaJson) {
 }
 
 function irADescodificacion() {
+    console.debug('[CHM] irADescodificacion invoked');
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     const btn = document.querySelector('[data-tab="descodificacion"]');

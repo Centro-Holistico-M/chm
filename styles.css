@@ -291,7 +291,7 @@ body {
     letter-spacing: 0.5px;
     white-space: nowrap;
     opacity: 0;
-    animation: sloganEntry 0.5s ease-out 0.5s both;
+    animation: sloganEntry 0.5s ease-out 0.5s forwards;
 }
 
 @keyframes sloganEntry {
