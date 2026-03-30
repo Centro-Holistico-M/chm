@@ -334,13 +334,13 @@ body {
 
 .nav-btn {
     flex: 1; 
-    max-width: 85px; 
-    padding: 8px 4px;
+    max-width: 100px; 
+    padding: 8px 6px;
     background: transparent; 
     border: 1px solid rgba(212,175,55,0.25);
     color: var(--text-muted); 
     font-family: 'Cinzel', serif;
-    font-size: 0.6rem; 
+    font-size: 0.65rem; 
     border-radius: var(--radius-sm); 
     cursor: pointer;
     transition: all 0.3s;
@@ -372,8 +372,13 @@ body {
 .tab-content { 
     display: none; 
     animation: contentEntry 0.5s ease-out both; 
+    min-height: calc(100vh - 130px);
 }
-.tab-content.active { display: block; }
+.tab-content.active { 
+    display: block; 
+    overflow-y: auto;
+    max-height: calc(100vh - 130px);
+}
 
 @keyframes contentEntry {
     from { opacity: 0; transform: translateY(20px); }
@@ -941,20 +946,25 @@ body {
     }
     
     .nav {
-        top: 52px;
+        top: 50px;
         gap: 2px;
-        padding: 5px 6px;
+        padding: 4px 5px;
     }
     
     .nav-btn {
-        padding: 6px 3px;
-        font-size: 0.55rem;
-        max-width: 72px;
-        min-height: 36px;
+        padding: 5px 2px;
+        font-size: 0.5rem;
+        max-width: 33%;
+        min-height: 32px;
+    }
+    
+    .tab-content {
+        min-height: calc(100vh - 95px);
+        max-height: calc(100vh - 95px);
     }
     
     .card {
-        padding: 14px;
+        padding: 10px;
     }
     
     .card h3 {
