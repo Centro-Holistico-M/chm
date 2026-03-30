@@ -1057,10 +1057,244 @@ function parseInterpretacion(texto) {
     return resultado;
 }
 
+// ============================================
+// DESCODIFICACIÓN GUIADA - Experience
+// ============================================
+
+// Estado global
+let descodEstado = {
+    step: 0,
+    sintoma: '',
+    resultados: [],
+    indiceActual: 0,
+    intentosNoResuena: 0
+};
+
 async function loadDescodificacion() {
     const container = document.getElementById('descodificacion-container');
-    
     await loadDescodData();
+    renderDescodPaso0(container);
+}
+
+function renderDescodPaso0(container) {
+    descodEstado.step = 0;
+    descodEstado.intentosNoResuena = 0;
+    descodEstado.indiceActual = 0;
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-frase">No llegaste aquí por casualidad</p>
+                <div class="descod-botones">
+                    <button class="descod-btn" onclick="renderDescodPaso1()">Explorar mi síntoma</button>
+                    <button class="descod-btn-outline" onclick="renderModoExploracion()">Explorar manualmente</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderDescodPaso1() {
+    const container = document.getElementById('descodificacion-container');
+    descodEstado.step = 1;
+    descodEstado.intentosNoResuena = 0;
+    descodEstado.indiceActual = 0;
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-pregunta">¿Qué sientes?</p>
+                <input type="text" id="descod-input" class="descod-input" placeholder="Ej: dolor de cabeza, ansiedad..." />
+                <button class="descod-btn" onclick="buscarSintomaGuiado()">Escuchar</button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('descod-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') buscarSintomaGuiado();
+    });
+}
+
+function buscarSintomaGuiado() {
+    const input = document.getElementById('descod-input');
+    const termino = normalizarTexto(input.value);
+    
+    if (!termino || termino.length < 2) {
+        alert('Por favor escribe qué sientes');
+        return;
+    }
+    
+    const terminos = termino.split(' ').filter(t => t.length > 2);
+    const resultados = sintomasIndex.filter(item => {
+        const textoBusqueda = `${item.sintoma} ${item.zona} ${item.subzona} ${item.emocion}`.toLowerCase();
+        return terminos.some(t => textoBusqueda.includes(t));
+    });
+    
+    if (resultados.length === 0) {
+        alert('No encontramos ese síntoma. Prueba con otras palabras');
+        return;
+    }
+    
+    descodEstado.resultados = resultados;
+    descodEstado.indiceActual = 0;
+    descodEstado.sintoma = termino;
+    
+    renderDescodPaso2();
+}
+
+function renderDescodPaso2() {
+    const container = document.getElementById('descodificacion-container');
+    descodEstado.step = 2;
+    
+    const r = descodEstado.resultados[descodEstado.indiceActual];
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-sintoma">${r.sintoma}</p>
+                <p class="descod-frase-sub">No es casualidad que estés sintiendo esto</p>
+                <p class="descod-frase-sub">El cuerpo ya habló… ahora escúchalo</p>
+                <button class="descod-btn" onclick="renderDescodPaso3()">Continuar</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderDescodPaso3() {
+    const container = document.getElementById('descodificacion-container');
+    descodEstado.step = 3;
+    
+    const r = descodEstado.resultados[descodEstado.indiceActual];
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-label">Conflicto</p>
+                <p class="descod-texto">${r.conflicto}</p>
+                <p class="descod-frase-sub">Observa sin juzgar… solo siente si hay algo ahí</p>
+                <div class="descod-botones">
+                    <button class="descod-btn" onclick="renderDescodPaso4()">Esto me resuena</button>
+                    <button class="descod-btn-outline" onclick="siguienteResultado()">No me resuena</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function siguienteResultado() {
+    descodEstado.intentosNoResuena++;
+    
+    if (descodEstado.intentosNoResuena >= 3) {
+        renderNoMatch();
+        return;
+    }
+    
+    descodEstado.indiceActual = (descodEstado.indiceActual + 1) % descodEstado.resultados.length;
+    renderDescodPaso3();
+}
+
+function renderNoMatch() {
+    const container = document.getElementById('descodificacion-container');
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-frase">Tal vez esto no se trata de encontrar la respuesta… sino de observarte un poco más</p>
+                <div class="descod-botones">
+                    <button class="descod-btn" onclick="renderDescodPaso1()">Intentar de nuevo</button>
+                    <button class="descod-btn-outline" onclick="renderModoExploracion()">Explorar manualmente</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderDescodPaso4() {
+    const container = document.getElementById('descodificacion-container');
+    descodEstado.step = 4;
+    
+    const r = descodEstado.resultados[descodEstado.indiceActual];
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-label">Emoción</p>
+                <p class="descod-texto">${r.emocion}</p>
+                <button class="descod-btn" onclick="renderDescodPaso5()">Continuar</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderDescodPaso5() {
+    const container = document.getElementById('descodificacion-container');
+    descodEstado.step = 5;
+    
+    const r = descodEstado.resultados[descodEstado.indiceActual];
+    const palabras = r.palabras_clave ? r.palabras_clave.split(',').map(p => p.trim()) : [];
+    
+    let palabrasHtml = '';
+    if (palabras.length > 0 && palabras[0]) {
+        palabrasHtml = `
+            <div class="descod-palabras">
+                ${palabras.map(p => `<span class="descod-palabra">${p}</span>`).join('')}
+            </div>
+        `;
+    }
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-label">Patrón</p>
+                ${palabrasHtml}
+                <p class="descod-pregunta-italic">¿Qué estás intentando evitar?</p>
+                <input type="text" id="descod-input-evitar" class="descod-input" placeholder="Escribe si lo sientes... (opcional)" />
+                <button class="descod-btn" onclick="renderDescodPaso6()">Continuar</button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('descod-input-evitar').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') renderDescodPaso6();
+    });
+}
+
+function renderDescodPaso6() {
+    const container = document.getElementById('descodificacion-container');
+    descodEstado.step = 6;
+    
+    const r = descodEstado.resultados[descodEstado.indiceActual];
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-label">Recomendación</p>
+                <p class="descod-texto">${r.recomendacion}</p>
+                <p class="descod-mensaje-final">Tu cuerpo no es el problema… es el mensaje</p>
+                <div class="descod-botones">
+                    <button class="descod-btn" onclick="renderDescodPaso1()">Explorar otro síntoma</button>
+                    <button class="descod-btn-outline" onclick="renderGuardarProceso()">Guardar proceso</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderGuardarProceso() {
+    const container = document.getElementById('descodificacion-container');
+    
+    container.innerHTML = `
+        <div class="descod-container descod-fade">
+            <div class="descod-paso">
+                <p class="descod-frase">Esto que viste… es tuyo ahora</p>
+                <button class="descod-btn" onclick="renderDescodPaso0()">Cerrar</button>
+            </div>
+        </div>
+    `;
+}
+
+function renderModoExploracion() {
+    const container = document.getElementById('descodificacion-container');
     
     const zonasSet = new Set();
     sintomasIndex.forEach(item => {
@@ -1077,54 +1311,155 @@ async function loadDescodificacion() {
     };
     
     let html = `
-        <div class="desc-page">
-            <h2 class="desc-title">🔮 Descodificación</h2>
-            <p class="desc-subtitle">Tu cuerpo es un mapa de emociones</p>
-            
-            <div class="desc-buscar">
-                <input type="text" id="desc-input" class="desc-input" placeholder="¿Qué sientes?" />
-                <button class="desc-btn" onclick="buscarDescEnPagina()">Interpretar</button>
+        <div class="descod-container">
+            <div class="descod-paso">
+                <p class="descod-pregunta">¿Qué sientes?</p>
+                <input type="text" id="desc-input-manual" class="descod-input" placeholder="Ej: dolor de cabeza..." />
+                <button class="descod-btn" onclick="buscarDescEnPaginaManual()">Buscar</button>
             </div>
-            
-            <div id="desc-resultado-pagina"></div>
-            
-            <p class="desc-instruccion">O explora por zona del cuerpo:</p>
-            
-            <div class="desc-zonas-grid">
+            <div id="descod-resultado-manual"></div>
+            <p class="descod-label">O explora por zona:</p>
+            <div class="descod-zonas-grid">
     `;
     
-    if (zonas.length === 0) {
+    zonas.forEach(zona => {
+        const count = sintomasIndex.filter(s => s.zona === zona).length;
+        const icono = iconosZonas[zona.toLowerCase()] || '🔘';
         html += `
-            <p style="text-align:center;color:var(--text-muted);padding:20px;">
-                Cargando zonas del cuerpo...
-            </p>
+            <div class="descod-zona-card" onclick="mostrarSubzonasDescod('${zona}')">
+                <span>${icono}</span>
+                <span>${zona}</span>
+                <span class="descod-count">${count}</span>
+            </div>
         `;
-    } else {
-        zonas.forEach(zona => {
-            const count = sintomasIndex.filter(s => s.zona === zona).length;
-            const icono = iconosZonas[zona.toLowerCase()] || '🔘';
-            html += `
-                <div class="desc-zona-card" onclick="mostrarSubzonas('${zona}')">
-                    <span class="desc-zona-icono">${icono}</span>
-                    <span class="desc-zona-nombre">${zona}</span>
-                    <span class="desc-zona-count">${count} síntomas</span>
-                </div>
-            `;
-        });
-    }
+    });
     
     html += `
             </div>
-            <p class="desc-nota">Esto no es un diagnóstico médico. Es una lectura emocional.</p>
+            <button class="descod-btn-outline" onclick="renderDescodPaso0()" style="margin-top:16px;">← Volver</button>
         </div>
     `;
     
     container.innerHTML = html;
-    
-    document.getElementById('desc-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') buscarDescEnPagina();
-    });
 }
+
+function buscarDescEnPaginaManual() {
+    const input = document.getElementById('desc-input-manual');
+    const resultado = document.getElementById('descod-resultado-manual');
+    const termino = normalizarTexto(input.value);
+    
+    if (!termino) {
+        resultado.innerHTML = '<p class="descod-error">¿Qué sientes?</p>';
+        return;
+    }
+    
+    const terminos = termino.split(' ').filter(t => t.length > 2);
+    const resultados = sintomasIndex.filter(item => {
+        const textoBusqueda = `${item.sintoma} ${item.zona} ${item.subzona} ${item.emocion}`.toLowerCase();
+        return terminos.some(t => textoBusqueda.includes(t));
+    });
+    
+    if (resultados.length > 0) {
+        const r = resultados[0];
+        resultado.innerHTML = `
+            <div class="descod-resultado-card">
+                <p class="descod-sintoma">${r.sintoma}</p>
+                <p class="descod-zona">📍 ${r.zona}</p>
+                <p><strong>Conflicto:</strong> ${r.conflicto}</p>
+                <p><strong>Emoción:</strong> ${r.emocion}</p>
+                <p><strong>Recomendación:</strong> ${r.recomendacion}</p>
+            </div>
+        `;
+    } else {
+        resultado.innerHTML = '<p class="descod-error">No encontrado. Prueba con otras palabras.</p>';
+    }
+}
+
+function mostrarSubzonasDescod(zona) {
+    const container = document.getElementById('descodificacion-container');
+    
+    const subzonasSet = new Set();
+    sintomasIndex.filter(s => s.zona === zona).forEach(s => {
+        if (s.subzona) subzonasSet.add(s.subzona);
+    });
+    const subzonas = Array.from(subzonasSet);
+    
+    let html = `
+        <div class="descod-container">
+            <button class="descod-btn-outline" onclick="renderModoExploracion()" style="margin-bottom:16px;">← Volver</button>
+            <p class="descod-label">${zona}</p>
+            <div class="descod-zonas-grid">
+    `;
+    
+    subzonas.forEach(subzona => {
+        html += `
+            <div class="descod-zona-card" onclick="mostrarSintomasDescod('${zona}', '${subzona}')">
+                <span>${subzona}</span>
+            </div>
+        `;
+    });
+    
+    html += '</div></div>';
+    container.innerHTML = html;
+}
+
+function mostrarSintomasDescod(zona, subzona) {
+    const container = document.getElementById('descodificacion-container');
+    const sintomas = sintomasIndex.filter(s => s.zona === zona && s.subzona === subzona);
+    
+    let html = `
+        <div class="descod-container">
+            <button class="descod-btn-outline" onclick="mostrarSubzonasDescod('${zona}')" style="margin-bottom:16px;">← Volver</button>
+            <p class="descod-label">${zona} › ${subzona}</p>
+            <div class="descod-zonas-grid">
+    `;
+    
+    sintomas.forEach(s => {
+        html += `
+            <div class="descod-zona-card" onclick="mostrarDetalleSintomaDescod('${encodeURIComponent(JSON.stringify(s))}')">
+                <span>${s.sintoma}</span>
+            </div>
+        `;
+    });
+    
+    html += '</div></div>';
+    container.innerHTML = html;
+}
+
+function mostrarDetalleSintomaDescod(sintomaJson) {
+    const s = JSON.parse(decodeURIComponent(sintomaJson));
+    const container = document.getElementById('descodificacion-container');
+    
+    container.innerHTML = `
+        <div class="descod-container">
+            <button class="descod-btn-outline" onclick="mostrarSintomasDescod('${s.zona}', '${s.subzona}')" style="margin-bottom:16px;">← Volver</button>
+            <div class="descod-resultado-card">
+                <p class="descod-sintoma">${s.sintoma}</p>
+                <p class="descod-zona">📍 ${s.zona} › ${s.subzona}</p>
+                <p><strong>Conflicto:</strong> ${s.conflicto}</p>
+                <p><strong>Emoción:</strong> ${s.emocion}</p>
+                ${s.palabras_clave ? `<p><strong>Patrón:</strong> ${s.palabras_clave}</p>` : ''}
+                <p><strong>Recomendación:</strong> ${s.recomendacion}</p>
+            </div>
+        </div>
+    `;
+}
+
+// Funciones helper para onclick en HTML
+window.renderDescodPaso0 = renderDescodPaso0;
+window.renderDescodPaso1 = renderDescodPaso1;
+window.renderModoExploracion = renderModoExploracion;
+window.buscarSintomaGuiado = buscarSintomaGuiado;
+window.renderDescodPaso2 = renderDescodPaso2;
+window.renderDescodPaso3 = renderDescodPaso3;
+window.renderDescodPaso4 = renderDescodPaso4;
+window.renderDescodPaso5 = renderDescodPaso5;
+window.renderDescodPaso6 = renderDescodPaso6;
+window.siguienteResultado = siguienteResultado;
+window.buscarDescEnPaginaManual = buscarDescEnPaginaManual;
+window.mostrarSubzonasDescod = mostrarSubzonasDescod;
+window.mostrarSintomasDescod = mostrarSintomasDescod;
+window.mostrarDetalleSintomaDescod = mostrarDetalleSintomaDescod;
 
 async function loadContacto() {
     const container = document.getElementById('contacto-container');
