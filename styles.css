@@ -197,8 +197,7 @@ body {
 .app-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    justify-content: space-between;
+    height: 100dvh;
 }
 
 /* Header: Logo + Slogan */
@@ -209,6 +208,7 @@ body {
     padding-top: calc(8px + var(--safe-area-inset-top));
     padding-bottom: 8px;
     gap: 4px;
+    flex-shrink: 0;
 }
 
 /* FONDO SUTIL */
@@ -254,12 +254,12 @@ body {
 }
 
 .logo { 
-    width: 50px; height: 50px;
+    width: 80px; height: 80px;
     background: #000;
     animation: logoEntry 0.6s ease-out 0.2s both, logoPulse 2s ease-in-out infinite 1s;
-    padding: 0;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(212,175,55,0.5), 0 0 40px rgba(212,175,55,0.25);
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(212,175,55,0.6), 0 0 50px rgba(212,175,55,0.3);
 }
 
 @keyframes logoEntry {
@@ -286,7 +286,7 @@ body {
 .slogan {
     font-family: 'Montserrat', sans-serif; 
     color: var(--gold);
-    font-size: 0.7rem; 
+    font-size: 0.9rem; 
     font-weight: 600;
     letter-spacing: 0.5px;
     white-space: nowrap;
@@ -318,6 +318,7 @@ body {
     z-index: 99;
     border-bottom: 1px solid rgba(212,175,55,0.1);
     animation: navEntry 0.5s ease-out 0.4s both;
+    flex-shrink: 0;
 }
 
 @keyframes navEntry {
@@ -361,8 +362,7 @@ body {
     flex: 1;
     padding: 12px;
     overflow-y: auto;
-    min-height: 100px;
-    max-height: 55vh;
+    min-height: 0;
     overscroll-behavior: contain;
 }
 
@@ -882,6 +882,7 @@ body {
     background: var(--bg);
     position: relative;
     z-index: 10;
+    flex-shrink: 0;
 }
 
 @media (max-width: 480px) {
