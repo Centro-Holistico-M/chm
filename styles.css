@@ -2410,6 +2410,159 @@ body {
     transform: scale(0.98);
 }
 
+/* Selector de tipo de yoga */
+.yoga-tipo-selector {
+    margin-bottom: 16px;
+}
+
+.yoga-tipo-selector label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.tipo-botones {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tipo-btn {
+    flex: 1;
+    min-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.tipo-btn:hover {
+    border-color: var(--gold);
+    background: rgba(212,175,55,0.08);
+}
+
+.tipo-btn.active {
+    border-color: var(--gold);
+    background: rgba(212,175,55,0.15);
+}
+
+.tipo-btn.active.vinyasa {
+    background: rgba(100,149,237,0.15);
+    border-color: #6495ed;
+}
+
+.tipo-btn.active.hatha {
+    background: rgba(147,112,219,0.15);
+    border-color: #9370db;
+}
+
+.tipo-icon {
+    font-size: 1.5rem;
+}
+
+.tipo-btn span:not(.tipo-icon) {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.tipo-btn small {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Clase generada header */
+.clase-generada-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed rgba(212,175,55,0.2);
+}
+
+.clase-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.clase-tipo, .clase-duracion, .clase-intencion {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+.clase-tipo {
+    background: rgba(156,39,176,0.2);
+    color: #ce93d8;
+    border: 1px solid rgba(156,39,176,0.3);
+}
+
+.clase-tipo.vinyasa {
+    background: rgba(100,149,237,0.2);
+    color: #6495ed;
+    border: 1px solid rgba(100,149,237,0.3);
+}
+
+.clase-tipo.hatha {
+    background: rgba(147,112,219,0.2);
+    color: #9370db;
+    border: 1px solid rgba(147,112,219,0.3);
+}
+
+.clase-duracion {
+    background: rgba(33,150,243,0.2);
+    color: #64b5f6;
+    border: 1px solid rgba(33,150,243,0.3);
+}
+
+.clase-intencion {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.clase-ritmo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.clase-ritmo span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Posturas con estilo según tipo */
+.paso-postura.vinyasa {
+    border-left: 4px solid #6495ed;
+}
+
+.paso-postura.hatha {
+    border-left: 4px solid #9370db;
+}
+
+.paso-postura.vinyasa .paso-numero {
+    background: rgba(100,149,237,0.2);
+    color: #6495ed;
+}
+
+.paso-postura.hatha .paso-numero {
+    background: rgba(147,112,219,0.2);
+    color: #9370db;
+}
+
 /* Clase generada */
 .clase-container {
     background: rgba(0,0,0,0.2);

@@ -1977,7 +1977,12 @@ function volverASeccionM() {
 // YOGA MINIAPP - Sistema de generación de clases
 // ============================================
 
-// Base de datos de posturas de yoga (placeholder - usuario proporcionará datos completos)
+// ============================================
+// BASE DE DATOS DE POSTURAS DE YOGA
+// ============================================
+// Estructura modular para facilitar futura integración con fuentes externas
+// Si se reemplaza esta sección, mantener la misma estructura de objetos
+
 let posturaDB = [
     {
         nombre: "Postura del Niño",
@@ -1986,6 +1991,13 @@ let posturaDB = [
         fase_lunar_adecuada: ["luna_nueva", "luna_llena", "luna_menguante"],
         intencion_alineada: ["soltar", "equilibrar"],
         duracion_estimada_seg: 60,
+        // Nuevos campos para diferenciación Vinyasa/Hatha
+        complejidad: 1, // 1-5 (1=muy fácil, 5=muy complejo)
+        nivel_intensidad: 1, // 1-5 (1=muy suave, 5=muy intenso)
+        duracion_vinyasa: 15, // segundos en flujo vinyasa
+        duracion_hatha: 60, // segundos en práctica estática
+        adecuada_vinyasa: true, // ¿Es adecuada para flujo vinyasa?
+        adecuada_hatha: true, // ¿Es adecuada para práctica estática?
         instrucciones_clave: [
             "Rodillas separadas ancho de caderas",
             "Glúteos hacia talones",
@@ -2014,6 +2026,12 @@ let posturaDB = [
         fase_lunar_adecuada: ["luna_nueva", "media_luna_creciente", "luna_menguante"],
         intencion_alineada: ["activar", "soltar", "equilibrar"],
         duracion_estimada_seg: 45,
+        complejidad: 1,
+        nivel_intensidad: 2,
+        duracion_vinyasa: 20,
+        duracion_hatha: 45,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
         instrucciones_clave: [
             "Manos bajo hombros, rodillas bajo caderas",
             "Inhala: arquea espalda, pecho al frente",
@@ -2041,6 +2059,12 @@ let posturaDB = [
         fase_lunar_adecuada: ["cuarto_creciente", "luna_llena", "cuarto_menguante"],
         intencion_alineada: ["activar", "enfocar", "abrir"],
         duracion_estimada_seg: 60,
+        complejidad: 2,
+        nivel_intensidad: 3,
+        duracion_vinyasa: 15,
+        duracion_hatha: 60,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
         instrucciones_clave: [
             "Manos a ancho de hombros, pies a ancho de caderas",
             "Levanta caderas hacia arriba y atrás",
@@ -2069,6 +2093,12 @@ let posturaDB = [
         fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
         intencion_alineada: ["activar", "enfocar"],
         duracion_estimada_seg: 60,
+        complejidad: 3,
+        nivel_intensidad: 4,
+        duracion_vinyasa: 20,
+        duracion_hatha: 60,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
         instrucciones_clave: [
             "Pie delantero flexionado 90°, pie trasero a 45°",
             "Cadera abierta hacia el lado",
@@ -2096,6 +2126,12 @@ let posturaDB = [
         fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
         intencion_alineada: ["activar", "enfocar", "equilibrar"],
         duracion_estimada_seg: 60,
+        complejidad: 3,
+        nivel_intensidad: 4,
+        duracion_vinyasa: 20,
+        duracion_hatha: 60,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
         instrucciones_clave: [
             "Pie delantero flexionado 90°, pie trasero a 45°",
             "Cadera abierta hacia el lado",
@@ -2123,6 +2159,12 @@ let posturaDB = [
         fase_lunar_adecuada: ["media_luna_creciente", "cuarto_creciente"],
         intencion_alineada: ["abrir", "enfocar"],
         duracion_estimada_seg: 60,
+        complejidad: 3,
+        nivel_intensidad: 3,
+        duracion_vinyasa: 25,
+        duracion_hatha: 60,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
         instrucciones_clave: [
             "Piernas separadas ampliamente",
             "Pie delantero 90°, pie trasero 45°",
@@ -2150,6 +2192,12 @@ let posturaDB = [
         fase_lunar_adecuada: ["luna_nueva", "cuarto_creciente", "luna_llena"],
         intencion_alineada: ["enfocar", "equilibrar"],
         duracion_estimada_seg: 45,
+        complejidad: 4,
+        nivel_intensidad: 3,
+        duracion_vinyasa: 15,
+        duracion_hatha: 45,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
         instrucciones_clave: [
             "Peso en pierna derecha",
             "Pie izquierdo en interior del muslo derecho",
@@ -2177,6 +2225,12 @@ let posturaDB = [
         fase_lunar_adecuada: ["luna_nueva", "media_luna_creciente", "cuarto_creciente", "luna_gibosa_creciente", "luna_llena", "luna_gibosa_menguante", "cuarto_menguante", "luna_menguante"],
         intencion_alineada: ["soltar", "equilibrar"],
         duracion_estimada_seg: 180,
+        complejidad: 1,
+        nivel_intensidad: 1,
+        duracion_vinyasa: 60,
+        duracion_hatha: 180,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
         instrucciones_clave: [
             "Acuéstate boca arriba",
             "Piernas ligeramente separadas",
@@ -2195,8 +2249,947 @@ let posturaDB = [
             "Mantener voz suave y lenta",
             "Dar tiempo suficiente para relajación"
         ]
+    },
+    // Posturas adicionales para completar flujos
+    {
+        nombre: "Tadasana",
+        sanskrit: "Tadasana",
+        tipo: ["equilibrio", "postura_base"],
+        fase_lunar_adecuada: ["luna_nueva", "media_luna_creciente", "cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["equilibrar", "enfocar"],
+        duracion_estimada_seg: 30,
+        complejidad: 1,
+        nivel_intensidad: 1,
+        duracion_vinyasa: 10,
+        duracion_hatha: 30,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Pies juntos o ligeramente separados",
+            "Distribuir peso uniformemente",
+            "Columna erguida, hombros relajados",
+            "Brazos a los lados, palmas hacia adelante"
+        ],
+        contraindicaciones: [],
+        beneficios: ["mejora postura", "aumenta conciencia corporal", "base para otras posturas"],
+        transicion_desde: {},
+        transicion_hacia: {
+            "Urdhva Hastasana": "Inhala y eleva brazos hacia el techo"
+        },
+        puntos_clave_instructor: [
+            "Base sólida y estable",
+            "Consciencia de alineación",
+            "Preparación para movimiento"
+        ]
+    },
+    {
+        nombre: "Urdhva Hastasana",
+        sanskrit: "Urdhva Hastasana",
+        tipo: ["flexibilidad", "respiración"],
+        fase_lunar_adecuada: ["media_luna_creciente", "cuarto_creciente"],
+        intencion_alineada: ["activar", "abrir"],
+        duracion_estimada_seg: 15,
+        complejidad: 1,
+        nivel_intensidad: 2,
+        duracion_vinyasa: 8,
+        duracion_hatha: 15,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Desde Tadasana, inhala y eleva brazos",
+            "Palmas frente a frente o unidas",
+            "Hombros relajados, lejos de orejas",
+            "Ligeramente hacia atrás para abrir pecho"
+        ],
+        contraindicaciones: ["lesión de hombro"],
+        beneficios: ["abre pecho y hombros", "estira laterales", "energiza"],
+        transicion_desde: {
+            "Tadasana": "Inhala y eleva brazos"
+        },
+        transicion_hacia: {
+            "Uttanasana": "Exhala y flexiona hacia adelante desde caderas"
+        },
+        puntos_clave_instructor: [
+            "Movimiento con inhalación",
+            "Mantener hombros abajo",
+            "Extensión completa de columna"
+        ]
+    },
+    {
+        nombre: "Uttanasana",
+        sanskrit: "Uttanasana",
+        tipo: ["flexibilidad"],
+        fase_lunar_adecuada: ["luna_nueva", "media_luna_creciente", "cuarto_menguante", "luna_menguante"],
+        intencion_alineada: ["soltar", "abrir"],
+        duracion_estimada_seg: 30,
+        complejidad: 2,
+        nivel_intensidad: 2,
+        duracion_vinyasa: 8,
+        duracion_hatha: 30,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Flexión desde caderas, no espalda baja",
+            "Rodillas pueden estar ligeramente flexionadas",
+            "Cabeza cuelga relajada",
+            "Manos en el suelo, espinillas o codos"
+        ],
+        contraindicaciones: ["lesión de espalda baja", "hipertensión"],
+        beneficios: ["estira cadena posterior", "calma sistema nervioso", "alivia estrés"],
+        transicion_desde: {
+            "Urdhva Hastasana": "Exhala y flexiona hacia adelante"
+        },
+        transicion_hacia: {
+            "Ardha Uttanasana": "Inhala y levanta torso a mitad de camino"
+        },
+        puntos_clave_instructor: [
+            "Peso en metatarsos, no talones",
+            "Estirar desde caderas, no redondear espalda",
+            "Rodillas pueden flexionarse si necesario"
+        ]
+    },
+    {
+        nombre: "Ardha Uttanasana",
+        sanskrit: "Ardha Uttanasana",
+        tipo: ["flexibilidad", "preparación"],
+        fase_lunar_adecuada: ["luna_nueva", "media_luna_creciente", "cuarto_creciente"],
+        intencion_alineada: ["activar", "enfocar"],
+        duracion_estimada_seg: 10,
+        complejidad: 1,
+        nivel_intensidad: 2,
+        duracion_vinyasa: 5,
+        duracion_hatha: 10,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Desde Uttanasana, inhala y levanta torso a mitad",
+            "Espalda plana, paralela al suelo",
+            "Manos en espinillas o suelo",
+            "Mirada al frente o ligeramente arriba"
+        ],
+        contraindicaciones: ["lesión de espalda baja"],
+        beneficios: ["fortalece espalda", "prepara para Chaturanga", "estira isquiotibiales"],
+        transicion_desde: {
+            "Uttanasana": "Inhala y levanta torso a mitad"
+        },
+        transicion_hacia: {
+            "Chaturanga": "Exhala, manos en suelo, salta o camina atrás"
+        },
+        puntos_clave_instructor: [
+            "Espalda plana, no redondeada",
+            "Hombros alejados de orejas",
+            "Preparación para transición"
+        ]
+    },
+    {
+        nombre: "Chaturanga Dandasana",
+        sanskrit: "Chaturanga Dandasana",
+        tipo: ["fuerza"],
+        fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["activar", "enfocar"],
+        duracion_estimada_seg: 10,
+        complejidad: 4,
+        nivel_intensidad: 5,
+        duracion_vinyasa: 5,
+        duracion_hatha: 10,
+        adecuada_vinyasa: true,
+        adecuada_hatha: false, // Demasiado intenso para Hatha estático
+        instrucciones_clave: [
+            "Desde plancha, bajar a 90° en codos",
+            "Codos pegados a costillas",
+            "Cuerpo en línea recta",
+            "Mirada al frente, ligeramente hacia abajo"
+        ],
+        contraindicaciones: ["lesión de hombro", "embarazo"],
+        beneficios: ["fortalece brazos, hombros y core", "prepara para inversiones"],
+        transicion_desde: {
+            "Ardha Uttanasana": "Manos en suelo, salta o camina atrás a plancha"
+        },
+        transicion_hacia: {
+            "Urdhva Mukha Svanasana": "Inhala, rodillas al suelo, arquea espalda"
+        },
+        puntos_clave_instructor: [
+            "Modificar con rodillas en suelo si necesario",
+            "No bajar más de 90° en codos",
+            "Mantener core activado"
+        ]
+    },
+    {
+        nombre: "Urdhva Mukha Svanasana",
+        sanskrit: "Urdhva Mukha Svanasana",
+        tipo: ["flexibilidad", "fuerza"],
+        fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["activar", "abrir"],
+        duracion_estimada_seg: 10,
+        complejidad: 3,
+        nivel_intensidad: 4,
+        duracion_vinyasa: 5,
+        duracion_hatha: 10,
+        adecuada_vinyasa: true,
+        adecuada_hatha: false,
+        instrucciones_clave: [
+            "Desde Chaturanga, inhala y arquea espalda",
+            "Brazos extendidos, hombros abajo",
+            "Muslos y rodillas levantados del suelo",
+            "Pecho abierto, mirada hacia arriba"
+        ],
+        contraindicaciones: ["lesión de espalda baja", "síndrome del túnel carpiano"],
+        beneficios: ["abre pecho y hombros", "fortalece brazos", "estira abdomen"],
+        transicion_desde: {
+            "Chaturanga": "Inhala y arquea espalda, rodillas pueden estar en suelo"
+        },
+        transicion_hacia: {
+            "Adho Mukha Svanasana": "Exhala, levanta caderas a Perro Abajo"
+        },
+        puntos_clave_instructor: [
+            "Hombros abajo, alejados de orejas",
+            "Core activado para proteger espalda baja",
+            "Modificación: rodillas en suelo"
+        ]
+    },
+    {
+        nombre: "Utkatasana",
+        sanskrit: "Utkatasana",
+        tipo: ["fuerza", "equilibrio"],
+        fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["activar", "enfocar"],
+        duracion_estimada_seg: 20,
+        complejidad: 2,
+        nivel_intensidad: 4,
+        duracion_vinyasa: 10,
+        duracion_hatha: 20,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Pies juntos o ligeramente separados",
+            "Flexiona rodillas como si sentarte en silla",
+            "Brazos extendidos hacia arriba",
+            "Peso en talones, pecho elevado"
+        ],
+        contraindicaciones: ["lesión de rodilla", "dolor lumbar"],
+        beneficios: ["fortalece piernas", "tonifica core", "aumenta calor corporal"],
+        transicion_desde: {
+            "Tadasana": "Inhala, eleva brazos, exhala y flexiona rodillas"
+        },
+        transicion_hacia: {
+            "Uttanasana": "Exhala y flexiona hacia adelante desde caderas"
+        },
+        puntos_clave_instructor: [
+            "Rodillas no sobrepasan dedos de pies",
+            "Pecho elevado, espalda no redondeada",
+            "Intensidad ajustable: más o menos flexión"
+        ]
+    },
+    {
+        nombre: "Virabhadrasana III",
+        sanskrit: "Virabhadrasana III",
+        tipo: ["equilibrio", "fuerza"],
+        fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["enfocar", "activar"],
+        duracion_estimada_seg: 20,
+        complejidad: 4,
+        nivel_intensidad: 4,
+        duracion_vinyasa: 10,
+        duracion_hatha: 20,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Desde Guerrero I, transfere peso a pierna delantera",
+            "Levanta pierna trasera, cuerpo paralelo al suelo",
+            "Brazos extendidos al frente o a los lados",
+            "Mirada fija en un punto"
+        ],
+        contraindicaciones: ["lesión de rodilla", "problemas de equilibrio"],
+        beneficios: ["fortalece piernas y core", "mejora equilibrio", "tonifica"],
+        transicion_desde: {
+            "Guerrero I": "Inclina torso adelante, levanta pierna trasera"
+        },
+        transicion_hacia: {
+            "Adho Mukha Svanasana": "Baja pierna, manos al suelo, Perro Abajo"
+        },
+        puntos_clave_instructor: [
+            "Modificación: manos en bloques",
+            "Caderas niveladas, no rotar",
+            "Core activado para estabilidad"
+        ]
+    },
+    {
+        nombre: "Ardha Chandrasana",
+        sanskrit: "Ardha Chandrasana",
+        tipo: ["equilibrio", "flexibilidad"],
+        fase_lunar_adecuada: ["media_luna_creciente", "luna_llena"],
+        intencion_alineada: ["abrir", "enfocar"],
+        duracion_estimada_seg: 20,
+        complejidad: 4,
+        nivel_intensidad: 3,
+        duracion_vinyasa: 10,
+        duracion_hatha: 20,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Desde Triángulo, flexiona rodilla delantera",
+            "Mano en suelo, levanta pierna trasera",
+            "Brazo superior extendido hacia arriba",
+            "Cuerpo forma T lateral"
+        ],
+        contraindicaciones: ["lesión de cadera", "problemas de equilibrio"],
+        beneficios: ["abre caderas", "fortalece pierna de soporte", "mejora equilibrio"],
+        transicion_desde: {
+            "Postura del Triángulo": "Flexiona rodilla delantera, mano en suelo"
+        },
+        transicion_hacia: {
+            "Postura del Triángulo": "Baja pierna trasera, regresa a Triángulo"
+        },
+        puntos_clave_instructor: [
+            "Modificación: mano en bloque o pared",
+            "Cadera superior sobre inferior",
+            "Pierna de soporte ligeramente flexionada"
+        ]
+    },
+    {
+        nombre: "Plancha",
+        sanskrit: "Phalakasana",
+        tipo: ["fuerza", "core"],
+        fase_lunar_adecuada: ["cuarto_creciente", "luna_llena"],
+        intencion_alineada: ["activar", "enfocar"],
+        duracion_estimada_seg: 30,
+        complejidad: 2,
+        nivel_intensidad: 4,
+        duracion_vinyasa: 10,
+        duracion_hatha: 30,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Manos bajo hombros, brazos extendidos",
+            "Cuerpo en línea recta de cabeza a talones",
+            "Core activado, glúteos tensados",
+            "Mirada al suelo, cuello neutro"
+        ],
+        contraindicaciones: ["síndrome del túnel carpiano", "embarazo avanzado"],
+        beneficios: ["fortalece core completo", "tonifica brazos", "prepara para Chaturanga"],
+        transicion_desde: {
+            "Adho Mukha Svanasana": "Inclina cuerpo adelante hasta plancha"
+        },
+        transicion_hacia: {
+            "Chaturanga": "Exhala y baja a Chaturanga",
+            "Adho Mukha Svanasana": "Levanta caderas a Perro Abajo"
+        },
+        puntos_clave_instructor: [
+            "Modificación: rodillas en suelo",
+            "No hundir caderas ni elevarlas demasiado",
+            "Hombros alineados con muñecas"
+        ]
+    },
+    {
+        nombre: "Postura de la Esfinge",
+        sanskrit: "Salamba Bhujangasana",
+        tipo: ["flexibilidad", "apertura"],
+        fase_lunar_adecuada: ["luna_nueva", "media_luna_creciente", "luna_menguante"],
+        intencion_alineada: ["abrir", "soltar"],
+        duracion_estimada_seg: 30,
+        complejidad: 2,
+        nivel_intensidad: 2,
+        duracion_vinyasa: 15,
+        duracion_hatha: 30,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Acostado boca abajo, antebrazos en suelo",
+            "Codos bajo hombros",
+            "Inhala y eleva pecho suavemente",
+            "Hombros relajados, lejos de orejas"
+        ],
+        contraindicaciones: ["lesión de espalda baja", "embarazo"],
+        beneficios: ["suave extensión de columna", "abre pecho", "fortalece espalda baja"],
+        transicion_desde: {
+            "Postura del Niño": "Gira y acuéstate boca abajo"
+        },
+        transicion_hacia: {
+            "Postura del Niño": "Lleva glúteos a talones, brazos extendidos"
+        },
+        puntos_clave_instructor: [
+            "Extensión suave, no forzar",
+            "Codos firmes, presionar antebrazos",
+            "Core ligeramente activado para proteger espalda"
+        ]
+    },
+    {
+        nombre: "Postura del Puente",
+        sanskrit: "Setu Bandhasana",
+        tipo: ["flexibilidad", "fuerza"],
+        fase_lunar_adecuada: ["luna_nueva", "cuarto_menguante", "luna_menguante"],
+        intencion_alineada: ["abrir", "equilibrar"],
+        duracion_estimada_seg: 30,
+        complejidad: 2,
+        nivel_intensidad: 3,
+        duracion_vinyasa: 15,
+        duracion_hatha: 30,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Acostado boca arriba, rodillas flexionadas",
+            "Pies a ancho de caderas, cerca de glúteos",
+            "Inhala y eleva caderas",
+            "Manos entrelazadas bajo espalda, brazos presionados al suelo"
+        ],
+        contraindicaciones: ["lesión de cuello", "embarazo"],
+        beneficios: ["abre pecho y hombros", "fortalece glúteos", "estira columna"],
+        transicion_desde: {
+            "Savasana": "Flexiona rodillas, prepara para puente"
+        },
+        transicion_hacia: {
+            "Savasana": "Baja caderas lentamente, relaja"
+        },
+        puntos_clave_instructor: [
+            "Rodillas alineadas, no se caen hacia afuera",
+            "Barbilla ligeramente alejada del pecho",
+            "Intensidad: elevar más o menos caderas"
+        ]
+    },
+    {
+        nombre: "Torsión Espinal Supina",
+        sanskrit: "Supta Matsyendrasana",
+        tipo: ["flexibilidad", "torsión"],
+        fase_lunar_adecuada: ["luna_nueva", "cuarto_menguante", "luna_menguante"],
+        intencion_alineada: ["soltar", "equilibrar"],
+        duracion_estimada_seg: 30,
+        complejidad: 1,
+        nivel_intensidad: 2,
+        duracion_vinyasa: 15,
+        duracion_hatha: 30,
+        adecuada_vinyasa: true,
+        adecuada_hatha: true,
+        instrucciones_clave: [
+            "Acostado boca arriba, abraza una rodilla al pecho",
+            "Deja caer rodilla al lado opuesto",
+            "Brazos en T, mirada al lado opuesto",
+            "Hombros pegados al suelo"
+        ],
+        contraindicaciones: ["embarazo", "lesión de espalda baja"],
+        beneficios: ["libera tensión lumbar", "masajea órganos abdominales", "calma mente"],
+        transicion_desde: {
+            "Savasana": "Flexiona rodilla, prepárate para torsión"
+        },
+        transicion_hacia: {
+            "Savasana": "Regresa a centro, cambia de lado"
+        },
+        puntos_clave_instructor: [
+            "Torsión suave, no forzar",
+            "Respirar profundamente en cada exhalación",
+            "Ambos hombros en el suelo"
+        ]
     }
 ];
+
+// ============================================
+// SECUENCIAS PREDEFINIDAS PARA VINYASA
+// ============================================
+// Bloques reutilizables para generación dinámica
+// Cada secuencia es un array de nombres de posturas
+
+const SECUENCIAS_VINYASA = {
+    // Sun Salutation A - Variaciones
+    sun_salutation_a_suave: [
+        "Tadasana",
+        "Urdhva Hastasana",
+        "Uttanasana",
+        "Ardha Uttanasana",
+        "Plancha", // Versión suave en lugar de Chaturanga
+        "Postura de la Esfinge", // Versión suave en lugar de Upward Dog
+        "Adho Mukha Svanasana"
+    ],
+    
+    sun_salutation_a_intensa: [
+        "Tadasana",
+        "Urdhva Hastasana",
+        "Uttanasana",
+        "Ardha Uttanasana",
+        "Chaturanga Dandasana",
+        "Urdhva Mukha Svanasana",
+        "Adho Mukha Svanasana"
+    ],
+    
+    // Sun Salutation B - Variaciones
+    sun_salutation_b: [
+        "Tadasana",
+        "Utkatasana",
+        "Uttanasana",
+        "Ardha Uttanasana",
+        "Chaturanga Dandasana",
+        "Urdhva Mukha Svanasana",
+        "Adho Mukha Svanasana",
+        "Guerrero I",
+        "Chaturanga Dandasana",
+        "Urdhva Mukha Svanasana",
+        "Adho Mukha Svanasana",
+        "Guerrero I" // Otro lado implícito
+    ],
+    
+    // Secuencia de Guerreros
+    secuencia_guerreros: [
+        "Adho Mukha Svanasana",
+        "Guerrero I",
+        "Guerrero II",
+        "Guerrero III",
+        "Adho Mukha Svanasana"
+    ],
+    
+    // Secuencia de equilibrio
+    secuencia_equilibrio: [
+        "Postura del Triángulo",
+        "Ardha Chandrasana",
+        "Postura del Árbol",
+        "Guerrero III"
+    ],
+    
+    // Secuencia de apertura de cadera
+    secuencia_apertura_cadera: [
+        "Guerrero II",
+        "Postura del Triángulo",
+        "Ardha Chandrasana",
+        "Guerrero II" // Simetría
+    ],
+    
+    // Secuencia de cierre (flexiones y torsiones)
+    secuencia_cierre: [
+        "Postura de la Esfinge",
+        "Postura del Puente",
+        "Torsión Espinal Supina",
+        "Savasana"
+    ]
+};
+
+// ============================================
+// FUNCIONES DE UTILIDAD PARA GENERACIÓN
+// ============================================
+
+// Calcular duración automática si no está definida
+function calcularDuracionAutomatica(postura, tipoClase) {
+    // Base: 10 segundos
+    let base = 10;
+    
+    // Ajustar por complejidad (1-5)
+    const complejidad = postura.complejidad || 3;
+    base += complejidad * 2; // +2-10 segundos
+    
+    // Ajustar por intensidad (1-5)
+    const intensidad = postura.nivel_intensidad || 3;
+    base += intensidad * 1.5; // +1.5-7.5 segundos
+    
+    // Ajustar por tipo de clase
+    if (tipoClase === 'vinyasa') {
+        // Vinyasa: más dinámico, menos tiempo por postura
+        return Math.max(5, Math.min(20, Math.round(base * 0.7)));
+    } else {
+        // Hatha: más estático, más tiempo por postura
+        return Math.max(20, Math.min(90, Math.round(base * 1.5)));
+    }
+}
+
+// Obtener postura por nombre
+function obtenerPosturaPorNombre(nombre) {
+    return posturaDB.find(p => p.nombre === nombre);
+}
+
+// Filtrar posturas por tipo de clase
+function filtrarPosturasPorTipoClase(tipoClase) {
+    return posturaDB.filter(p => {
+        if (tipoClase === 'vinyasa') {
+            return p.adecuada_vinyasa !== false;
+        } else {
+            return p.adecuada_hatha !== false;
+        }
+    });
+}
+
+// ============================================
+// GENERADOR DE CLASES VINYASA
+// ============================================
+
+function generarClaseVinyasa(duracion, intention) {
+    console.debug('[Yoga] Generando clase Vinyasa:', { duracion, intention });
+    
+    // 1. Seleccionar intensidad basada en duración
+    const intensidad = duracion <= 10 ? 'suave' : (duracion <= 20 ? 'moderada' : 'intensa');
+    
+    // 2. Seleccionar secuencia base según intención e intensidad
+    let secuenciaBase = [];
+    
+    switch (intention) {
+        case 'activar':
+            secuenciaBase = intensidad === 'suave' 
+                ? [...SECUENCIAS_VINYASA.sun_salutation_a_suave]
+                : [...SECUENCIAS_VINYASA.sun_salutation_a_intensa];
+            break;
+        case 'enfocar':
+            secuenciaBase = [...SECUENCIAS_VINYASA.secuencia_equilibrio];
+            break;
+        case 'abrir':
+            secuenciaBase = [...SECUENCIAS_VINYASA.secuencia_apertura_cadera];
+            break;
+        case 'soltar':
+            secuenciaBase = [...SECUENCIAS_VINYASA.secuencia_cierre];
+            break;
+        default:
+            secuenciaBase = [...SECUENCIAS_VINYASA.sun_salutation_a_suave];
+    }
+    
+    // 3. Calcular número de repeticiones según duración
+    // Cada secuencia dura aproximadamente 3-5 minutos
+    const repeticiones = Math.max(1, Math.ceil(duracion / 4));
+    
+    // 4. Generar flujo con variaciones
+    const flujoCompleto = [];
+    
+    for (let i = 0; i < repeticiones; i++) {
+        // Copiar secuencia base
+        let secuencia = [...secuenciaBase];
+        
+        // Insertar posturas adicionales aleatoriamente (no en la primera repetición)
+        if (i > 0 && Math.random() > 0.6) {
+            const posturasExtra = filtrarPosturasPorTipoClase('vinyasa')
+                .filter(p => !secuencia.includes(p.nombre));
+            
+            if (posturasExtra.length > 0) {
+                const posturaAleatoria = posturasExtra[Math.floor(Math.random() * posturasExtra.length)];
+                const posicion = Math.floor(Math.random() * (secuencia.length - 2)) + 1;
+                secuencia.splice(posicion, 0, posturaAleatoria.nombre);
+            }
+        }
+        
+        // Añadir postura de pico en la penúltima repetición
+        if (i === repeticiones - 2 && intensidad !== 'suave') {
+            const posturasPico = ['Guerrero III', 'Ardha Chandrasana', 'Chaturanga Dandasana'];
+            const posturaPico = posturasPico[Math.floor(Math.random() * posturasPico.length)];
+            secuencia.splice(Math.floor(secuencia.length / 2), 0, posturaPico);
+        }
+        
+        // Añadir secuencia al flujo completo
+        flujoCompleto.push(...secuencia);
+    }
+    
+    // 5. Asignar tiempos y transiciones
+    const flujoFinal = flujoCompleto.map((nombrePostura, indice) => {
+        const postura = obtenerPosturaPorNombre(nombrePostura);
+        if (!postura) return null;
+        
+        // Calcular duración
+        let duracionSeg = postura.duracion_vinyasa || 
+            calcularDuracionAutomatica(postura, 'vinyasa');
+        
+        // Ajustar según intensidad
+        if (intensidad === 'suave') duracionSeg *= 1.2;
+        if (intensidad === 'intensa') duracionSeg *= 0.8;
+        
+        // Generar transición
+        let transicion = '';
+        if (indice < flujoCompleto.length - 1) {
+            const siguiente = flujoCompleto[indice + 1];
+            transicion = generarTransicionVinyasa(nombrePostura, siguiente);
+        }
+        
+        return {
+            postura: postura.nombre,
+            duracion: `${Math.round(duracionSeg / 4)} respiraciones`,
+            guia: postura.instrucciones_clave[0] || "Mantén flujo continuo",
+            transicion: transicion,
+            tipo: 'vinyasa'
+        };
+    }).filter(Boolean);
+    
+    return {
+        tipo: 'vinyasa',
+        duracion: duracion,
+        flujo: flujoFinal,
+        ritmo: intensidad === 'suave' ? 'fluido-suave' : (intensidad === 'intensa' ? 'fluido-dinámico' : 'fluido'),
+        respiracion: "inhala-eleva, exhala-flexiona",
+        intensidad: intensidad
+    };
+}
+
+// Generar transiciones para Vinyasa
+function generarTransicionVinyasa(actual, siguiente) {
+    const posturaActual = obtenerPosturaPorNombre(actual);
+    const posturaSiguiente = obtenerPosturaPorNombre(siguiente);
+    
+    if (!posturaActual || !posturaSiguiente) {
+        return `Transición a ${siguiente}`;
+    }
+    
+    // Usar transiciones definidas si existen
+    if (posturaActual.transicion_hacia && posturaActual.transicion_hacia[siguiente]) {
+        return posturaActual.transicion_hacia[siguiente];
+    }
+    
+    // Transiciones genéricas basadas en tipos
+    const tiposActual = posturaActual.tipo || [];
+    const tiposSiguiente = posturaSiguiente.tipo || [];
+    
+    if (tiposActual.includes('equilibrio') && tiposSiguiente.includes('equilibrio')) {
+        return "Mantén concentración mientras transicionas";
+    }
+    
+    if (actual === 'Adho Mukha Svanasana' && siguiente.includes('Guerrero')) {
+        return "Lleva el pie al frente entre las manos";
+    }
+    
+    if (actual.includes('Guerrero') && siguiente === 'Adho Mukha Svanasana') {
+        return "Manos al suelo, salta o camina atrás";
+    }
+    
+    // Transición por defecto
+    return `Conecta con tu respiración y fluye hacia ${siguiente}`;
+}
+
+// ============================================
+// GENERADOR DE CLASES HATHA
+// ============================================
+
+function generarClaseHatha(duracion, intention) {
+    console.debug('[Yoga] Generando clase Hatha:', { duracion, intention });
+    
+    // 1. Distribuir tiempo por categorías según intención
+    const distribucion = calcularDistribucionHatha(duracion, intention);
+    
+    // 2. Seleccionar posturas por categoría
+    const flujo = [];
+    
+    // Apertura (respiración y posturas suaves)
+    flujo.push(...seleccionarPosturasPorCategoriaHatha('respiración', distribucion.apertura));
+    
+    // Cuerpo principal (categorías según intención)
+    Object.entries(distribucion.cuerpo).forEach(([categoria, minutos]) => {
+        flujo.push(...seleccionarPosturasPorCategoriaHatha(categoria, minutos));
+    });
+    
+    // Cierre (relajación)
+    flujo.push(...seleccionarPosturasPorCategoriaHatha('relajación', distribucion.cierre));
+    
+    // 3. Ordenar lógicamente (suelo → pie → suelo)
+    const flujoOrdenado = ordenarPosturasHatha(flujo);
+    
+    // 4. Asignar tiempos y transiciones
+    const flujoFinal = flujoOrdenado.map((postura, indice) => {
+        // Calcular duración
+        let duracionSeg = postura.duracion_hatha || 
+            calcularDuracionAutomatica(postura, 'hatha');
+        
+        // Ajustar según intención
+        if (intention === 'soltar') duracionSeg *= 1.2;
+        if (intention === 'activar') duracionSeg *= 0.9;
+        
+        // Generar transición
+        let transicion = '';
+        if (indice < flujoOrdenado.length - 1) {
+            const siguiente = flujoOrdenado[indice + 1];
+            transicion = generarTransicionHatha(postura.nombre, siguiente.nombre);
+        }
+        
+        return {
+            postura: postura.nombre,
+            duracion: `${Math.round(duracionSeg / 6)} respiraciones profundas`,
+            guia: postura.instrucciones_clave[1] || postura.instrucciones_clave[0] || "Mantén postura con respiración consciente",
+            transicion: transicion,
+            puntos_clave: postura.puntos_clave_instructor || [],
+            tipo: 'hatha'
+        };
+    });
+    
+    return {
+        tipo: 'hatha',
+        duracion: duracion,
+        flujo: flujoFinal,
+        ritmo: 'lento-meditativo',
+        respiracion: "5-8 respiraciones profundas por postura",
+        intention: intention
+    };
+}
+
+// Calcular distribución de tiempo para Hatha
+function calcularDistribucionHatha(duracion, intention) {
+    // Distribución base
+    let distribucion = {
+        apertura: Math.max(2, Math.floor(duracion * 0.1)), // 10% para apertura
+        cuerpo: {},
+        cierre: Math.max(3, Math.floor(duracion * 0.15)) // 15% para cierre
+    };
+    
+    // Distribución del cuerpo según intención
+    const tiempoCuerpo = duracion - distribucion.apertura - distribucion.cierre;
+    
+    switch (intention) {
+        case 'activar':
+            distribucion.cuerpo = {
+                fuerza: Math.floor(tiempoCuerpo * 0.4), // 40%
+                equilibrio: Math.floor(tiempoCuerpo * 0.3), // 30%
+                flexibilidad: Math.floor(tiempoCuerpo * 0.3) // 30%
+            };
+            break;
+        case 'soltar':
+            distribucion.cuerpo = {
+                flexibilidad: Math.floor(tiempoCuerpo * 0.5), // 50%
+                torsión: Math.floor(tiempoCuerpo * 0.3), // 30%
+                relajación: Math.floor(tiempoCuerpo * 0.2) // 20%
+            };
+            break;
+        case 'enfocar':
+            distribucion.cuerpo = {
+                equilibrio: Math.floor(tiempoCuerpo * 0.4), // 40%
+                fuerza: Math.floor(tiempoCuerpo * 0.3), // 30%
+                flexibilidad: Math.floor(tiempoCuerpo * 0.3) // 30%
+            };
+            break;
+        case 'abrir':
+            distribucion.cuerpo = {
+                flexibilidad: Math.floor(tiempoCuerpo * 0.5), // 50%
+                apertura: Math.floor(tiempoCuerpo * 0.3), // 30%
+                torsión: Math.floor(tiempoCuerpo * 0.2) // 20%
+            };
+            break;
+        default: // equilibrar
+            distribucion.cuerpo = {
+                fuerza: Math.floor(tiempoCuerpo * 0.25),
+                flexibilidad: Math.floor(tiempoCuerpo * 0.25),
+                equilibrio: Math.floor(tiempoCuerpo * 0.25),
+                torsión: Math.floor(tiempoCuerpo * 0.25)
+            };
+    }
+    
+    return distribucion;
+}
+
+// Seleccionar posturas por categoría para Hatha
+function seleccionarPosturasPorCategoriaHatha(categoria, minutos) {
+    const posturasAdecuadas = posturaDB.filter(p => {
+        if (categoria === 'respiración') {
+            return p.tipo.includes('relajación') || p.tipo.includes('respiración');
+        }
+        if (categoria === 'relajación') {
+            return p.tipo.includes('relajación');
+        }
+        return p.tipo.some(t => t.includes(categoria));
+    });
+    
+    if (posturasAdecuadas.length === 0) return [];
+    
+    // Seleccionar posturas según tiempo disponible
+    const tiempoTotalSeg = minutos * 60;
+    const posturasSeleccionadas = [];
+    let tiempoUsado = 0;
+    
+    // Mezclar aleatoriamente
+    const posturasMezcladas = [...posturasAdecuadas].sort(() => Math.random() - 0.5);
+    
+    for (const postura of posturasMezcladas) {
+        const duracion = postura.duracion_hatha || 
+            calcularDuracionAutomatica(postura, 'hatha');
+        
+        if (tiempoUsado + duracion <= tiempoTotalSeg) {
+            posturasSeleccionadas.push(postura);
+            tiempoUsado += duracion;
+        }
+        
+        // Limitar a máximo 4 posturas por categoría
+        if (posturasSeleccionadas.length >= 4) break;
+    }
+    
+    return posturasSeleccionadas;
+}
+
+// Ordenar posturas para Hatha (suelo → pie → suelo)
+function ordenarPosturasHatha(posturas) {
+    const posturasSuelo = posturas.filter(p => 
+        p.nombre.includes('Savasana') || 
+        p.nombre.includes('Niño') || 
+        p.nombre.includes('Puente') || 
+        p.nombre.includes('Torsión') ||
+        p.nombre.includes('Esfinge')
+    );
+    
+    const posturasPie = posturas.filter(p => 
+        p.nombre.includes('Guerrero') || 
+        p.nombre.includes('Árbol') || 
+        p.nombre.includes('Triángulo') ||
+        p.nombre.includes('Media Luna') ||
+        p.nombre.includes('Utkatasana')
+    );
+    
+    const posturasMixtas = posturas.filter(p => 
+        !posturasSuelo.includes(p) && !posturasPie.includes(p)
+    );
+    
+    // Orden: suelo → pie → suelo
+    return [...posturasSuelo.slice(0, 2), ...posturasPie, ...posturasMixtas, ...posturasSuelo.slice(2)];
+}
+
+// Generar transiciones para Hatha
+function generarTransicionHatha(actual, siguiente) {
+    const posturaActual = obtenerPosturaPorNombre(actual);
+    const posturaSiguiente = obtenerPosturaPorNombre(siguiente);
+    
+    if (!posturaActual || !posturaSiguiente) {
+        return `Prepárate para ${siguiente}`;
+    }
+    
+    // Usar transiciones definidas si existen
+    if (posturaActual.transicion_hacia && posturaActual.transicion_hacia[siguiente]) {
+        return posturaActual.transicion_hacia[siguiente];
+    }
+    
+    // Transiciones genéricas para Hatha
+    if (posturaActual.tipo.includes('relajación') && posturaSiguiente.tipo.includes('fuerza')) {
+        return "Levántate lentamente y prepárate para más movimiento";
+    }
+    
+    if (posturaActual.tipo.includes('fuerza') && posturaSiguiente.tipo.includes('flexibilidad')) {
+        return "Desde la postura anterior, busca apertura y suavidad";
+    }
+    
+    if (posturaActual.tipo.includes('equilibrio') && posturaSiguiente.tipo.includes('equilibrio')) {
+        return "Mantén la concentración mientras transicionas";
+    }
+    
+    // Transición por defecto para Hatha
+    return "Respira profundamente y prepárate para la siguiente postura";
+}
+
+// ============================================
+// FUNCIÓN PRINCIPAL DE GENERACIÓN (HÍBRIDA)
+// ============================================
+
+function generarClaseYogaGuiada(duracion, intention, tipoForzado = null) {
+    // Obtener tipo de preferencia guardada
+    const preferenciaGuardada = localStorage.getItem('yoga_tipo_preferido');
+    
+    // Determinar tipo de clase
+    let tipoClase;
+    if (tipoForzado && tipoForzado !== 'automatico') {
+        tipoClase = tipoForzado;
+        // Guardar preferencia si es manual
+        localStorage.setItem('yoga_tipo_preferido', tipoForzado);
+    } else if (preferenciaGuardada && preferenciaGuardada !== 'automatico') {
+        tipoClase = preferenciaGuardada;
+    } else {
+        // Modo automático: basado en fase lunar
+        const fase = obtenerFaseLunarHoy();
+        const caracteristicas = FASE_LUNAR_MAP[fase] || FASE_LUNAR_MAP['luna_nueva'];
+        tipoClase = caracteristicas.tipo.toLowerCase().includes('vinyasa') ? 'vinyasa' : 'hatha';
+    }
+    
+    // Generar según tipo
+    let clase;
+    if (tipoClase === 'vinyasa') {
+        clase = generarClaseVinyasa(duracion, intention);
+    } else {
+        clase = generarClaseHatha(duracion, intention);
+    }
+    
+    // Añadir información de tipo
+    clase.tipo_seleccionado = tipoClase;
+    clase.tipo_manual = tipoForzado && tipoForzado !== 'automatico';
+    
+    return clase;
+}
 
 // Constantes del sistema Yoga
 const FASE_LUNAR_MAP = {
@@ -2581,9 +3574,13 @@ function loadYoga() {
     // Inicializar historial
     cargarHistorialYoga();
     
-    // Obtener fase lunar
+    // Obtener fase lunar y preferencia guardada
     const faseActual = obtenerFaseLunarHoy();
     const caracteristicas = FASE_LUNAR_MAP[faseActual] || FASE_LUNAR_MAP['luna_nueva'];
+    const preferenciaGuardada = localStorage.getItem('yoga_tipo_preferido') || 'automatico';
+    
+    // Determinar tipo automático
+    const tipoAutomatico = caracteristicas.tipo.toLowerCase().includes('vinyasa') ? 'vinyasa' : 'hatha';
     
     container.innerHTML = `
         <div class="yoga-miniapp">
@@ -2592,6 +3589,31 @@ function loadYoga() {
                     <span class="fase-icon">🌙</span>
                     <span class="fase-texto">${faseActual.replace(/_/g, ' ')}</span>
                 </div>
+                
+                <div class="yoga-tipo-selector">
+                    <label>Tipo de Yoga:</label>
+                    <div class="tipo-botones">
+                        <button class="tipo-btn ${preferenciaGuardada === 'automatico' ? 'active' : ''}" 
+                                data-tipo="automatico">
+                            <span class="tipo-icon">🌓</span>
+                            <span>Automático</span>
+                            <small>(Basado en fase lunar: ${tipoAutomatico})</small>
+                        </button>
+                        <button class="tipo-btn ${preferenciaGuardada === 'vinyasa' ? 'active vinyasa' : ''}" 
+                                data-tipo="vinyasa">
+                            <span class="tipo-icon">💧</span>
+                            <span>Vinyasa</span>
+                            <small>Fluido y dinámico</small>
+                        </button>
+                        <button class="tipo-btn ${preferenciaGuardada === 'hatha' ? 'active hatha' : ''}" 
+                                data-tipo="hatha">
+                            <span class="tipo-icon">🧘</span>
+                            <span>Hatha</span>
+                            <small>Estático y profundo</small>
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="duracion-selector">
                     <label>Duración:</label>
                     <select id="duracion-select">
@@ -2600,8 +3622,9 @@ function loadYoga() {
                         <option value="30">30 min</option>
                     </select>
                 </div>
+                
                 <button id="generar-btn" class="yoga-btn-primary">
-                    Generar Clase de Hoy
+                    Generar Clase
                 </button>
             </div>
             
@@ -2622,17 +3645,39 @@ function loadYoga() {
         </div>
     `;
     
-    // Event listeners
+    // Event listeners para selector de tipo
+    document.querySelectorAll('.tipo-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remover active de todos
+            document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active', 'vinyasa', 'hatha'));
+            // Agregar active al seleccionado
+            btn.classList.add('active');
+            const tipo = btn.dataset.tipo;
+            if (tipo === 'vinyasa') btn.classList.add('vinyasa');
+            if (tipo === 'hatha') btn.classList.add('hatha');
+            
+            // Guardar preferencia si no es automático
+            if (tipo !== 'automatico') {
+                localStorage.setItem('yoga_tipo_preferido', tipo);
+            } else {
+                localStorage.removeItem('yoga_tipo_preferido');
+            }
+        });
+    });
+    
+    // Event listener para generar clase
     document.getElementById('generar-btn').addEventListener('click', () => {
         const duracion = parseInt(document.getElementById('duracion-select').value);
-        const clase = generarClaseYogaGuiada(duracion);
+        const tipoSeleccionado = document.querySelector('.tipo-btn.active').dataset.tipo;
+        const clase = generarClaseYogaGuiada(duracion, 'equilibrar', tipoSeleccionado);
         mostrarClaseYogaGuiada(clase);
     });
     
     // Auto-generar clase al cargar
     setTimeout(() => {
         const duracion = parseInt(document.getElementById('duracion-select').value) || 20;
-        const clase = generarClaseYogaGuiada(duracion);
+        const tipoSeleccionado = document.querySelector('.tipo-btn.active').dataset.tipo;
+        const clase = generarClaseYogaGuiada(duracion, 'equilibrar', tipoSeleccionado);
         mostrarClaseYogaGuiada(clase);
     }, 300);
 }
@@ -2644,87 +3689,75 @@ function mostrarClaseYogaGuiada(clase) {
     
     const mostrarInstructor = document.getElementById('modo-instructor')?.checked || false;
     
-    // Generar HTML del flujo
-    const flujoHTML = clase.flujo.map((seccion, seccionIndex) => {
-        if (seccion.instrucciones) {
+    // Generar HTML del flujo (nueva estructura plana)
+    const flujoHTML = clase.flujo.map((paso, index) => {
+        // Si es una postura
+        if (paso.postura) {
+            const postura = obtenerPosturaPorNombre(paso.postura);
+            const puntosClaveHTML = mostrarInstructor && postura?.puntos_clave_instructor ? 
+                `<div class="puntos-clave-instructor">
+                    <strong>Puntos clave:</strong>
+                    <ul>${postura.puntos_clave_instructor.map(p => `<li>${p}</li>`).join('')}</ul>
+                </div>` : '';
+            
+            // Clase CSS según tipo
+            const claseTipo = paso.tipo === 'vinyasa' ? 'vinyasa' : 'hatha';
+            
             return `
-                <div class="paso-instrucciones">
-                    <div class="seccion-header">
-                        <span class="seccion-numero">${seccionIndex + 1}</span>
-                        <span class="seccion-tipo">Inicio</span>
-                    </div>
-                    <div class="instrucciones-lista">
-                        ${seccion.instrucciones.map(i => `<p class="instruccion">${i}</p>`).join('')}
+                <div class="paso-postura ${claseTipo}" data-index="${index}">
+                    <div class="paso-numero">${index + 1}</div>
+                    <div class="postura-contenido">
+                        <h4>${paso.postura}</h4>
+                        <div class="postura-detalles">
+                            <span class="duracion">⏱️ ${paso.duracion}</span>
+                            <span class="guia">📢 ${paso.guia}</span>
+                        </div>
+                        ${puntosClaveHTML}
                     </div>
                 </div>
             `;
-        }
-        
-        if (seccion.pasos) {
-            const pasosHTML = seccion.pasos.map((paso, i) => {
-                if (paso.postura) {
-                    const postura = posturaDB.find(p => p.nombre === paso.postura);
-                    const puntosClaveHTML = mostrarInstructor && postura?.puntos_clave_instructor ? 
-                        `<div class="puntos-clave-instructor">
-                            <strong>Puntos clave:</strong>
-                            <ul>${postura.puntos_clave_instructor.map(p => `<li>${p}</li>`).join('')}</ul>
-                        </div>` : '';
-                    
-                    return `
-                        <div class="paso-postura">
-                            <div class="paso-numero">${seccionIndex + 1}.${i + 1}</div>
-                            <div class="postura-contenido">
-                                <h4>${paso.postura}</h4>
-                                <div class="postura-detalles">
-                                    <span class="duracion">⏱️ ${paso.duracion}</span>
-                                    <span class="guia">📢 ${paso.guia}</span>
-                                </div>
-                                ${puntosClaveHTML}
-                            </div>
-                        </div>
-                    `;
-                } else if (paso.transicion) {
-                    return `
-                        <div class="paso-transicion">
-                            <div class="transicion-contenido">
-                                <span class="transicion-icon">→</span>
-                                <span class="transicion-texto">${paso.transicion}</span>
-                            </div>
-                        </div>
-                    `;
-                } else if (paso.instrucciones) {
-                    return `
-                        <div class="paso-instrucciones-final">
-                            ${paso.instrucciones.map(i => `<p class="instruccion-final">${i}</p>`).join('')}
-                        </div>
-                    `;
-                }
-                return '';
-            }).join('');
-            
+        } 
+        // Si es una transición
+        else if (paso.transicion) {
             return `
-                <div class="seccion-flujo">
-                    <div class="seccion-header">
-                        <span class="seccion-numero">${seccionIndex + 1}</span>
-                        <span class="seccion-tipo">${seccion.tipo}</span>
+                <div class="paso-transicion" data-index="${index}">
+                    <div class="transicion-contenido">
+                        <span class="transicion-icon">→</span>
+                        <span class="transicion-texto">${paso.transicion}</span>
                     </div>
-                    ${pasosHTML}
                 </div>
             `;
         }
         return '';
     }).join('');
     
+    // Información del tipo de clase
+    const tipoInfo = clase.tipo_seleccionado === 'vinyasa' 
+        ? `💧 Vinyasa${clase.intensidad ? ` (${clase.intensidad})` : ''}`
+        : `🧘 Hatha`;
+    
+    const ritmoInfo = clase.ritmo || (clase.tipo_seleccionado === 'vinyasa' ? 'Fluido' : 'Lento');
+    const respiracionInfo = clase.respiracion || (clase.tipo_seleccionado === 'vinyasa' 
+        ? 'Inhala-eleva, exhala-flexiona' 
+        : '5-8 respiraciones profundas');
+    
     // Modo instructor
     const modoInstructorHTML = mostrarInstructor ? `
         <div class="modo-instructor-panel">
             <h4>Modo Instructor</h4>
             <div class="instructor-info">
-                <p><strong>Ritmo:</strong> ${clase.modoInstructor.ritmoGeneral}</p>
-                <p><strong>Respiración:</strong> ${clase.modoInstructor.respiracionPorPostura}</p>
+                <p><strong>Tipo:</strong> ${tipoInfo}</p>
+                <p><strong>Ritmo:</strong> ${ritmoInfo}</p>
+                <p><strong>Respiración:</strong> ${respiracionInfo}</p>
+                ${clase.intention ? `<p><strong>Intención:</strong> ${clase.intention}</p>` : ''}
                 <p><strong>Puntos clave:</strong></p>
                 <ul>
-                    ${clase.modoInstructor.puntosClave.map(p => `<li>${p}</li>`).join('')}
+                    <li>Mantener conciencia de la respiración</li>
+                    <li>No forzar rango de movimiento</li>
+                    <li>Observar calidad del movimiento</li>
+                    ${clase.tipo_seleccionado === 'vinyasa' ? 
+                        '<li>Mantener fluidez entre posturas</li>' : 
+                        '<li>Mantener alineación en cada postura</li>'}
                 </ul>
             </div>
         </div>
@@ -2733,12 +3766,13 @@ function mostrarClaseYogaGuiada(clase) {
     container.innerHTML = `
         <div class="clase-generada-header">
             <div class="clase-info">
-                <div class="clase-tipo">${clase.tipoYoga}</div>
+                <div class="clase-tipo ${clase.tipo_seleccionado}">${tipoInfo}</div>
                 <div class="clase-duracion">${clase.duracion} min</div>
-                <div class="clase-intencion">Intención: ${clase.intention}</div>
+                ${clase.intention ? `<div class="clase-intencion">Intención: ${clase.intention}</div>` : ''}
             </div>
-            <div class="clase-mensaje">
-                <p>${clase.mensajeDia}</p>
+            <div class="clase-ritmo">
+                <span>Ritmo: ${ritmoInfo}</span>
+                <span>Respiración: ${respiracionInfo}</span>
             </div>
         </div>
         
