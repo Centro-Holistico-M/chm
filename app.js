@@ -1093,17 +1093,25 @@ async function loadDescodificacion() {
             <div class="desc-zonas-grid">
     `;
     
-    zonas.forEach(zona => {
-        const count = sintomasIndex.filter(s => s.zona === zona).length;
-        const icono = iconosZonas[zona.toLowerCase()] || '🔘';
+    if (zonas.length === 0) {
         html += `
-            <div class="desc-zona-card" onclick="mostrarSubzonas('${zona}')">
-                <span class="desc-zona-icono">${icono}</span>
-                <span class="desc-zona-nombre">${zona}</span>
-                <span class="desc-zona-count">${count} síntomas</span>
-            </div>
+            <p style="text-align:center;color:var(--text-muted);padding:20px;">
+                Cargando zonas del cuerpo...
+            </p>
         `;
-    });
+    } else {
+        zonas.forEach(zona => {
+            const count = sintomasIndex.filter(s => s.zona === zona).length;
+            const icono = iconosZonas[zona.toLowerCase()] || '🔘';
+            html += `
+                <div class="desc-zona-card" onclick="mostrarSubzonas('${zona}')">
+                    <span class="desc-zona-icono">${icono}</span>
+                    <span class="desc-zona-nombre">${zona}</span>
+                    <span class="desc-zona-count">${count} síntomas</span>
+                </div>
+            `;
+        });
+    }
     
     html += `
             </div>
@@ -1226,9 +1234,16 @@ async function buscarDescEnPagina() {
     
     if (resultados.length > 0) {
         const r = resultados[0];
-        const interpretacion = await interpretarConIA(r);
         
-        if (interpretacion) {
+        // Intentar IA primero
+        let interpretacion = null;
+        try {
+            interpretacion = await interpretarConIA(r);
+        } catch(e) {
+            console.log('IA no disponible, mostrando datos base');
+        }
+        
+        if (interpretacion && interpretacion.trim()) {
             const parsed = parseInterpretacion(interpretacion);
             resultado.innerHTML = `
                 <div class="desc-card">
@@ -1256,13 +1271,31 @@ async function buscarDescEnPagina() {
                 </div>
             `;
         } else {
+            // Fallback: mostrar datos de Google Sheets
             resultado.innerHTML = `
                 <div class="desc-card">
                     <h3>${r.sintoma}</h3>
-                    <p class="desc-zona-info">📍 ${r.zona}</p>
-                    <p><strong>Conflicto:</strong> ${r.conflicto}</p>
-                    <p><strong>Emoción:</strong> ${r.emocion}</p>
-                    <p><strong>Recomendación:</strong> ${r.recomendacion}</p>
+                    <p class="desc-zona-info">📍 ${r.zona} ${r.subzona ? '› ' + r.subzona : ''}</p>
+                    
+                    <div class="desc-seccion">
+                        <span class="desc-seccion-icono">💭</span>
+                        <p><strong>Conflicto:</strong> ${r.conflicto || 'No disponible'}</p>
+                    </div>
+                    
+                    <div class="desc-seccion">
+                        <span class="desc-seccion-icono">❤️</span>
+                        <p><strong>Emoción:</strong> ${r.emocion || 'No disponible'}</p>
+                    </div>
+                    
+                    ${r.palabras_clave ? `<div class="desc-seccion">
+                        <span class="desc-seccion-icono">🔑</span>
+                        <p><strong>Palabras clave:</strong> ${r.palabras_clave}</p>
+                    </div>` : ''}
+                    
+                    ${r.recomendacion ? `<div class="desc-recomendacion">
+                        <span class="desc-seccion-icono">🌿</span>
+                        <p>${r.recomendacion}</p>
+                    </div>` : ''}
                 </div>
             `;
         }
@@ -1270,7 +1303,7 @@ async function buscarDescEnPagina() {
         resultado.innerHTML = `
             <div class="desc-no-encontrado">
                 <p>No encontramos "${input.value}" en nuestro mapa corporal.</p>
-                <p class="desc-sugerencia">Prueba con otras palabras: dolor, tensión, fatiga, ansiedad...</p>
+                <p class="desc-sugerencia">Prueba con otras palabras: dolor, cabeza, estómago, ansiedad...</p>
             </div>
         `;
     }
