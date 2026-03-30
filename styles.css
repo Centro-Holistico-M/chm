@@ -281,12 +281,22 @@ body {
     to { opacity: 1; }
 }
 
+.header-slogan {
+    position: fixed;
+    top: calc(8px + var(--safe-area-inset-top) + 50px + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    text-align: center;
+}
+
 .slogan {
     font-family: 'Montserrat', sans-serif; 
     color: var(--gold);
-    font-size: 0.75rem; 
+    font-size: 0.7rem; 
     font-weight: 600;
     letter-spacing: 0.5px;
+    white-space: nowrap;
     opacity: 0;
     animation: sloganEntry 0.5s ease-out 0.5s both;
 }
@@ -307,7 +317,7 @@ body {
 
 /* NAV */
 .nav {
-    position: fixed; top: 82px; left: 0; right: 0;
+    position: fixed; top: 90px; left: 0; right: 0;
     display: flex; justify-content: center; gap: 4px;
     padding: 6px 10px;
     padding-bottom: calc(6px + var(--safe-area-inset-bottom));
@@ -355,7 +365,7 @@ body {
 
 /* CONTENT */
 .content { 
-    margin-top: 138px; 
+    margin-top: 146px; 
     padding: 16px; 
 }
 
@@ -909,7 +919,7 @@ body {
 /* MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
     .content {
-        margin-top: 120px;
+        margin-top: 128px;
         padding: 12px;
     }
     
@@ -922,13 +932,16 @@ body {
         top: calc(6px + var(--safe-area-inset-top));
     }
     
+    .header-slogan {
+        top: calc(6px + var(--safe-area-inset-top) + 40px + 2px);
+    }
+    
     .slogan {
-        top: calc(6px + var(--safe-area-inset-top) + 40px + 6px);
-        font-size: 0.7rem;
+        font-size: 0.6rem;
     }
     
     .nav {
-        top: 68px;
+        top: 74px;
         gap: 3px;
         padding: 6px 8px;
     }
