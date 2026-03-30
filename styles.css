@@ -38,17 +38,10 @@
 
 /* FUSION LOGO - Un solo logo para splash y header */
 .fusion-logo {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     z-index: 10000;
     animation: logoFusionMove 3s ease-in-out forwards;
     opacity: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+    cursor: pointer;
 }
 
 .fusion-logo img {
@@ -63,35 +56,27 @@
 @keyframes logoFusionMove {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.3);
+        transform: scale(0.3);
     }
     15% {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1.08);
+        transform: scale(1.08);
     }
     60% {
-        transform: translate(-50%, -30%) scale(1.02);
+        transform: scale(1.02);
     }
     100% {
         opacity: 1;
-        transform: translate(-50%, 0);
-        top: calc(8px + var(--safe-area-inset-top));
+        transform: scale(1);
     }
 }
 
 /* Después de fusión, el logo queda en posición header */
 .fusion-logo.fused {
-    position: fixed;
-    top: calc(8px + var(--safe-area-inset-top));
-    left: 50%;
-    transform: translate(-50%, 0);
     z-index: 100;
     animation: none;
     opacity: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+    cursor: pointer;
 }
 
 .fusion-logo.fused img {
@@ -196,6 +181,7 @@
 html, body {
     -webkit-overflow-scrolling: touch;
     overflow-x: hidden;
+    height: 100%;
 }
 
 body {
@@ -203,10 +189,26 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding-bottom: 20px;
-    padding-top: calc(20px + var(--safe-area-inset-top));
-    padding-left: var(--safe-area-inset-left);
-    padding-right: var(--safe-area-inset-right);
+    padding: 0;
+    margin: 0;
+}
+
+/* Contenedor Principal Flexbox - Todo en una pantalla */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    justify-content: space-between;
+}
+
+/* Header: Logo + Slogan */
+.app-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: calc(8px + var(--safe-area-inset-top));
+    padding-bottom: 8px;
+    gap: 4px;
 }
 
 /* FONDO SUTIL */
@@ -281,15 +283,6 @@ body {
     to { opacity: 1; }
 }
 
-.header-slogan {
-    position: fixed;
-    top: calc(8px + var(--safe-area-inset-top) + 50px + 2px);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 100;
-    text-align: center;
-}
-
 .slogan {
     font-family: 'Montserrat', sans-serif; 
     color: var(--gold);
@@ -317,10 +310,10 @@ body {
 
 /* NAV */
 .nav {
-    position: fixed; top: 65px; left: 0; right: 0;
-    display: flex; justify-content: center; gap: 4px;
-    padding: 6px 10px;
-    padding-bottom: calc(6px + var(--safe-area-inset-bottom));
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
     background: rgba(10,10,10,0.98);
     z-index: 99;
     border-bottom: 1px solid rgba(212,175,55,0.1);
@@ -333,18 +326,18 @@ body {
 }
 
 .nav-btn {
-    flex: 1; 
-    max-width: 100px; 
-    padding: 8px 6px;
-    background: transparent; 
+    flex: 1;
+    max-width: 120px;
+    padding: 10px 8px;
+    background: transparent;
     border: 1px solid rgba(212,175,55,0.25);
-    color: var(--text-muted); 
+    color: var(--text-muted);
     font-family: 'Cinzel', serif;
-    font-size: 0.65rem; 
-    border-radius: var(--radius-sm); 
+    font-size: 0.65rem;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.3s;
-    text-transform: uppercase; 
+    text-transform: uppercase;
     letter-spacing: 0.3px;
 }
 
@@ -354,30 +347,29 @@ body {
     background: rgba(212,175,55,0.08);
 }
 
-.nav-btn.active { 
-    background: var(--gold); 
-    color: #000; 
-    border-color: var(--gold); 
+.nav-btn.active {
+    background: var(--gold);
+    color: #000;
+    border-color: var(--gold);
     font-weight: 600;
 }
 
 .nav-btn:active { transform: scale(0.96); }
 
 /* CONTENT */
-.content { 
-    margin-top: 100px; 
-    padding: 12px; 
+.content {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    min-height: 0;
 }
 
-.tab-content { 
-    display: none; 
-    animation: contentEntry 0.5s ease-out both; 
-    min-height: calc(100vh - 130px);
+.tab-content {
+    display: none;
+    animation: contentEntry 0.5s ease-out both;
 }
-.tab-content.active { 
-    display: block; 
-    overflow-y: auto;
-    max-height: calc(100vh - 130px);
+.tab-content.active {
+    display: block;
 }
 
 @keyframes contentEntry {
@@ -878,18 +870,18 @@ body {
 /* FOOTER */
 .footer {
     text-align: center;
-    padding: 12px 16px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     color: var(--text-muted);
-    font-size: 0.7rem;
-    margin-top: auto;
+    font-size: 0.6rem;
     white-space: nowrap;
+    background: var(--bg);
 }
 
 @media (max-width: 480px) {
     .footer {
-        font-size: 0.65rem;
-        padding: 12px 8px;
+        font-size: 0.55rem;
+        padding: 6px 8px;
     }
 }
 
@@ -923,66 +915,57 @@ body {
 
 /* MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
-    .content {
-        margin-top: 85px;
-        padding: 8px;
+    .app-header {
+        padding-top: calc(6px + var(--safe-area-inset-top));
+        padding-bottom: 6px;
+        gap: 3px;
     }
     
-    .fusion-logo.fused img {
-        width: 38px;
-        height: 38px;
-    }
-    
-    .fusion-logo.fused {
-        top: calc(4px + var(--safe-area-inset-top));
-    }
-    
-    .header-slogan {
-        top: calc(4px + var(--safe-area-inset-top) + 38px + 2px);
+    .fusion-logo img {
+        width: 36px;
+        height: 36px;
+        padding: 3px;
     }
     
     .slogan {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
     }
     
     .nav {
-        top: 50px;
-        gap: 2px;
-        padding: 4px 5px;
+        gap: 6px;
+        padding: 8px 12px;
     }
     
     .nav-btn {
-        padding: 5px 2px;
+        padding: 8px 4px;
         font-size: 0.5rem;
-        max-width: 33%;
-        min-height: 32px;
+        max-width: 35%;
     }
     
-    .tab-content {
-        min-height: calc(100vh - 95px);
-        max-height: calc(100vh - 95px);
+    .content {
+        padding: 6px;
     }
     
     .card {
-        padding: 10px;
+        padding: 8px;
     }
     
     .card h3 {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
     }
 
     .calendario-widget {
-        padding: 12px;
-        margin-bottom: 20px;
+        padding: 8px;
+        margin-bottom: 12px;
     }
     
     .cal-mes {
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
     
     .cal-nav-btn {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
     }
     
     .cal-dia {
