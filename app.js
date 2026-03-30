@@ -1200,21 +1200,8 @@ async function loadContacto() {
             
             ${redes ? `<p class="contacto-titulo-sección">Síguenos</p>
             <div class="redes-sociales">${redes}</div>` : ''}
-            
-            <div class="descodificacion-consulta">
-                <h3 class="section-subtitle">🔍 Descodificación</h3>
-                <p class="descodificacion-desc">Ingresa un síntoma para explorar su significado emocional</p>
-                <input type="text" id="sintoma-input" class="sintoma-input" placeholder="Ej: dolor de cabeza, ansiedad, fatiga..." />
-                <button class="sintoma-buscar-btn" id="btn-buscar-sintoma">Interpretar</button>
-                <div id="sintoma-resultado" class="sintoma-resultado"></div>
-            </div>
         </div>
     `;
-    
-    document.getElementById('btn-buscar-sintoma').addEventListener('click', buscarSintoma);
-    document.getElementById('sintoma-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') buscarSintoma();
-    });
 }
 
 async function buscarDescEnPagina() {
@@ -1230,7 +1217,12 @@ async function buscarDescEnPagina() {
     showLoading(true);
     await loadDescodData();
     
-    const resultados = sintomasIndex.filter(item => item.sintoma.includes(termino));
+    // Buscar en cualquier campo (sintoma, zona, subzona, emocion)
+    const terminos = termino.split(' ').filter(t => t.length > 2);
+    const resultados = sintomasIndex.filter(item => {
+        const textoBusqueda = `${item.sintoma} ${item.zona} ${item.subzona} ${item.emocion} ${item.conflicto}`.toLowerCase();
+        return terminos.some(t => textoBusqueda.includes(t));
+    });
     
     if (resultados.length > 0) {
         const r = resultados[0];
@@ -1429,7 +1421,12 @@ async function buscarSintoma() {
     showLoading(true);
     await loadDescodData();
     
-    const resultados = sintomasIndex.filter(item => item.sintoma.includes(termino));
+    // Buscar en cualquier campo
+    const terminos = termino.split(' ').filter(t => t.length > 2);
+    const resultados = sintomasIndex.filter(item => {
+        const textoBusqueda = `${item.sintoma} ${item.zona} ${item.subzona} ${item.emocion} ${item.conflicto}`.toLowerCase();
+        return terminos.some(t => textoBusqueda.includes(t));
+    });
     
     if (resultados.length > 0) {
         const r = resultados[0];

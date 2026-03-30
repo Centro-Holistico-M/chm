@@ -203,7 +203,7 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding-bottom: 50px;
+    padding-bottom: 20px;
     padding-top: calc(20px + var(--safe-area-inset-top));
     padding-left: var(--safe-area-inset-left);
     padding-right: var(--safe-area-inset-right);
@@ -317,7 +317,7 @@ body {
 
 /* NAV */
 .nav {
-    position: fixed; top: 90px; left: 0; right: 0;
+    position: fixed; top: 76px; left: 0; right: 0;
     display: flex; justify-content: center; gap: 4px;
     padding: 6px 10px;
     padding-bottom: calc(6px + var(--safe-area-inset-bottom));
@@ -365,7 +365,7 @@ body {
 
 /* CONTENT */
 .content { 
-    margin-top: 146px; 
+    margin-top: 132px; 
     padding: 16px; 
 }
 
@@ -919,7 +919,7 @@ body {
 /* MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
     .content {
-        margin-top: 128px;
+        margin-top: 114px;
         padding: 12px;
     }
     
@@ -941,7 +941,7 @@ body {
     }
     
     .nav {
-        top: 74px;
+        top: 60px;
         gap: 3px;
         padding: 6px 8px;
     }
