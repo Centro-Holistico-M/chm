@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Establecer botón Horarios como activo al inicio
     document.querySelector('.nav-btn[data-tab="horarios"]').classList.add('active');
     
-    // Fusionar logo después de la animación (3s)
+    // Fusionar logo después de la animación (3.3s para coincidir con CSS)
     setTimeout(() => {
         const splash = document.getElementById('splash');
         if (splash) {
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fusionLogo) {
             fusionLogo.classList.add('fused');
         }
-    }, 3000);
+    }, 3300);
     
     // Crear partículas del splash
     initSplashParticles();
@@ -1912,9 +1912,9 @@ async function cargarSeccionM() {
             <!-- Miniapp Yoga -->
             <div class="miniapp-card" onclick="abrirMiniapp('yoga')">
                 <div class="miniapp-icon">🧘</div>
-                <div class="miniapp-titulo">Yoga Terapéutico</div>
+                <div class="miniapp-titulo">Yoga</div>
                 <div class="miniapp-descripcion">
-                    Clases diarias basado en fase lunar
+                    Clases guiadas según fase lunar
                 </div>
             </div>
             
@@ -3512,178 +3512,6 @@ function calcularEstructuraPorDuracion(duracionMinutos) {
         30: { inicio: 3, calentamiento: 4, flujoPrincipal: 12, posturasClave: 6, cierre: 5 }
     };
     return estructura[duracionMinutos] || estructura[20];
-}
-
-// Generar clase yoga guiada
-function generarClaseYogaGuiada(duracionSeleccionada = 20) {
-    const fase = obtenerFaseLunarHoy();
-    const intention = obtenerIntencionDiaria();
-    const caracteristicas = FASE_LUNAR_MAP[fase] || FASE_LUNAR_MAP['luna_nueva'];
-    
-    // Filtrar posturas adecuadas
-    const posturasAdecuadas = filtrarPosturasAdecuadas(fase, intention);
-    
-    // Generar mensaje del día
-    const mensajeDia = generarMensajeDia(fase, intention);
-    
-    // Estructura de tiempo
-    const estructura = calcularEstructuraPorDuracion(duracionSeleccionada);
-    
-    // Construir flujo guiado
-    const flujo = [];
-    
-    // INICIO (respiración)
-    flujo.push({
-        tipo: "inicio",
-        instrucciones: [
-            "Siéntate cómodamente, columna erguida",
-            "Cierra ojos, lleva atención a la respiración",
-            "Inhala profundo por nariz, exhala completamente",
-            `Hoy: ${mensajeDia}`
-        ]
-    });
-    
-    // CALENTAMIENTO
-    if (posturasAdecuadas.length > 0) {
-        const calentamientoPosturas = seleccionarPosturasVariadas(
-            posturasAdecuadas.filter(p => p.tipo.includes('flexibilidad') || p.tipo.includes('movilidad')),
-            estructura.calentamiento
-        );
-        
-        if (calentamientoPosturas.length > 0) {
-            flujo.push({
-                tipo: "calentamiento",
-                pasos: calentamientoPosturas.map((p, i) => ({
-                    postura: p.nombre,
-                    duracion: `${Math.max(3, Math.round(p.duracion_estimada_seg / 20))} respiraciones`,
-                    guia: p.instrucciones_clave[0] || "Mantén respiración consciente"
-                }))
-            });
-        }
-    }
-    
-    // FLUJO PRINCIPAL
-    const flujoPosturas = seleccionarPosturasVariadas(
-        posturasAdecuadas.filter(p => p.tipo.includes('fuerza') || p.tipo.includes('equilibrio')),
-        estructura.flujoPrincipal
-    );
-    
-    if (flujoPosturas.length > 0) {
-        const flujoSteps = [];
-        flujoPosturas.forEach((postura, i) => {
-            // Añadir postura
-            flujoSteps.push({
-                postura: postura.nombre,
-                duracion: `${Math.max(3, Math.round(postura.duracion_estimada_seg / 15))} respiraciones`,
-                guia: postura.instrucciones_clave[0] || "Mantén postura con respiración estable"
-            });
-            
-            // Añadir transición si no es la última
-            if (i < flujoPosturas.length - 1) {
-                const siguiente = flujoPosturas[i + 1];
-                flujoSteps.push({
-                    transicion: generarTransicion(postura, siguiente)
-                });
-            }
-        });
-        
-        flujo.push({
-            tipo: "flujo",
-            pasos: flujoSteps
-        });
-    }
-    
-    // POSTURAS CLAVE
-    const posturasClave = seleccionarPosturasVariadas(
-        posturasAdecuadas.filter(p => p.tipo.includes('flexibilidad') || p.tipo.includes('relajación')),
-        estructura.posturasClave
-    );
-    
-    if (posturasClave.length > 0) {
-        flujo.push({
-            tipo: "posturas_clave",
-            pasos: posturasClave.map(p => ({
-                postura: p.nombre,
-                duracion: `${Math.max(3, Math.round(p.duracion_estimada_seg / 10))} respiraciones`,
-                guia: p.instrucciones_clave[0] || "Mantén postura, respira profundamente"
-            }))
-        });
-    }
-    
-    // CIERRE
-    flujo.push({
-        tipo: "cierre",
-        pasos: [
-            {
-                postura: "Savasana",
-                duracion: "2 minutos",
-                guia: "Relaja todo el cuerpo, cierra ojos, respira naturalmente"
-            },
-            {
-                transicion: "Levántate lentamente, llevando la calma contigo"
-            },
-            {
-                instrucciones: ["Clase finalizada. Namaste 🙏"]
-            }
-        ]
-    });
-    
-    // Modo instructor mejorado
-    const modoInstructor = {
-        ritmoGeneral: caracteristicas.ritmo,
-        respiracionPorPostura: "3 a 6 respiraciones (ajustar según postura)",
-        puntosClave: [
-            `Enfoque: ${caracteristicas.enfoque}`,
-            "Mantener conciencia de la respiración en todo momento",
-            "No forzar rango de movimiento; honrar los límites del cuerpo",
-            ...(intention === 'soltar' ? ["Enfatizar la exhalación para liberar tensión"] : []),
-            ...(intention === 'activar' ? ["Iniciar movimientos con inhalación energética"] : []),
-            "Observar la calidad de movimiento, no la cantidad"
-        ]
-    };
-    
-    // Verificar similitud con historial
-    if (esClaseAdecuadamenteUnica(flujo, yogaHistorial)) {
-        // Actualizar historial
-        yogaHistorial.fechas.push(new Date().toISOString().split('T')[0]);
-        if (yogaHistorial.fechas.length > 7) yogaHistorial.fechas.shift();
-        
-        // Actualizar posturas recientes
-        const posturasUsadas = flujo.flatMap(seccion => 
-            seccion.pasos?.filter(p => p.postura).map(p => p.postura) || []
-        );
-        yogaHistorial.posturasRecientes = [...new Set([...posturasUsadas, ...yogaHistorial.posturasRecientes])].slice(0, 20);
-        
-        // Actualizar secuencias recientes
-        const secuenciaHash = Array.from(JSON.stringify(flujo)).reduce(
-            (hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0
-        );
-        yogaHistorial.secuenciasRecientes = [secuenciaHash.toString(), ...yogaHistorial.secuenciasRecientes].slice(0, 5);
-        
-        guardarHistorialYoga();
-    }
-    
-    return {
-        fecha: new Date().toISOString().split('T')[0],
-        faseLunar: fase,
-        tipoYoga: caracteristicas.tipo,
-        duracion: duracionSeleccionada,
-        intention: intention,
-        mensajeDia: mensajeDia,
-        flujo: flujo,
-        modoInstructor: modoInstructor
-    };
-}
-
-function esClaseAdecuadamenteUnica(flujo, historial) {
-    if (!historial || historial.secuenciasRecientes.length === 0) return true;
-    
-    // Verificar similitud simple
-    const secuenciaHash = Array.from(JSON.stringify(flujo)).reduce(
-        (hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0
-    );
-    
-    return !historial.secuenciasRecientes.includes(secuenciaHash.toString());
 }
 
 // Cargar miniapp Yoga

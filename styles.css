@@ -83,7 +83,7 @@
     animation: logoPulse 2s ease-in-out infinite;
 }
 
-.fusion-logo.fused .slogan {
+.fusion-logo.fused + .slogan {
     opacity: 1;
     animation: sloganPulse 3s ease-in-out 1s infinite;
 }
