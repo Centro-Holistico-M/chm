@@ -1947,6 +1947,10 @@ function abrirMiniapp(tipo) {
     // Cargar contenido específico del miniapp
     switch(tipo) {
         case 'descodificacion':
+            // Asegurar que el contenedor existe
+            if (!document.getElementById('descodificacion-container')) {
+                miniappSeccion.innerHTML = '<div id="descodificacion-container"></div>';
+            }
             loadDescodificacion();
             break;
         case 'yoga':
