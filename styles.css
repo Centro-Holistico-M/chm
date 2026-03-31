@@ -249,9 +249,15 @@ body {
     align-items: center;
     justify-content: center;
     background: var(--bg);
-    z-index: 100;
+    z-index: 200;
     padding: 8px 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid rgba(212,175,55,0.1);
+    color: var(--text-muted);
+    font-size: 0.6rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Ocultar elementos por defecto */
@@ -365,7 +371,11 @@ body {
     .app-header-fixed { height: 70px; }
     .nav-fixed { top: 70px; height: 35px; }
     .app-content { top: 105px; bottom: 40px; } /* 70+35=105 */
-    .app-footer-fixed { height: 40px; }
+    .app-footer-fixed { 
+        height: 40px; 
+        font-size: 0.55rem;
+        padding: 6px 8px;
+    }
     
     .miniapp-card { padding: 20px 14px; }
     .miniapp-icon { font-size: 2.2rem; }
