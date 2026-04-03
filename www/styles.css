@@ -1742,147 +1742,38 @@ body {
 }
 
 /* =====================================================
-   APP DOWNLOAD BANNER - Atrevido y Animado
+   APP CHIP - Minimalista Integrado
    ===================================================== */
-.app-banner {
-    position: relative;
-    margin-top: 24px;
-    padding: 0;
-    border-radius: 20px;
-    overflow: hidden;
-    animation: bannerFloat 4s ease-in-out infinite;
-    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
-}
-
-@keyframes bannerFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-}
-
-.app-banner-glow {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255,255,255,0.1) 50%,
-        transparent 70%
-    );
-    animation: glowRotate 6s linear infinite;
-}
-
-@keyframes glowRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.app-banner-content {
-    position: relative;
-    display: flex;
+.app-chip {
+    display: inline-flex;
     align-items: center;
-    gap: 16px;
-    padding: 20px 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6B8DD6 100%);
-    z-index: 1;
-}
-
-.app-icon-container {
-    flex-shrink: 0;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.2);
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
-}
-
-.app-icon {
-    font-size: 32px;
-    animation: iconBounce 1.2s ease-in-out infinite;
-}
-
-@keyframes iconBounce {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(5deg); }
-}
-
-.app-text {
-    flex: 1;
-    text-align: left;
-}
-
-.app-text h3 {
-    margin: 0;
-    color: white;
-    font-size: 1.4rem;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    letter-spacing: 0.5px;
-}
-
-.app-text p {
-    margin: 4px 0 0 0;
-    color: rgba(255,255,255,0.9);
-    font-size: 0.95rem;
-    font-weight: 400;
-}
-
-.app-download-btn {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 28px;
-    background: white;
-    color: #667eea;
-    border-radius: 30px;
-    font-size: 1rem;
-    font-weight: 700;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 10px 18px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 25px;
+    color: var(--gold);
     text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
-.app-download-btn:hover {
-    transform: scale(1.08);
-    box-shadow: 0 8px 25px rgba(255,255,255,0.4);
+.app-chip:hover {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
 }
 
-.app-download-btn span {
-    font-size: 1.2rem;
+.app-chip-icon {
+    font-size: 1rem;
 }
 
-/* Responsive */
-@media (max-width: 500px) {
-    .app-banner-content {
-        flex-direction: column;
-        text-align: center;
-        padding: 24px 20px;
-    }
-    
-    .app-text {
-        text-align: center;
-    }
-    
-    .app-download-btn {
-        margin-top: 8px;
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .app-icon-container {
-        width: 70px;
-        height: 70px;
-    }
-    
-    .app-icon {
-        font-size: 40px;
-    }
+.app-chip-text {
+    font-family: 'Cinzel', serif;
+    letter-spacing: 1px;
 }
 
 /* =====================================================

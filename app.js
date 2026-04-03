@@ -929,21 +929,10 @@ async function loadConocete() {
             <div class="redes-sociales">${redes}</div>` : ''}
             
             ${c.Descarga || c.LinkAPK ? `
-            <div class="app-banner">
-                <div class="app-banner-glow"></div>
-                <div class="app-banner-content">
-                    <div class="app-icon-container">
-                        <span class="app-icon">📱</span>
-                    </div>
-                    <div class="app-text">
-                        <h3>Instala la App</h3>
-                        <p>Llévanos contigo a todas partes</p>
-                    </div>
-                    <a href="${c.Descarga || c.LinkAPK}" target="_blank" class="app-download-btn">
-                        <span>📲</span> Descargar
-                    </a>
-                </div>
-            </div>
+            <a href="${c.Descarga || c.LinkAPK}" target="_blank" class="app-chip">
+                <span class="app-chip-icon">📱</span>
+                <span class="app-chip-text">App</span>
+            </a>
             ` : ''}
         </div>
     `;
@@ -1599,21 +1588,10 @@ async function loadContacto() {
             <div class="redes-sociales">${redes}</div>` : ''}
             
             ${c.Descarga || c.LinkAPK ? `
-            <div class="app-banner">
-                <div class="app-banner-glow"></div>
-                <div class="app-banner-content">
-                    <div class="app-icon-container">
-                        <span class="app-icon">📱</span>
-                    </div>
-                    <div class="app-text">
-                        <h3>Instala la App</h3>
-                        <p>Llévanos contigo a todas partes</p>
-                    </div>
-                    <a href="${c.Descarga || c.LinkAPK}" target="_blank" class="app-download-btn">
-                        <span>📲</span> Descargar
-                    </a>
-                </div>
-            </div>
+            <a href="${c.Descarga || c.LinkAPK}" target="_blank" class="app-chip">
+                <span class="app-chip-icon">📱</span>
+                <span class="app-chip-text">App</span>
+            </a>
             ` : ''}
         </div>
     `;
