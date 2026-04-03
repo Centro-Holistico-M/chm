@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Centro Holístico M</title>
+    <meta name="description" content="Centro Holístico M">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Centro Holístico M">
+    <link rel="manifest" href="./images/manifest.json">
+    <link rel="icon" type="image/png" href="./images/logo.png">
+    <link rel="apple-touch-icon" href="./images/icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <!-- Splash solo para fondo y partículas -->
+    <div id="splash" class="splash">
+        <div class="splash-aura"></div>
+        <div class="splash-particles" id="splash-particles"></div>
+    </div>
+
+<!-- Contenedor Principal -->
+<div class="app-container">
+    <!-- Header FIJO -->
+    <header class="app-header-fixed">
+        <div id="fusion-logo" class="fusion-logo" onclick="irASeccionM()">
+            <img src="./images/logo.png" alt="Centro Holístico M">
+        </div>
+        <p class="slogan" id="slogan"></p>
+        <nav class="nav-fixed">
+            <button class="nav-btn" data-tab="horarios">Horarios</button>
+            <button class="nav-btn" data-tab="servicios">Eventos</button>
+            <button class="nav-btn" data-tab="contacto">Contacto</button>
+        </nav>
+    </header>
+
+    <!-- Contenido principal (entre header y footer fijos) -->
+    <main class="app-content">
+        <!-- SECTION M (oculta por defecto, solo visible vía logo) -->
+        <section id="seccion-m" class="tab-content hidden">
+            <div id="seccion-m-contenedor"></div>
+        </section>
+        
+        <!-- MINIAPPS (accesibles solo desde Section M) -->
+        <section id="descodificacion" class="tab-content hidden"></section>
+        <section id="yoga" class="tab-content hidden"></section>
+        <section id="living-light" class="tab-content hidden"></section>
+        
+        <!-- SECCIONES PRINCIPALES (accesibles vía nav buttons) -->
+        <section id="horarios" class="tab-content active">
+            <div id="horarios-container"></div>
+        </section>
+        <section id="servicios" class="tab-content hidden">
+            <div id="servicios-container"></div>
+        </section>
+        <section id="contacto" class="tab-content hidden">
+            <div id="contacto-container"></div>
+        </section>
+    </main>
+
+    <!-- Footer FIJO -->
+    <footer class="app-footer-fixed">
+        <p>© 2026 Centro Holístico M. Todos los derechos reservados 🄼</p>
+    </footer>
+</div>
+
+    <div class="bg-aura"></div>
+    <div class="particles" id="particles"></div>
+
+    <div id="loading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="./app.js"></script>
+    <script>
+        if (!window.location.href.startsWith('capacitor://')) {
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./images/sw.js')
+                        .then(reg => console.log('✅ SW registrado:', reg.scope))
+                        .catch(err => console.log('❌ SW error:', err));
+                });
+            }
+        }
+    </script>
+</body>
+</html>
