@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agente M — Descodificación</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --gold-dim: #8a6e30;
+    --bg: #0a0907;
+    --bg2: #110f0b;
+    --bg3: #1a1710;
+    --text: #e8dfc8;
+    --text-dim: #9a9080;
+    --border: rgba(201,168,76,0.2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    font-weight: 400;
+  }
+
+  header p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 0.3rem;
+    letter-spacing: 0.05em;
+  }
+
+  .orb {
+    width: 5px;
+    height: 5px;
+    background: var(--gold);
+    border-radius: 50%;
+    margin: 0.6rem auto 0;
+    box-shadow: 0 0 10px var(--gold), 0 0 20px rgba(201,168,76,0.3);
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1.2rem 1rem;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  #chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    padding-bottom: 0.5rem;
+    min-height: 280px;
+    max-height: calc(100vh - 260px);
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { align-items: flex-end; }
+  .msg.agent { align-items: flex-start; }
+
+  .msg-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: 'Cinzel', serif;
+  }
+
+  .msg.agent .msg-label { color: var(--gold-dim); }
+
+  .bubble {
+    max-width: 88%;
+    padding: 0.8rem 1rem;
+    border-radius: 2px;
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+
+  .msg.user .bubble {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-right: 2px solid var(--gold-dim);
+    color: var(--text);
+    font-style: italic;
+  }
+
+  .msg.agent .bubble {
+    background: linear-gradient(135deg, rgba(201,168,76,0.06), rgba(201,168,76,0.02));
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--gold);
+    color: var(--text);
+  }
+
+  .msg.agent .bubble section { margin-bottom: 0.8rem; }
+  .msg.agent .bubble section:last-child { margin-bottom: 0; }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .bullet-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .bullet-list li {
+    padding: 0.15rem 0 0.15rem 1.1rem;
+    position: relative;
+    color: var(--text);
+    font-size: 0.92rem;
+  }
+
+  .bullet-list li::before {
+    content: '◆';
+    position: absolute;
+    left: 0;
+    font-size: 0.35rem;
+    color: var(--gold);
+    top: 0.4rem;
+  }
+
+  .highlight-phrase {
+    display: inline-block;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold-light);
+    padding: 0.1rem 0.5rem;
+    font-style: italic;
+    margin: 0.1rem 0;
+    font-size: 0.9rem;
+  }
+
+  .input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 0.9rem;
+    position: relative;
+  }
+
+  .input-area::before {
+    content: 'SÍNTOMA';
+    position: absolute;
+    top: -0.5rem;
+    left: 0.9rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--gold-dim);
+    background: var(--bg2);
+    padding: 0 0.35rem;
+  }
+
+  textarea {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    resize: none;
+    line-height: 1.6;
+    min-height: 60px;
+    width: 100%;
+    font-style: italic;
+  }
+
+  textarea::placeholder { color: var(--text-dim); font-style: italic; }
+
+  .input-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .hint {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-transform: uppercase;
+  }
+
+  button:hover {
+    background: rgba(201,168,76,0.1);
+    border-color: var(--gold);
+  }
+
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .thinking {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dim);
+    font-style: italic;
+    font-size: 0.8rem;
+    padding: 0.4rem 0;
+  }
+
+  .thinking-dots span {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    background: var(--gold-dim);
+    border-radius: 50%;
+    animation: dot 1.4s ease-in-out infinite;
+  }
+
+  .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .welcome {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-dim);
+    font-style: italic;
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+
+  .welcome em {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--gold-dim);
+    margin-top: 0.8rem;
+    font-style: normal;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AGENTE M</h1>
+  <p>Canal entre el síntoma y la raíz</p>
+  <div class="orb"></div>
+</header>
+
+<main>
+  <div id="chat">
+    <div class="welcome">
+      Dime lo que observas.<br>
+      Yo leeré lo que hay detrás.
+      <em>EL SÍNTOMA HABLA… PERO LA BOCA CONFIESA</em>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <textarea id="input" placeholder="Describe el síntoma, lo que dijo, cómo lo dijo..." rows="3"></textarea>
+    <div class="input-footer">
+      <span class="hint">Shift+Enter para enviar</span>
+      <button id="sendBtn" onclick="send()">Leer ↗</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const SYSTEM_PROMPT = `Eres el Agente M, copiloto interno de VicMac durante sus consultas de descodificación en el Centro Holístico M.
+
+VicMac es un buscador de la verdad que trabaja con descodificación basada en la idea de que la realidad se crea desde el interior a través de las palabras. El Centro Holístico M se enfoca en transformación emocional y energética, donde la sanación ocurre al tomar conciencia de uno mismo.
+
+Tu función: traducir el síntoma físico en emoción, conflicto interno y patrón de lenguaje. No curas. Revelas.
+
+PRINCIPIOS:
+- Neutralidad total. No juzgas.
+- Escuchas palabras exactas, tono, repeticiones, contradicciones.
+- El síntoma es un mensaje.
+- Detectas la frase inconsciente, el decreto oculto.
+- Guias con "¿Puede ser que…?", "¿Qué pasaba cuando empezó?"
+
+SIMBOLOGÍA DEL CUERPO:
+- Garganta → lo no dicho
+- Rodilla → flexibilidad, orgullo
+- Espalda baja → soporte, miedo al futuro
+- Piel → contacto, límites
+- Cabeza → control
+- Corazón → amor, duelo
+- Estómago → lo que no se digiere, miedo
+- Ojos → lo que no se quiere ver
+- Oídos → lo que no se quiere escuchar
+
+FLUJO DE LECTURA:
+1. LECTURA SIMBÓLICA: qué representa ese síntoma
+2. CONFLICTO PROBABLE: emoción detrás
+3. DECRETO OCULTO: frase inconsciente
+4. PREGUNTAS CLAVE: 2-3 preguntas para la consulta
+5. PATRÓN A EXPLORAR: si hay repetición
+
+TONO: Profundo, preciso, sin florituras. Como quien lee entre líneas.`;
+
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('sendBtn');
+let messages = [];
+
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+
+function addMsg(role, content) {
+  const welcome = chat.querySelector('.welcome');
+  if (welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  div.className = `msg ${role === 'user' ? 'user' : 'agent'}`;
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.textContent = role === 'user' ? 'VicMac' : 'Agente M';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.innerHTML = role === 'user' ? content : formatResponse(content);
+
+  div.appendChild(label);
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function formatResponse(text) {
+  const lines = text.split('\n');
+  let html = '';
+  let buffer = [];
+  let inSection = false;
+
+  const titles = ['LECTURA SIMBÓLICA', 'CONFLICTO PROBABLE', 'DECRETO OCULTO', 'PREGUNTAS CLAVE', 'PATRÓN A EXPLORAR'];
+
+  function flush() {
+    if (!buffer.length) return '';
+    let content = buffer.join(' ').trim();
+    buffer = [];
+    if (!content) return '';
+    content = content.replace(/"([^"]+)"/g, '<span class="highlight-phrase">"$1"</span>');
+    content = content.replace(/«([^»]+)»/g, '<span class="highlight-phrase">«$1»</span>');
+    return `<p>${content}</p>`;
+  }
+
+  for (let line of lines) {
+    let trimmed = line.trim();
+    if (!trimmed) {
+      if (buffer.length) {
+        if (inSection) { html += '</section>'; inSection = false; }
+        html += flush();
+      }
+      continue;
+    }
+
+    let isSection = false;
+    for (let title of titles) {
+      if (trimmed.toUpperCase().includes(title) || /^\d+\./.test(trimmed)) {
+        if (buffer.length) {
+          if (inSection) { html += '</section>'; inSection = false; }
+          html += flush();
+        }
+        const rest = trimmed.replace(/^\d+\.\s*/, '').replace(new RegExp(`^${title}:?\\s*`, 'i'), '').trim();
+        html += `<section><div class="section-title">${title}</div>`;
+        if (rest) {
+          rest = rest.replace(/"([^"]+)"/g, '<span class="highlight-phrase">"$1"</span>');
+          html += `<p>${rest}</p>`;
+        }
+        inSection = true;
+        isSection = true;
+        break;
+      }
+    }
+
+    if (!isSection) {
+      if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
+        if (inSection) { html += '</section>'; inSection = false; }
+        const item = trimmed.replace(/^[-•·]\s*/, '');
+        item = item.replace(/"([^"]+)"/g, '<span class="highlight-phrase">"$1"</span>');
+        html += `<ul class="bullet-list"><li>${item}</li></ul>`;
+      } else {
+        buffer.push(trimmed);
+      }
+    }
+  }
+
+  if (buffer.length) {
+    if (inSection) html += '</section>';
+    html += flush();
+  }
+
+  return html || `<p>${text}</p>`;
+}
+
+function showThinking() {
+  const div = document.createElement('div');
+  div.className = 'msg agent';
+  div.id = 'thinking';
+  div.innerHTML = `
+    <div class="msg-label">Agente M</div>
+    <div class="thinking">
+      <div class="thinking-dots"><span></span><span></span><span></span></div>
+      leyendo lo invisible…
+    </div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeThinking() {
+  const t = document.getElementById('thinking');
+  if (t) t.remove();
+}
+
+function getOpenAIKey() {
+  return window.OPENAI_API_KEY || '';
+}
+
+async function send() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  sendBtn.disabled = true;
+  addMsg('user', text);
+  messages.push({ role: 'user', content: text });
+  showThinking();
+
+  try {
+    const key = getOpenAIKey();
+    if (!key) {
+      removeThinking();
+      addMsg('agent', 'API key no configurada. Consulta con VicMac.');
+      sendBtn.disabled = false;
+      return;
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages
+        ],
+        max_tokens: 1000,
+        temperature: 0.7
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) {
+      removeThinking();
+      addMsg('agent', 'Error: ' + data.error.message);
+      sendBtn.disabled = false;
+      return;
+    }
+
+    const reply = data.choices?.[0]?.message?.content || 'Sin respuesta.';
+    removeThinking();
+    addMsg('agent', reply);
+    messages.push({ role: 'assistant', content: reply });
+  } catch (err) {
+    removeThinking();
+    addMsg('agent', 'Error de conexión. Intenta de nuevo.');
+    console.error(err);
+  }
+
+  sendBtn.disabled = false;
+  input.focus();
+}
+</script>
+</body>
+</html>

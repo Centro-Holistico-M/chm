@@ -384,6 +384,20 @@ body {
     .btn-regresar-seccion-m { padding: 8px 14px; font-size: 0.8rem; }
 }
 
+/* Highlight today in Horarios - Opción A (días como .dia en #horarios) */
+#horarios .dia.today {
+  background: rgba(212,175,55,.25);
+  border-left: 2px solid #d4af37;
+  border-radius: 6px;
+  color: #fff;
+}
+#horarios [data-day].today {
+  background: rgba(212,175,55,.25);
+  border-left: 2px solid #d4af37;
+  border-radius: 6px;
+  color: #fff;
+}
+
 /* Header: Logo + Slogan */
 .app-header {
     display: flex;
@@ -2217,6 +2231,40 @@ body {
     .desc-btn {
         width: 100%;
     }
+}
+
+/* Descodificación - Selector de modo */
+.descod-selector {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+}
+
+.descod-sel-btn {
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+    border-radius: 2px;
+}
+
+.descod-sel-btn:hover {
+    background: rgba(212,175,55,0.15);
+}
+
+.descod-sel-btn.active {
+    background: var(--gold);
+    color: var(--bg);
+    font-weight: 500;
 }
 
 /* Descodificación Guided Experience */

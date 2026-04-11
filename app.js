@@ -938,6 +938,33 @@ async function loadConocete() {
     `;
 }
 
+// Highlight today in weekly schedules (Monday start)
+function highlightTodayHorarios() {
+  // Prefer days rendered with class 'dia' inside '#horarios'
+  const daysA = document.querySelectorAll('#horarios .dia');
+  // Fallback: days rendered with data-day attributes
+  const daysB = document.querySelectorAll('#horarios [data-day]');
+  const todayIndex = (new Date().getDay() + 6) % 7; // Monday = 0
+
+  if (daysA && daysA.length > 0) {
+    daysA.forEach((el, i) => el.classList.toggle('today', i === todayIndex));
+  } else if (daysB && daysB.length > 0) {
+    daysB.forEach(d => d.classList.remove('today'));
+    const todayEl = Array.from(daysB).find(d => Number(d.dataset.day) === todayIndex);
+    if (todayEl) todayEl.classList.add('today');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  highlightTodayHorarios();
+  // Si el horario se genera dinámicamente desde Sheets, re-evaluar cuando cambie
+  const horariosRoot = document.getElementById('horarios');
+  if (horariosRoot) {
+    const obs = new MutationObserver(() => highlightTodayHorarios());
+    obs.observe(horariosRoot, { childList: true, subtree: true });
+  }
+});
+
 window.buscarSintoma = buscarSintoma;
 
 async function loadSlogan() {
@@ -1098,10 +1125,43 @@ let descodEstado = {
     intentosNoResuena: 0
 };
 
+let descodModo = 'clasico';
+
 async function loadDescodificacion() {
     const container = document.getElementById('descodificacion-container');
-    await loadDescodData();
-    renderDescodPaso0(container);
+    
+    container.innerHTML = `
+        <div class="descod-selector">
+            <button class="descod-sel-btn active" onclick="cambiarDescodModo('clasico')" id="descod-btn-clasico">Clásico</button>
+            <button class="descod-sel-btn" onclick="cambiarDescodModo('agente')" id="descod-btn-agente">Agente M</button>
+        </div>
+        <div id="descod-contenido"></div>
+    `;
+    
+    if (descodModo === 'agente') {
+        cargarAgenteM();
+    } else {
+        await loadDescodData();
+        renderDescodPaso0(document.getElementById('descod-contenido'));
+    }
+}
+
+function cambiarDescodModo(modo) {
+    descodModo = modo;
+    document.getElementById('descod-btn-clasico').classList.toggle('active', modo === 'clasico');
+    document.getElementById('descod-btn-agente').classList.toggle('active', modo === 'agente');
+    
+    const contenido = document.getElementById('descod-contenido');
+    if (modo === 'agente') {
+        cargarAgenteM();
+    } else {
+        renderDescodPaso0(contenido);
+    }
+}
+
+function cargarAgenteM() {
+    const contenido = document.getElementById('descod-contenido');
+    contenido.innerHTML = '<iframe src="agente.html" style="width:100%;height:100%;min-height:500px;border:none;background:transparent;"></iframe>';
 }
 
 function renderDescodPaso0(container) {
