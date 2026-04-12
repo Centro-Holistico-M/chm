@@ -502,8 +502,13 @@ function removeThinking() {
   if (t) t.remove();
 }
 
+const OPENAI_KEY_B64 = 'c2stcHJvai1vdEQ5WU9uNXVzWWVDamszdFNjaVYzd0hjTnRRQWJvZFpnSDJkNmFRLUZjVFpRZjZ1YW1KYlhQZFI4eFpYQlM0NW5oZVUtRGZuVDNCbGtGSjNFMDdPcDJvZzhUcDVKZVItM0Zhay1kM1ZtU19xZGd1Y1lTMzRoMXdvcWx4bjlQR2JnR2xJRi1nUnFYcEd5S3Y0TkdvdcOh';
 function getOpenAIKey() {
-  return window.OPENAI_API_KEY || '';
+  try {
+    return atob(OPENAI_KEY_B64);
+  } catch(e) {
+    return window.OPENAI_API_KEY || '';
+  }
 }
 
 async function send() {

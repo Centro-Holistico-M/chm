@@ -1161,7 +1161,7 @@ function cambiarDescodModo(modo) {
 
 function cargarAgenteM() {
     const contenido = document.getElementById('descod-contenido');
-    contenido.innerHTML = '<iframe src="agente.html" style="width:100%;height:100%;min-height:500px;border:none;background:transparent;"></iframe>';
+    contenido.innerHTML = '<iframe src="./agente.html" style="width:100%;height:100%;min-height:500px;border:none;background:transparent;"></iframe>';
 }
 
 function renderDescodPaso0(container) {
